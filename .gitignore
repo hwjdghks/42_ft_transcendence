@@ -1,0 +1,41 @@
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.sqlite3
+*.log
+
+# Django
+*.db
+*.pot
+*.pyc
+*.pyo
+*.log
+*.sqlite3
+
+# Environment
+.env
+*.env
+venv/
+.env.*
+__pypackages__/
+
+# VSCode
+.vscode/
+
+# IDEs
+.idea/
+*.iml
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Backup files
+*~
+*.bak
+*.swp

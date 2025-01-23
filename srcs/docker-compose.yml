@@ -1,0 +1,42 @@
+services:
+  frontend:
+    image: nginx:latest
+    container_name: frontend
+    volumes:
+      - ./requirements/frontend/srcs:/usr/share/nginx/html
+      - ./requirements/frontend/conf/nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+    networks:
+      - ft
+
+  backend:
+    build: requirements/backend
+    image: backend:ft
+    container_name: backend
+    init: true
+    depends_on:
+      - db
+    environment:
+      DJANGO_SETTINGS_MODULE: backend.settings
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DATABASE_URL: ${DJANGO_URL}
+    networks:
+      - ft
+
+  db:
+    image: postgres:15
+    container_name: db
+    environment:
+      POSTGRES_USER: dbuser
+      POSTGRES_PASSWORD: dbpass
+      POSTGRES_DB: dbname
+    networks:
+      - ft
+
+networks:
+  ft:
+    driver: bridge
