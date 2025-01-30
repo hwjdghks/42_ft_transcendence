@@ -1,0 +1,125 @@
+/* General Styles */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.bg-white {
+    background-color: #fff;
+}
+
+.profile-img {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.stat-card {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    color: white;
+    text-align: center;
+}
+
+/* Dropdown Styles */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-toggle {
+    width: 100%;
+    background: none;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    z-index: 10;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.chevron {
+    transition: transform 0.3s ease;
+}
+
+.chevron.rotated {
+    transform: rotate(180deg);
+}
+
+.profile-img {
+    width: 128px;
+    height: 128px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.stat-card {
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.accordion-button {
+    width: 100%;
+    padding: 1rem;
+    background-color: #fff;
+    border: none;
+    border-radius: 10px !important;
+}
+  
+.accordion-button:not(.collapsed) {
+    background-color: #fff;
+    box-shadow: none;
+}
+  
+.accordion-button::after {
+    display: none;
+}
+  
+.accordion-body {
+    padding: 1rem;
+    background-color: #fff;
+    border-radius: 0 0 10px 10px;
+}
+  
+.bi-chevron-down {
+    transition: transform 0.3s ease;
+}
+  
+.accordion-button:not(.collapsed) .bi-chevron-down {
+    transform: rotate(180deg);
+}
+
+.content {
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+    transition: all 0.3s ease;
+}
+
+.bi-chevron-down {
+    transition: transform 0.3s ease;
+}
+
+.bg-purple {
+    background-color: #6f42c1;
+}

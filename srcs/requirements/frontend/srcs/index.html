@@ -1,24 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple Example</title>
-  <script src="script.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game App</title>
+
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    crossorigin="anonymous"
+  >
+
+  <!-- CSS 파일 연결 -->
+  <link rel="stylesheet" href="./scripts/style/main.css">
+  <link rel="stylesheet" href="./scripts/style/navbar.css">
+  <link rel="stylesheet" href="./scripts/style/profile.css">
+
 </head>
 <body>
-  <h1>Simple Django Example</h1>
+  <!-- 네비게이션 바 -->
+  <div id="navbar"></div>
 
-  <h2>Insert Data</h2>
-  <form id="dataForm">
-    <input type="text" id="name" placeholder="Name" required>
-    <textarea id="description" placeholder="Description" required></textarea>
-    <button type="submit">Add Data</button>
-  </form>
-  <p id="insertResponse"></p>
+  <!-- 각 페이지 내용이 렌더링될 영역 -->
+  <div id="app"></div>
 
-  <h2>View Data</h2>
-  <button id="fetchData">Get All Data</button>
-  <pre id="dataList"></pre>
+  <script src="./scripts/components/navbar.js"></script>
+  <script src="./scripts/pages/game/gameOption.js"></script>
+  <script src="./scripts/pages/profile/profile.js"></script>
+
+
+  <script src="./scripts/router.js"></script>
+
+  <!-- Bootstrap JS -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+    crossorigin="anonymous"
+  ></script>
+
 </body>
 </html>
