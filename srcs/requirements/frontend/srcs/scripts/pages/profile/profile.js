@@ -1,26 +1,3 @@
-function toggleContent(id) {
-    const content = document.getElementById(id);
-    const button = content.previousElementSibling;
-    const icon = button.querySelector('.bi-chevron-down');
-    
-    // 다른 모든 content를 닫습니다
-    document.querySelectorAll('.content').forEach(el => {
-        if (el.id !== id) {
-            el.style.display = 'none';
-            el.previousElementSibling.querySelector('.bi-chevron-down').style.transform = 'rotate(0deg)';
-        }
-    });
-
-    // 선택된 content를 토글합니다
-    if (content.style.display === 'none' || content.style.display === '') {
-        content.style.display = 'block';
-        icon.style.transform = 'rotate(180deg)';
-    } else {
-        content.style.display = 'none';
-        icon.style.transform = 'rotate(0deg)';
-    }
-}
-
 const accordions = document.querySelectorAll('.accordion-button');
 accordions.forEach(button => {
   button.addEventListener('click', () => {
@@ -122,24 +99,20 @@ function createProfilePage() {
                     <span class="fs-4 fw-bold">Match history</span>
                     <i class="bi bi-chevron-down"></i>
                 </button>
-                <div id="matchHistory" class="content p-3 bg-white rounded-3 mt-2" style="display: none;">
-                    <div>Match 1</div>
-                    <div>Match 2</div>
-                    <div>Match 3</div>
+                <div id="matchHistory" class="content p-3 bg-white rounded-3 mt-2 shadow-sm" style="display: none;">
                 </div>
             </div>
-
             <div class="accordion-item mb-3 border-0">
-                <button class="w-100 p-3 text-start bg-white rounded-3 shadow-sm d-flex justify-content-between align-items-center" 
-                    data-content="friends" onclick="toggleContent('friends')">
-                    <span class="fs-4 fw-bold">Friends</span>
-                    <i class="bi bi-chevron-down"></i>
-                </button>
-                <div id="friends" class="content p-3 bg-white rounded-3 mt-2" style="display: none;">
-                    <div>Friend 1</div>
-                    <div>Friend 2</div>
-                    <div>Friend 3</div>
-                </div>
+                <div class="accordion mt-4">
+                    <div class="accordion-item mb-3 border-0">
+                        <button class="w-100 p-3 text-start bg-white rounded-3 shadow-sm d-flex justify-content-between align-items-center" 
+                            data-content="friends" onclick="toggleContent('friends')">
+                            <span class="fs-4 fw-bold">Friends</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div id="friends" class="content p-3 bg-white rounded-3 mt-2" style="display: none;">
+                            <!-- Friends list will be rendered here -->
+                        </div>
             </div>
 
             <div class="accordion-item mb-3 border-0">
@@ -160,6 +133,7 @@ function createProfilePage() {
 
     `;
 
+
     const buttons = container.querySelectorAll('.accordion-item button');
     buttons.forEach(button => {
         button.addEventListener('click', () => {
@@ -170,5 +144,35 @@ function createProfilePage() {
 
     return container;
 }
+
+function toggleContent(id) {
+    const content = document.getElementById(id);
+    const button = content.previousElementSibling;
+    const icon = button.querySelector('.bi-chevron-down');
+    
+    document.querySelectorAll('.content').forEach(el => {
+        if (el.id !== id) {
+            el.style.display = 'none';
+            el.previousElementSibling.querySelector('.bi-chevron-down').style.transform = 'rotate(0deg)';
+        }
+    });
+
+    if (content.style.display === 'none' || content.style.display === '') {
+        content.style.display = 'block';
+        icon.style.transform = 'rotate(180deg)';
+        
+        if (id === 'matchHistory') {
+            content.innerHTML = loadMatchHistory();
+        }
+        
+        else if (id === 'friends') {
+            renderFriends();
+        }
+    } else {
+        content.style.display = 'none';
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
+
 window.toggleContent = toggleContent;
 window.createProfilePage = createProfilePage;

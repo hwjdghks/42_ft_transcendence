@@ -123,3 +123,11 @@
 .bg-purple {
     background-color: #6f42c1;
 }
+
+/* Add Friend 텍스트 스타일 */
+.add-friend-title {
+    font-weight: bold;       /* 글씨 굵게 */
+    color: #6f42c1;          /* 보라색 텍스트 (#6f42c1) */
+    font-size: 1.5rem;       /* 적당한 크기 */
+    margin-bottom: 1rem;     /* 제목 아래 여백 */
+}
