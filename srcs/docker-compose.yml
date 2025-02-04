@@ -21,7 +21,6 @@ services:
     depends_on:
       - db
     environment:
-      DJANGO_SETTINGS_MODULE: backend.settings
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
       DATABASE_URL: ${DJANGO_URL}
     networks:
