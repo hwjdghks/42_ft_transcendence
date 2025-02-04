@@ -1,6 +1,7 @@
 services:
   frontend:
-    image: nginx:latest
+    build: requirements/frontend
+    image: frontend:ft
     container_name: frontend
     volumes:
       - ./requirements/frontend/srcs:/usr/share/nginx/html
