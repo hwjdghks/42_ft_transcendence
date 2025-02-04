@@ -28,7 +28,7 @@ services:
       - ft
 
   db:
-    image: postgres:15
+    image: postgres:17-alpine
     container_name: db
     environment:
       POSTGRES_USER: dbuser
