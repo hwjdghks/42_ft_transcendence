@@ -22,4 +22,4 @@ ENTRYPOINT ["./entrypoint.sh"]
 
 # CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
-CMD ["gunicorn", "backend.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "backend.wsgi:application", "--bind", "backend:8000"]
