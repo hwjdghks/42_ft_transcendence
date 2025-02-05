@@ -31,8 +31,8 @@ if not SECRET_KEY:
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-# DEBUG = True
-DEBUG = False
+DEBUG = True
+# DEBUG = False
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'backend', '0.0.0.0']
 
@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'testing',
+    
+	'rest_framework',# db추가 테스트용
 ]
 
 MIDDLEWARE = [
@@ -140,3 +142,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MEDIA_URL = '/usr/' # 이미지 업로드 테스트
+MEDIA_ROOT = 'share/postgresql_db' # 이미지 업로드 테스트
+
