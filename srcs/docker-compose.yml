@@ -6,6 +6,7 @@ services:
     volumes:
       - ./requirements/frontend/srcs:/usr/share/nginx/html
       - ./requirements/frontend/conf/nginx.conf:/etc/nginx/conf.d/default.conf
+      - profile:/usr/share/nginx/media/profile_images
     ports:
       - "80:80"
       - "443:443"
@@ -24,6 +25,8 @@ services:
     environment:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
       DATABASE_URL: ${DJANGO_URL}
+    volumes:
+      - profile:/app/media/profile_images
     networks:
       - ft
 
@@ -40,3 +43,12 @@ services:
 networks:
   ft:
     driver: bridge
+
+volumes:
+  profile:
+    name: profile
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/media/profile_images/
+      o: bind
