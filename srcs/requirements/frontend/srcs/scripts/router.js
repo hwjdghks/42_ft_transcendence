@@ -17,10 +17,11 @@ const pages = {
   gameplay: window.getGameOptionPage, 
   // 혹은 ESModule 방식이라면 import 해서: gameplay: getGameOptionPage,
 
+  playerList: window.getGamePlayerListPage,
+
   profile: () => {
     return window.createProfilePage().outerHTML;
   },
-  
 
   // 기본(해당 해시가 없을 경우)
   default: () => `
