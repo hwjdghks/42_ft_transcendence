@@ -86,8 +86,8 @@ function getGameOptionPage() {
       </div>
     </div>
   `;
+
   // 3) 위에서 만든 container 내부의 요소를 찾아서 이벤트 리스너를 붙인다.
-  //    예: btn-group 관련 클릭 이벤트
   const btnGroups = container.querySelectorAll('.btn-group');
   btnGroups.forEach(btnGroup => {
     btnGroup.addEventListener('click', (event) => {
@@ -104,18 +104,21 @@ function getGameOptionPage() {
     });
   });
 
-  // Next 버튼 이벤트 예시
+  // Next 버튼 이벤트
   const nextButton = container.querySelector('#game-option-next');
   if (nextButton) {
     nextButton.addEventListener('click', () => {
       // 선택된 옵션 수집
+      const groups = container.querySelectorAll('.btn-group');
       const options = {
-        // 예: 첫 번째 .btn-group에서 active 버튼의 textContent
-        players: container.querySelector('.btn-group:nth-of-type(1) .active')?.textContent.trim(),
-        // ...
+        players: groups[0].querySelector('.active')?.textContent.trim(),
+        paddleSize: groups[1].querySelector('.active')?.textContent.trim(),
+        ballSpeed: groups[2].querySelector('.active')?.textContent.trim(),
+        obstacles: groups[3].querySelector('.active')?.textContent.trim(),
+        theme: groups[4].querySelector('.active')?.textContent.trim()
       };
-      // 로컬 스토리지에 저장
-      localStorage.setItem('gameOptions', JSON.stringify(options));
+      // 세션 스토리지에 저장
+      sessionStorage.setItem('gameOptions', JSON.stringify(options));
       // 라우터 이동
       window.location.hash = '#playerList';
     });
