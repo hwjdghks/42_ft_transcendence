@@ -1,21 +1,25 @@
-FROM python:3.11
+FROM python:3.11 AS builder
 
 WORKDIR /app
 
-# requirements.txt를 컨테이너로 복사
-COPY conf/requirements.txt /app/
+COPY conf/requirements.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-# 패키지 설치
-RUN pip install --no-cache-dir -r /app/requirements.txt
+FROM python:3.11-slim
 
-COPY srcs/ /app/
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libpq-dev && \
+    rm -rf /var/lib/apt/lists/*
 
-# RUN python manage.py collectstatic --noinput
+WORKDIR /app
 
-COPY tools/script.sh /app/entrypoint.sh
+COPY --from=builder /install/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
+COPY --from=builder /install/bin/gunicorn /usr/local/bin/
+COPY srcs/ .
+COPY tools/script.sh entrypoint.sh
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["./entrypoint.sh"]
 
 # CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
-CMD ["gunicorn", "backend.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "backend.wsgi:application", "--bind", "backend:8000"]
