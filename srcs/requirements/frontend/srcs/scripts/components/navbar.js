@@ -6,7 +6,7 @@ navbar.innerHTML = `
       <div>
         <img src="../static/logo.png" alt="Logo">
         <a href="#profile" class="nav-link">Profile</a>
-        <a href="#gameplay" class="nav-link">GamePlay</a>
+        <a href="#gameplay/option" class="nav-link">GamePlay</a>
       </div>
     </div>
   </nav>

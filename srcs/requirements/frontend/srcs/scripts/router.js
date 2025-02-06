@@ -1,7 +1,5 @@
 // ./scripts/router.js
 
-// 예: 다른 페이지들도 각 js 파일에서 비슷하게 "HTML 문자열을 리턴"하는 함수를
-// 전역(window) 혹은 export로 꺼내온 뒤, 아래 객체에 매핑해주면 됩니다.
 const pages = {
   login: () => `
     <h1>Login Page</h1>
@@ -13,15 +11,11 @@ const pages = {
     <p>Sign up to create an account.</p>
   `,
 
-  // gameOption.js에서 전역으로 등록한 함수
-  gameplay: window.getGameOptionPage, 
-  // 혹은 ESModule 방식이라면 import 해서: gameplay: getGameOptionPage,
 
-  playerList: window.getGamePlayerListPage,
-
-  tournamant: window.getTournamentPage,
-
-  pingpong: window.getPingPongGamePage,
+  "gameplay/option": window.getGameOptionPage, 
+  "gameplay/list": window.getGamePlayerListPage,
+  "gameplay/tournamant": window.getTournamentPage,
+  "gameplay/play": window.getPingPongGamePage,
 
   profile: () => {
     return window.createProfilePage().outerHTML;

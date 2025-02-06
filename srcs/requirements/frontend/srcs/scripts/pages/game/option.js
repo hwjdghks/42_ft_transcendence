@@ -1,15 +1,11 @@
 function getGameOptionPage() {
   const container = document.createElement('div');
   container.className ='container py-5';
-  container.innerHTML = 
-  `
-    <div class="container py-5">
+
+  container.innerHTML =  `
       <!-- Header Section -->
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold">Game Option</h2>
-        <button class="btn btn-outline-secondary">
-          <i class="bi bi-arrow-left"></i> Back
-        </button>
       </div>
 
       <!-- Players Section -->
@@ -82,9 +78,8 @@ function getGameOptionPage() {
 
       <!-- Next Button -->
       <div class="text-center">
-        <button class="btn btn-success w-50" id="game-option-next">Next</button>
+        <button class="btn btn-primary w-50" id="game-option-next">Next</button>
       </div>
-    </div>
   `;
 
   // 3) 위에서 만든 container 내부의 요소를 찾아서 이벤트 리스너를 붙인다.
@@ -118,9 +113,9 @@ function getGameOptionPage() {
         theme: groups[4].querySelector('.active')?.textContent.trim()
       };
       // 세션 스토리지에 저장
-      sessionStorage.setItem('gameOptions', JSON.stringify(options));
+      sessionStorage.setItem('game-option', JSON.stringify(options));
       // 라우터 이동
-      window.location.hash = '#playerList';
+      window.location.hash = '#gameplay/list';
     });
   }
   return container;

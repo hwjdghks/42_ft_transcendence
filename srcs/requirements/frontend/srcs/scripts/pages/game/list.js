@@ -1,20 +1,14 @@
-// ./srcs/scripts/pages/game/gamePlayerList.js
-
 function getGamePlayerListPage() {
-    // 컨테이너 div 생성
     const container = document.createElement('div');
     container.className = 'container py-5';
-    container.style.maxWidth = '600px';
   
     // 내부 HTML
     container.innerHTML = `
       <!-- 상단 제목과 뒤로가기 버튼 -->
-      <div class="d-flex align-items-center mb-4">
-      <!-- 페이지 제목 -->
-      <h2 class="fw-bold mb-0">Player List</h2>
-        <!-- 뒤로가기 -->
-        <button class="btn btn-link text-decoration-none text-dark me-3" onclick="window.history.back()">
-          <i class="bi bi-arrow-left fs-4"></i>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Player List</h2>
+        <button class="btn btn-outline-secondary" id="game-list-back">
+          <i class="bi bi-arrow-left"></i> Back
         </button>
       </div>
   
@@ -73,15 +67,20 @@ function getGamePlayerListPage() {
   
       <!-- Next 버튼 -->
       <div class="text-center">
-        <button class="btn btn-primary w-50" id="playerListNextBtn">Next</button>
+        <button class="btn btn-primary w-50" id="game-list-next">Next</button>
       </div>
     `;
   
     // Next 버튼 동작 예시
-    const nextBtn = container.querySelector('#playerListNextBtn');
+    const nextBtn = container.querySelector('#game-list-next');
     nextBtn.addEventListener('click', () => {
-      // 예: 다음 라우트(#gameplay)로 이동, 혹은 다른 기능 등
-      window.location.hash = '#tournamant';
+      window.location.hash = '#gameplay/tournamant';
+    });
+
+    // back 버튼
+    const backBtn = container.querySelector('#game-list-back');
+    backBtn.addEventListener('click', () => {
+      window.location.hash = '#gameplay/option';
     });
   
     return container;

@@ -7,14 +7,14 @@ function getTournamentPage() {
     
     // 페이지 내용 (백 버튼 + "Tournament" 제목 + 브래킷 + Next 버튼)
     container.innerHTML = `
-      <!-- 상단: 뒤로가기 버튼과 페이지 제목 -->
-      <div class="d-flex align-items-center mb-4">
-        <button class="btn btn-link text-decoration-none text-dark me-3" onclick="window.history.back()">
-          <i class="bi bi-arrow-left fs-4"></i>
+      <!-- 상단 제목과 뒤로가기 버튼 -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Tournament</h2>
+        <button class="btn btn-outline-secondary" id="game-tournamant-back">
+          <i class="bi bi-arrow-left"></i> Back
         </button>
-        <h2 class="fw-bold mb-0">Tournament</h2>
       </div>
-  
+
       <!-- 브래킷 3컬럼: Top 8 / Top 4 / Final -->
       <div class="row">
         <!-- Left Column: Top 8 -->
@@ -100,18 +100,23 @@ function getTournamentPage() {
           </div>
         </div>
       </div>
-  
+
       <!-- 하단 Next 버튼 (원한다면 라우트 이동 등 기능 처리) -->
-      <div class="text-end mt-3">
-        <button class="btn btn-primary" id="tournamentNextBtn">Next</button>
+      <div class="text-center">
+        <button class="btn btn-primary w-50" id="game-tournamant-next">Next</button>
       </div>
     `;
-  
-    // Next 버튼 동작 예시
-    const nextBtn = container.querySelector('#tournamentNextBtn');
+
+    // Next 버튼
+    const nextBtn = container.querySelector('#game-tournamant-next');
     nextBtn.addEventListener('click', () => {
-      window.location.hash = '#pingpong';
-      // alert('Next button clicked!');
+      window.location.hash = '#gameplay/play';
+    });
+
+    // back 버튼
+    const backBtn = container.querySelector('#game-tournamant-back');
+    backBtn.addEventListener('click', () => {
+      window.location.hash = '#gameplay/list';
     });
   
     return container;
