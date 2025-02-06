@@ -19,6 +19,8 @@ const pages = {
 
   playerList: window.getGamePlayerListPage,
 
+  tournamant: window.getTournamentPage,
+
   profile: () => {
     return window.createProfilePage().outerHTML;
   },

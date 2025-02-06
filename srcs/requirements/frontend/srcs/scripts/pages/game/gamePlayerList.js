@@ -81,7 +81,7 @@ function getGamePlayerListPage() {
     const nextBtn = container.querySelector('#playerListNextBtn');
     nextBtn.addEventListener('click', () => {
       // 예: 다음 라우트(#gameplay)로 이동, 혹은 다른 기능 등
-      window.location.hash = '#gameplay';
+      window.location.hash = '#tournamant';
     });
   
     return container;
