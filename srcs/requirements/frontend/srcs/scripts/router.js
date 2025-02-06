@@ -21,6 +21,8 @@ const pages = {
 
   tournamant: window.getTournamentPage,
 
+  pingpong: window.getPingPongGamePage,
+
   profile: () => {
     return window.createProfilePage().outerHTML;
   },

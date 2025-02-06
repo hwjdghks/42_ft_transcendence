@@ -110,9 +110,8 @@ function getTournamentPage() {
     // Next 버튼 동작 예시
     const nextBtn = container.querySelector('#tournamentNextBtn');
     nextBtn.addEventListener('click', () => {
-      // 예: 다른 페이지로 이동
-      // window.location.hash = '#someOtherPage';
-      alert('Next button clicked!');
+      window.location.hash = '#pingpong';
+      // alert('Next button clicked!');
     });
   
     return container;
