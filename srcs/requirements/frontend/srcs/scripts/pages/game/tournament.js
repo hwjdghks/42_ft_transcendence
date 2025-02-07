@@ -2,189 +2,146 @@ function getTournamentPage() {
   const container = document.createElement('div');
   container.className = 'container py-5';
 
-  const gameOptions = JSON.parse(sessionStorage.getItem('game_option')) || {};
-  const players = gameOptions.usernames ? ['You', ...gameOptions.usernames] : ['You'];
+  // 세션스토리지에서 옵션/유저 목록/매치 목록 불러오기
+  const options = JSON.parse(sessionStorage.getItem('game_option'));
+  const usernames = JSON.parse(sessionStorage.getItem('username'));
 
-  function createMatch(player1, player2, status = 'Waiting..') {
-      return `
-          <div class="border rounded p-3 mb-3">
-              <div class="text-secondary fw-bold">${status}</div>
-              <div class="d-flex justify-content-between align-items-center">
-                  <span class="fw-bold fs-5">0 : 0</span>
-                  <small>${new Date().toISOString().split('T')[0]}</small>
-              </div>
-              <div class="mt-2 text-muted">${player1} vs ${player2}</div>
-          </div>
+  // 데이터가 없으면 옵션 페이지로 돌려보내기
+  if (!options || !usernames) {
+    alert('옵션 데이터가 없습니다. 다시 설정해주세요.');
+    window.location.hash = '#gameplay/option';
+    return container; // 안전상 return
+  }
+
+  // 초기 matches 불러오기(이미 있는지 확인)
+  let matches = JSON.parse(sessionStorage.getItem('matches')) || createBracket(usernames);
+
+  // 대진표 그리는 함수
+  function renderBracket(matchData, parent) {
+    parent.innerHTML = ''; // 기존 내용 초기화
+
+    // 제목
+    const title = document.createElement('h2');
+    title.textContent = 'Tournament Bracket';
+    title.className = 'mb-4 fw-bold';
+    parent.appendChild(title);
+
+    // bracket container
+    const bracketDiv = document.createElement('div');
+    bracketDiv.id = 'bracket';
+
+    // 각 매치 표시
+    matchData.forEach((match, index) => {
+      const matchCard = document.createElement('div');
+      matchCard.className = 'card mb-2'; // Bootstrap card로 간단한 스타일
+
+      const cardBody = document.createElement('div');
+      cardBody.className = 'card-body d-flex justify-content-between align-items-center';
+
+      // 매치 기본 정보
+      const matchTitle = document.createElement('div');
+      matchTitle.innerHTML = `
+        <strong>Match ${index + 1}</strong> 
+        : ${match.player1} vs ${match.player2 ?? '부전승'}
       `;
-  }
 
-  function generateMatches() {
-      const matches = [];
-      for (let i = 0; i < players.length; i += 2) {
-          const player1 = players[i] || '???';
-          const player2 = players[i + 1] || '???';
-          matches.push(createMatch(player1, player2));
+      cardBody.appendChild(matchTitle);
+
+      // (이미 승자 결정) 혹은 점수가 있으면 표시
+      if (match.winner) {
+        // 스코어 표시
+        let scoreText = '';
+        if (match.score) {
+          scoreText = ` | 점수: ${match.score.player1} - ${match.score.player2}`;
+        }
+        const winnerInfo = document.createElement('div');
+        winnerInfo.innerHTML = `
+          <span class="text-success fw-bold">승자: ${match.winner}</span>
+          <small class="text-muted ms-2">${scoreText}</small>
+        `;
+        cardBody.appendChild(winnerInfo);
+      } else {
+        // 아직 승자가 없으면 TBD
+        const tbdInfo = document.createElement('div');
+        tbdInfo.innerHTML = `<span class="text-muted">TBD</span>`;
+        cardBody.appendChild(tbdInfo);
       }
-      return matches.join('');
+
+      matchCard.appendChild(cardBody);
+      bracketDiv.appendChild(matchCard);
+    });
+
+    parent.appendChild(bracketDiv);
+
+    // "Next Match" 버튼(아래에서 재생성)
+    parent.appendChild(nextButton);
   }
 
-  container.innerHTML = `
-      <div class="d-flex justify-content-between align-items-center mb-4">
-          <h2 class="fw-bold">Tournament</h2>
-          <button class="btn btn-outline-secondary" id="game-tournament-back">
-              <i class="bi bi-arrow-left"></i> Back
-          </button>
-      </div>
+  // 다음 매치 or 다음 라운드 진행 버튼
+  const nextButton = document.createElement('button');
+  nextButton.textContent = '다음 경기 진행';
+  nextButton.className = 'btn btn-primary mt-4';
 
-      <div class="row">
-          <div class="col-12 col-md-4 mb-4">
-              <h5 class="fw-bold mb-3">Top 8</h5>
-              ${generateMatches()}
-          </div>
-      </div>
+  nextButton.addEventListener('click', () => {
+    // 아직 winner가 없는 매치를 찾음
+    const nextMatch = matches.find(match => !match.winner);
 
-      <div class="text-center">
-          <button class="btn btn-primary w-50" id="game-tournament-next">Next</button>
-      </div>
-  `;
-
-  container.querySelector('#game-tournament-next').addEventListener('click', () => {
+    if (nextMatch) {
+      // 이 매치를 currentMatch로 설정하고, play 페이지로 이동
+      sessionStorage.setItem('currentMatch', JSON.stringify(nextMatch));
+      sessionStorage.setItem('matches', JSON.stringify(matches));
       window.location.hash = '#gameplay/play';
+    } else {
+      // 남은 매치가 모두 끝났으면, 우승자들만 모아서 다음 라운드 or 최종 우승
+      const winners = matches.map(m => m.winner).filter(Boolean);
+
+      if (winners.length > 1) {
+        // 다음 라운드 대진표 생성
+        matches = createBracket(winners);
+
+        // 새 대진표를 세션스토리지에 저장
+        sessionStorage.setItem('matches', JSON.stringify(matches));
+
+        // 화면 갱신(새로고침 없이도 대진표 렌더)
+        renderBracket(matches, container);
+      } else {
+        // 최종 우승자 1명
+        alert(`🏆 최종 우승자: ${winners[0]} 🏆`);
+
+        // 토너먼트 관련 세션스토리지 초기화(필요시)
+        resetTournamentSession();
+        // 필요하다면 메인 화면(#profile 등)으로 이동하거나, 그대로 끝
+      }
+    }
   });
 
-  container.querySelector('#game-tournament-back').addEventListener('click', () => {
-      window.location.hash = '#gameplay/option';
-  });
+  // 세션스토리지 정리하는 함수 (선택)
+  function resetTournamentSession() {
+    sessionStorage.removeItem('game_option');
+    sessionStorage.removeItem('username');
+    sessionStorage.removeItem('matches');
+    sessionStorage.removeItem('currentMatch');
+  }
+
+  // bracket 첫 렌더링
+  renderBracket(matches, container);
 
   return container;
 }
 
+// 대진표 생성 로직 (8강, 4강, 2강 등)
+function createBracket(players) {
+  const matches = [];
+  // 2명씩 짝지어서 매치 생성
+  for (let i = 0; i < players.length; i += 2) {
+    matches.push({
+      player1: players[i],
+      player2: players[i + 1] || null,
+      winner: null,
+      score: null // 스코어 저장용
+    });
+  }
+  return matches;
+}
+
 window.getTournamentPage = getTournamentPage;
-
-// // ./srcs/scripts/pages/game/tournament.js
-
-// function getTournamentPage() {
-//     // 컨테이너 생성
-//     const container = document.createElement('div');
-//     container.className = 'container py-5';
-    
-//     // 페이지 내용 (백 버튼 + "Tournament" 제목 + 브래킷 + Next 버튼)
-//     container.innerHTML = `
-//       <!-- 상단 제목과 뒤로가기 버튼 -->
-//       <div class="d-flex justify-content-between align-items-center mb-4">
-//         <h2 class="fw-bold">Tournament</h2>
-//         <button class="btn btn-outline-secondary" id="game-tournament-back">
-//           <i class="bi bi-arrow-left"></i> Back
-//         </button>
-//       </div>
-
-//       <!-- 브래킷 3컬럼: Top 8 / Top 4 / Final -->
-//       <div class="row">
-//         <!-- Left Column: Top 8 -->
-//         <div class="col-12 col-md-4 mb-4">
-//           <h5 class="fw-bold mb-3">Top 8</h5>
-  
-//           <!-- Match 1 -->
-//           <div class="border rounded p-3 mb-3">
-//             <div class="d-flex justify-content-between align-items-center">
-//               <span class="fw-bold fs-5">7 : 0</span>
-//               <small>2025/03/15</small>
-//             </div>
-//             <div class="mt-2 text-muted">username vs ???</div>
-//           </div>
-  
-//           <!-- Match 2 -->
-//           <div class="border rounded p-3 mb-3">
-//             <div class="d-flex justify-content-between align-items-center">
-//               <span class="fw-bold fs-5">0 : 7</span>
-//               <small>2025/03/15</small>
-//             </div>
-//             <div class="mt-2 text-muted">username vs username</div>
-//           </div>
-  
-//           <!-- Match 3 (다음 플레이 강조) -->
-//           <div class="border border-2 rounded p-3 mb-3" style="border-color: #6e44ff !important;">
-//             <div class="text-primary fw-bold">Next play</div>
-//             <div class="d-flex justify-content-between align-items-center">
-//               <span class="fw-bold fs-5">0 : 0</span>
-//               <small>2025/03/15</small>
-//             </div>
-//             <div class="mt-2 text-muted">username vs username</div>
-//           </div>
-  
-//           <!-- Match 4 (Waiting...) -->
-//           <div class="border rounded p-3">
-//             <div class="text-secondary fw-bold">Waiting..</div>
-//             <div class="d-flex justify-content-between align-items-center">
-//               <span class="fw-bold fs-5">0 : 0</span>
-//               <small>2025/03/15</small>
-//             </div>
-//             <div class="mt-2 text-muted">username vs username</div>
-//           </div>
-//         </div>
-  
-//         <!-- Middle Column: Top 4 -->
-//         <div class="col-12 col-md-4 mb-4">
-//           <h5 class="fw-bold mb-3">Top 4</h5>
-  
-//           <!-- Match 1 -->
-//           <div class="border rounded p-3 mb-3">
-//             <div class="text-secondary fw-bold">Waiting..</div>
-//             <div class="d-flex justify-content-between align-items-center">
-//               <span class="fw-bold fs-5">0 : 0</span>
-//               <small>2025/03/15</small>
-//             </div>
-//             <div class="mt-2 text-muted">??? vs ???</div>
-//           </div>
-  
-//           <!-- Match 2 -->
-//           <div class="border rounded p-3">
-//             <div class="text-secondary fw-bold">Waiting..</div>
-//             <div class="d-flex justify-content-between align-items-center">
-//               <span class="fw-bold fs-5">0 : 0</span>
-//               <small>2025/03/15</small>
-//             </div>
-//             <div class="mt-2 text-muted">??? vs ???</div>
-//           </div>
-//         </div>
-  
-//         <!-- Right Column: Final -->
-//         <div class="col-12 col-md-4 mb-4">
-//           <h5 class="fw-bold mb-3">Final</h5>
-  
-//           <!-- Match 1 -->
-//           <div class="border rounded p-3">
-//             <div class="text-secondary fw-bold">Waiting..</div>
-//             <div class="d-flex justify-content-between align-items-center">
-//               <span class="fw-bold fs-5">0 : 0</span>
-//               <small>2025/03/15</small>
-//             </div>
-//             <div class="mt-2 text-muted">??? vs ???</div>
-//           </div>
-//         </div>
-//       </div>
-
-//       <!-- 하단 Next 버튼 (원한다면 라우트 이동 등 기능 처리) -->
-//       <div class="text-center">
-//         <button class="btn btn-primary w-50" id="game-tournament-next">Next</button>
-//       </div>
-//     `;
-
-//     // Next 버튼
-//     const nextBtn = container.querySelector('#game-tournament-next');
-//     nextBtn.addEventListener('click', () => {
-//       window.location.hash = '#gameplay/play';
-//     });
-
-//     // back 버튼
-//     const backBtn = container.querySelector('#game-tournament-back');
-//     backBtn.addEventListener('click', () => {
-//       window.location.hash = '#gameplay/option';
-//     });
-  
-//     return container;
-//   }
-  
-//   // 전역 등록 (라우터에서 사용)
-//   window.getTournamentPage = getTournamentPage;
-  

@@ -14,7 +14,7 @@ const pages = {
 
   "gameplay/option": window.getGameOptionPage, 
   "gameplay/list": window.getGamePlayerListPage,
-  "gameplay/tournamant": window.getTournamentPage,
+  "gameplay/tournament": window.getTournamentPage,
   "gameplay/play": window.getPingPongGamePage,
 
   profile: () => {
