@@ -27,12 +27,9 @@ const pages = {
 function router() {
   
   const hash = window.location.hash.replace('#', '') || 'default';
-  console.log('Current hash:', hash);
 
   const app = document.getElementById('app');
   const renderPage = pages[hash] || pages.default;
-  console.log('Current hash:', hash);
-  console.log('Rendered page:', renderPage);
   
   // HTML 문자열을 받아서 app.innerHTML에 주입
   const pageContent = renderPage();
@@ -41,8 +38,6 @@ function router() {
   } else {
     app.replaceChildren(pageContent);
   }
-
-  console.log('App innerHTML updated:', app.innerHTML);
 }
 
 // 첫 로딩 시 실행
