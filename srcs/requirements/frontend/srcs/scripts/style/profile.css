@@ -152,3 +152,7 @@
 input, select {
     text-align: left;
 }
+
+.bg-purple {
+    background-color: #6f42c1;
+}
