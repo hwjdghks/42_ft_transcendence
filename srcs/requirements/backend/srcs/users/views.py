@@ -1,11 +1,13 @@
+import json
+
 from django.http import JsonResponse
 from django.http import HttpRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 from django.contrib.auth import authenticate
+
 from authentication.views import generate_jwt, jwt_required
 from .models import User
-import json
 
 @csrf_exempt
 @require_POST
