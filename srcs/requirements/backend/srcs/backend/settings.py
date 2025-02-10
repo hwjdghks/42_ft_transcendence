@@ -28,6 +28,16 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 if not SECRET_KEY:
     raise ValueError("The DJANGO_SECRET_KEY environment variable is not set")
 
+JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
+
+if not JWT_SECRET_KEY:
+    raise ValueError("The JWT_SECRET_KEY environment variable is not set")
+
+JWT_ALGORITHM = 'HS256'
+
+import datetime
+
+JWT_EXPIRATION_DELTA = datetime.timedelta(hours=1)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
@@ -47,6 +57,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users',
+    'authentication',
 ]
 
 MIDDLEWARE = [
@@ -124,7 +135,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 
