@@ -20,7 +20,6 @@ const pages = {
   "gameplay/tournament": window.getTournamentPage,
   "gameplay/play": window.getPingPongGamePage,
   // 혹은 ESModule 방식이라면 import 해서: gameplay: getGameOptionPage,
-
   profile: () => {
     return window.createProfilePage().outerHTML;
   },
@@ -44,7 +43,7 @@ function router() {
     return;
   }
   
-  
+  // 그 외의 경우 해당하는 페이지 또는 로그인 페이지 표시
   const renderPage = pages[hash] || pages.login;
   const pageContent = renderPage();
   
