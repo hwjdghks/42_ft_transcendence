@@ -26,6 +26,7 @@ async function login(email, password) {
         console.error('Login error:', error);
     }
 }
+
 /*
 function logout() {
     sessionStorage.removeItem('jwtToken'); 
@@ -33,29 +34,7 @@ function logout() {
 }
 */
 
-/*
-async function fetchProfile() {
-    const token = sessionStorage.getItem('jwtToken'); // JWT 가져오기
 
-    try {
-        const response = await fetch('http://localhost/api/users/profile', { // 프로필 API URL
-            method: 'GET', // HTTP 요청 메서드 (GET, POST 등)
-            headers: {
-                'Content-Type': 'application/json', // 요청 데이터 형식
-                'Authorization': `Bearer ${token}` // JWT 포함
-            }
-        });
-
-        if (!response.ok) { // 응답이 실패하면 오류 처리
-            throw new Error('Unauthorized');
-        }
-
-        return await response.json(); // JSON 응답 데이터 반환
-    } catch (error) {
-        console.error('Error fetching profile:', error); // 오류 로그 출력
-    }
-}
-*/
 
 export function LoginPage() {
     return `
