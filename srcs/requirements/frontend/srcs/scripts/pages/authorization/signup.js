@@ -13,12 +13,7 @@ async function handleSignupSubmit(event) {
 
     try {
         const response = await fetchSignup({ username, email, password });
-        if (response.success) {
-            showMessage('Signup successful! Verification code sent to your email.', 'success');
-            event.target.reset();
-        } else {
-            showMessage(response.message || 'Signup failed. Please try again.', 'error');
-        }
+        showMessage(response.message, 'success');
     } catch (error) {
         showMessage('An error occurred. Please try again later.', 'error');
         console.error(error);
@@ -27,7 +22,7 @@ async function handleSignupSubmit(event) {
 
 // Fetch 함수
 async function fetchSignup(data) {
-    const response = await fetch('http://localhost/api/users/signup', {
+    const response = await fetch('https://localhost/api/users/signup/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
