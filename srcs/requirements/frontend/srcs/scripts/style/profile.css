@@ -10,8 +10,8 @@
 }
 
 .profile-img {
-    width: 64px;
-    height: 64px;
+    width: 128px;
+    height: 128px;
     border-radius: 50%;
     object-fit: cover;
 }
@@ -20,6 +20,7 @@
     padding: 0.5rem;
     border-radius: 0.5rem;
     color: white;
+    font-size: 1.2rem;
     text-align: center;
 }
 
@@ -68,18 +69,7 @@
     transform: rotate(180deg);
 }
 
-.profile-img {
-    width: 128px;
-    height: 128px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.stat-card {
-    font-size: 1.2rem;
-    text-align: center;
-}
-
+/* Accordion Styles */
 .accordion-button {
     width: 100%;
     padding: 1rem;
@@ -87,41 +77,60 @@
     border: none;
     border-radius: 10px !important;
 }
-  
 .accordion-button:not(.collapsed) {
     background-color: #fff;
     box-shadow: none;
 }
-  
+
 .accordion-button::after {
     display: none;
 }
-  
+
 .accordion-body {
     padding: 1rem;
     background-color: #fff;
     border-radius: 0 0 10px 10px;
 }
-  
+
 .bi-chevron-down {
     transition: transform 0.3s ease;
 }
-  
+
 .accordion-button:not(.collapsed) .bi-chevron-down {
     transform: rotate(180deg);
 }
 
 .content {
-    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+    box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
     transition: all 0.3s ease;
 }
 
-.bi-chevron-down {
-    transition: transform 0.3s ease;
+/* Button Styles */
+.btn-purple {
+    background-color: #6f42c1;
+    color: white;
+    border: none;
 }
 
-.bg-purple {
+.btn-purple:hover {
+    background-color: #5a379f;
+}
+
+.btn-outline-primary {
+    border: 1px solid #6f42c1;
+    color: #6f42c1;
+    background-color: transparent;
+}
+
+.btn-outline-primary:hover {
     background-color: #6f42c1;
+    color: white;
+}
+
+.btn-danger {
+    background-color: #6f42c1;
+    color: white;
+    border: none;
 }
 
 /* Add Friend 텍스트 스타일 */
@@ -130,4 +139,19 @@
     color: #6f42c1;          /* 보라색 텍스트 (#6f42c1) */
     font-size: 1.5rem;       /* 적당한 크기 */
     margin-bottom: 1rem;     /* 제목 아래 여백 */
+}
+
+/* Form Labels */
+.form-label {
+    text-align: left;
+    font-weight: bold;
+}
+
+/* Aligning input fields to left */
+input, select {
+    text-align: left;
+}
+
+.bg-purple {
+    background-color: #6f42c1;
 }

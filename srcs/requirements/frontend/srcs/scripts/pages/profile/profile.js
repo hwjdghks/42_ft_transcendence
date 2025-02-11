@@ -27,6 +27,49 @@ function initializeDropdowns() {
     });
 }
 
+function updateProfilePage(data) {
+    // 데이터 예시: { username: "JohnDoe", stats: { totals: 10, wins: 5, losses: 3, draws: 2 } }
+
+    // 프로필 이름 업데이트
+    const usernameElement = document.querySelector('.fs-2.fw-bold');
+    if (usernameElement) {
+        usernameElement.textContent = data.username;
+    }
+
+    // 통계 데이터 업데이트
+    const stats = data.stats || {};
+    const statElements = document.querySelectorAll('.stat-card + .text-center .fs-1.fw-bold');
+    if (statElements.length >= 4) {
+        statElements[0].textContent = stats.totals || 0; // Totals
+        statElements[1].textContent = stats.wins || 0;   // Wins
+        statElements[2].textContent = stats.losses || 0; // Losses
+        statElements[3].textContent = stats.draws || 0;  // Draws
+    }
+}
+
+async function fetchProfileData() {
+    try {
+        const token = sessionStorage.getItem('jwtToken');
+        const response = await fetch('http://localhost/api/users/profile', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch profile data');
+        }
+
+        const profileData = await response.json(); 
+        updateProfilePage(profileData);
+        
+    } catch (error) {
+        console.error('Error fetching profile data:', error);
+    }
+}
+
 function createProfilePage() {
     const container = document.createElement('div');
     container.className = 'container py-5';
@@ -122,9 +165,6 @@ function createProfilePage() {
                     <i class="bi bi-chevron-down"></i>
                 </button>
                 <div id="setting" class="content p-3 bg-white rounded-3 mt-2" style="display: none;">
-                    <div>Setting 1</div>
-                    <div>Setting 2</div>
-                    <div>Setting 3</div>
                 </div>
             </div>
         </div>
@@ -141,6 +181,8 @@ function createProfilePage() {
             toggleContent(contentId);
         });
     });
+
+    // fetchProfileData(); /*실행 시 주석 해제*/
 
     return container;
 }
@@ -167,6 +209,10 @@ function toggleContent(id) {
         
         else if (id === 'friends') {
             renderFriends();
+        }
+        else if (id === 'setting') {
+            content.innerHTML = ''; 
+            content.appendChild(renderSettings());
         }
     } else {
         content.style.display = 'none';

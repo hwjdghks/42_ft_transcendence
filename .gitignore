@@ -39,4 +39,6 @@ ehthumbs.db
 *~
 *.bak
 *.swp
-output.txt
+
+# media volume
+media/
