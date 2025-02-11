@@ -2,7 +2,6 @@
 import { LoginPage } from './pages/authorization/login.js';
 import { SignupPage } from './pages/authorization/signup.js';
 
-// 404 페이지 컴포넌트
 const NotFoundPage = () => `
   <div class="not-found">
     <h1>404 - Page Not Found</h1>
@@ -14,7 +13,13 @@ const NotFoundPage = () => `
 const pages = {
   login: () => LoginPage(),
   signup: () => SignupPage(),
-  gameplay: window.getGameOptionPage,
+
+  // gameOption.js에서 전역으로 등록한 함수
+  "gameplay/option": window.getGameOptionPage, 
+  "gameplay/list": window.getGamePlayerListPage,
+  "gameplay/tournament": window.getTournamentPage,
+  "gameplay/play": window.getPingPongGamePage,
+  // 혹은 ESModule 방식이라면 import 해서: gameplay: getGameOptionPage,
   profile: () => {
     return window.createProfilePage().outerHTML;
   },
@@ -28,7 +33,7 @@ function router() {
     app.innerHTML = LoginPage();
     return;
   }
-  
+
   const hash = window.location.hash.replace('#', '');
   const app = document.getElementById('app');
   

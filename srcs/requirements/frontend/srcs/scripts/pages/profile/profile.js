@@ -1,4 +1,3 @@
-
 const accordions = document.querySelectorAll('.accordion-button');
 accordions.forEach(button => {
   button.addEventListener('click', () => {
@@ -166,7 +165,6 @@ function createProfilePage() {
                     <i class="bi bi-chevron-down"></i>
                 </button>
                 <div id="setting" class="content p-3 bg-white rounded-3 mt-2" style="display: none;">
-
                 </div>
             </div>
         </div>
