@@ -42,7 +42,36 @@ function router() {
     app.innerHTML = NotFoundPage();
     return;
   }
+
+
+  // 토너먼트 시작 전에는 'gameplay/tournament' 또는 'gameplay/play' 경로 접근 금지
+  if ((hash === 'gameplay/tournament' || hash === 'gameplay/play') &&
+      sessionStorage.getItem('tournament_in_progress') !== 'true') {
+    alert('토너먼트 사이클이 시작되지 않았습니다. 먼저 게임 옵션을 설정해주세요.');
+    window.location.hash = '#gameplay/option';
+    return;
+  }
   
+  // 토너먼트 진행 중일 때 토너먼트 관련 페이지만 허용하고, 그 외 이동 시 사용자 확인 후 세션 초기화
+  if (sessionStorage.getItem('tournament_in_progress') === 'true') {
+    const allowedDuringTournament = ['gameplay/tournament', 'gameplay/play'];
+    if (hash && !allowedDuringTournament.includes(hash)) {
+      const leave = confirm('현재 토너먼트가 진행 중입니다. 정말 나가시겠습니까?');
+      if (!leave) {
+        // 이탈 취소: 강제로 토너먼트 페이지로 복귀
+        // window.location.hash = '#gameplay/tournament';
+        return;
+      } else {
+        // 사용자가 이탈을 선택한 경우, 세션 스토리지 초기화
+        sessionStorage.removeItem('tournament_in_progress');
+        sessionStorage.removeItem('game_option');
+        sessionStorage.removeItem('username');
+        sessionStorage.removeItem('matches');
+        sessionStorage.removeItem('currentMatch');
+      }
+    }
+  }
+
   // 그 외의 경우 해당하는 페이지 또는 로그인 페이지 표시
   const renderPage = pages[hash] || pages.login;
   const pageContent = renderPage();
@@ -58,3 +87,18 @@ function router() {
 window.addEventListener('load', router);
 // 해시 변경 시마다 실행
 window.addEventListener('hashchange', router);
+
+// router.js나 index.html, 혹은 공통 스크립트 어딘가에 배치
+window.addEventListener('beforeunload', (event) => {
+  if (sessionStorage.getItem("tournament_in_progress") === "true") {
+    // 토너먼트 도중 새로고침/창 닫기 시 데이터 초기화
+    sessionStorage.removeItem("tournament_in_progress");
+    sessionStorage.removeItem('game_option');
+    sessionStorage.removeItem('username');
+    sessionStorage.removeItem('matches');
+    sessionStorage.removeItem('currentMatch');
+
+    // event.preventDefault();
+    // event.returnValue = '';
+  }
+});

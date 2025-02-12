@@ -11,6 +11,8 @@ function getTournamentPage() {
     alert('옵션 데이터가 없습니다. 다시 설정해주세요.');
     window.location.hash = '#gameplay/option';
     return container; // 안전상 return
+  } else {
+    sessionStorage.setItem("tournament_in_progress", "true");
   }
 
   // 초기 matches 불러오기(이미 있는지 확인)
@@ -117,6 +119,7 @@ function getTournamentPage() {
 
   // 세션스토리지 정리하는 함수 (선택)
   function resetTournamentSession() {
+    sessionStorage.removeItem('tournament_in_progress');
     sessionStorage.removeItem('game_option');
     sessionStorage.removeItem('username');
     sessionStorage.removeItem('matches');

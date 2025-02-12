@@ -1,7 +1,6 @@
 function getGameOptionPage() {
   const container = document.createElement('div');
   container.className = 'container py-5';
-
   container.innerHTML = `
       <!-- Header Section -->
       <div class="d-flex justify-content-between align-items-center mb-4">
@@ -134,6 +133,7 @@ function getGameOptionPage() {
   nextButton.addEventListener('click', () => {
     if (validateInputs()) {
       saveOptionsToSessionStorage();
+      sessionStorage.setItem('tournament_in_progress', 'true');
       // 토너먼트 페이지로 이동
       window.location.hash = '#gameplay/tournament';
     } else {
