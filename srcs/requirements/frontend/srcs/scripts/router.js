@@ -3,8 +3,8 @@ import { LoginPage } from './pages/authorization/login.js';
 import { SignupPage } from './pages/authorization/signup.js';
 
 import { GameOptionPage } from './pages/game/option.js';
-import { GamePlayPage } from './pages/game/play.js';
 import { GameTournamentPage } from './pages/game/tournament.js';
+// import { GamePlayPage } from './pages/game/play.js';
 
 
 const NotFoundPage = () => `
@@ -21,8 +21,7 @@ const pages = {
 
   // gameOption.js에서 전역으로 등록한 함수
   "gameplay/option": () => GameOptionPage(), 
-  "gameplay/list": window.getGamePlayerListPage,
-  "gameplay/tournament": window.getTournamentPage,
+  "gameplay/tournament": () => GameTournamentPage(),
   "gameplay/play": window.getPingPongGamePage,
   // 혹은 ESModule 방식이라면 import 해서: gameplay: getGameOptionPage,
   profile: () => {

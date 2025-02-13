@@ -11,6 +11,19 @@ function renderPlayerInputs(container, players) {
     </div>
   `;
 
+  // api로 받아올 경우 아래 주석 해제
+  // profileAPI.getProfileInfo()
+  //   .then((profileData) => {
+  //     const username = profileData.username;
+  //     const user1Input = container.querySelector('#user1-container input');
+  //     if (user1Input) {
+  //       user1Input.value = username;
+  //     }
+  //   })
+  //   .catch((error) => {
+  //     console.error('Error fetching profile info', error);
+  //   });
+
   // 나머지 인원 입력 필드 생성
   for (let i = 1; i < players; i++) {
     playerInputs.innerHTML += `
