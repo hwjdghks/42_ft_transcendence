@@ -2,6 +2,11 @@
 import { LoginPage } from './pages/authorization/login.js';
 import { SignupPage } from './pages/authorization/signup.js';
 
+import { GameOptionPage } from './pages/game/option.js';
+import { GamePlayPage } from './pages/game/play.js';
+import { GameTournamentPage } from './pages/game/tournament.js';
+
+
 const NotFoundPage = () => `
   <div class="not-found">
     <h1>404 - Page Not Found</h1>
@@ -15,7 +20,7 @@ const pages = {
   signup: () => SignupPage(),
 
   // gameOption.js에서 전역으로 등록한 함수
-  "gameplay/option": window.getGameOptionPage, 
+  "gameplay/option": () => GameOptionPage(), 
   "gameplay/list": window.getGamePlayerListPage,
   "gameplay/tournament": window.getTournamentPage,
   "gameplay/play": window.getPingPongGamePage,
