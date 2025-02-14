@@ -4,7 +4,7 @@ import { SignupPage } from './pages/authorization/signup.js';
 
 import { GameOptionPage } from './pages/game/option.js';
 import { GameTournamentPage } from './pages/game/tournament.js';
-// import { GamePlayPage } from './pages/game/play.js';
+import { GamePlayPage } from './pages/game/play.js';
 
 
 const NotFoundPage = () => `
@@ -19,11 +19,10 @@ const pages = {
   login: () => LoginPage(),
   signup: () => SignupPage(),
 
-  // gameOption.js에서 전역으로 등록한 함수
   "gameplay/option": () => GameOptionPage(), 
   "gameplay/tournament": () => GameTournamentPage(),
-  "gameplay/play": window.getPingPongGamePage,
-  // 혹은 ESModule 방식이라면 import 해서: gameplay: getGameOptionPage,
+  "gameplay/play": () => GamePlayPage(sessionStorage.getItem('game_option')),
+
   profile: () => {
     return window.createProfilePage().outerHTML;
   },
@@ -55,7 +54,7 @@ function router() {
     window.location.hash = '#gameplay/option';
     return;
   }
-  
+
   // 토너먼트 진행 중일 때 토너먼트 관련 페이지만 허용하고, 그 외 이동 시 사용자 확인 후 세션 초기화
   if (sessionStorage.getItem('tournament_in_progress') === 'true') {
     const allowedDuringTournament = ['gameplay/tournament', 'gameplay/play'];

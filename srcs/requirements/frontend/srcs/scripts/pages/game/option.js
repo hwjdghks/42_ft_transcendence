@@ -1,74 +1,3 @@
-// 플레이어 입력 필드를 렌더링하는 함수
-function renderPlayerInputs(container, players) {
-  const playerInputs = container.querySelector('#playerInputs');
-  playerInputs.innerHTML = '';
-
-  // User 1 (자기 이름으로 고정. 추후 fetch로 받아오기)
-  playerInputs.innerHTML += `
-    <div class="mb-3">
-      <label class="form-label">User 1</label>
-      <input type="text" class="form-control" placeholder="username" value="Me" disabled>
-    </div>
-  `;
-
-  // api로 받아올 경우 아래 주석 해제
-  // profileAPI.getProfileInfo()
-  //   .then((profileData) => {
-  //     const username = profileData.username;
-  //     const user1Input = container.querySelector('#user1-container input');
-  //     if (user1Input) {
-  //       user1Input.value = username;
-  //     }
-  //   })
-  //   .catch((error) => {
-  //     console.error('Error fetching profile info', error);
-  //   });
-
-  // 나머지 인원 입력 필드 생성
-  for (let i = 1; i < players; i++) {
-    playerInputs.innerHTML += `
-      <div class="mb-3">
-        <label class="form-label">User ${i + 1}</label>
-        <input type="text" class="form-control" placeholder="Enter username">
-      </div>
-    `;
-  }
-
-  // 플레이어 이름 입력할 때마다 저장
-  const inputs = playerInputs.querySelectorAll('input:not([disabled])');
-  inputs.forEach((input) => {
-    input.addEventListener('input', () => saveOptionsToSessionStorage(container));
-  });
-}
-
-// 선택 사항을 sessionStorage에 저장하는 함수
-function saveOptionsToSessionStorage(container) {
-  const players = container.querySelector('.btn-group .active[data-players]')?.getAttribute('data-players') || '2';
-  const paddleSize = container.querySelectorAll('.btn-group')[1].querySelector('.active')?.textContent;
-  const ballSpeed = container.querySelectorAll('.btn-group')[2].querySelector('.active')?.textContent;
-  const obstacles = container.querySelectorAll('.btn-group')[3].querySelector('.active')?.textContent;
-
-  // 플레이어 이름들을 배열로 수집
-  const playerInputs = container.querySelectorAll('#playerInputs input');
-  const usernameArr = [...playerInputs].map(input => input.value);
-
-  const options = {
-    players,
-    paddleSize,
-    ballSpeed,
-    obstacles,
-  };
-
-  sessionStorage.setItem('game_option', JSON.stringify(options));
-  sessionStorage.setItem('username', JSON.stringify(usernameArr));
-}
-
-// 입력값 검증 함수
-function validateInputs(container) {
-  const inputs = container.querySelectorAll('#playerInputs input:not([disabled])');
-  return [...inputs].every(input => input.value.trim() !== '');
-}
-
 // 게임 옵션 페이지 생성 함수
 function GameOptionPage() {
   const container = document.createElement('div');
@@ -187,6 +116,77 @@ function GameOptionPage() {
   });
 
   return container;
+}
+
+// 플레이어 입력 필드를 렌더링하는 함수
+function renderPlayerInputs(container, players) {
+  const playerInputs = container.querySelector('#playerInputs');
+  playerInputs.innerHTML = '';
+
+  // User 1 (자기 이름으로 고정. 추후 fetch로 받아오기)
+  playerInputs.innerHTML += `
+    <div class="mb-3">
+      <label class="form-label">User 1</label>
+      <input type="text" class="form-control" placeholder="username" value="Me" disabled>
+    </div>
+  `;
+
+  // api로 받아올 경우 아래 주석 해제
+  // profileAPI.getProfileInfo()
+  //   .then((profileData) => {
+  //     const username = profileData.username;
+  //     const user1Input = container.querySelector('#user1-container input');
+  //     if (user1Input) {
+  //       user1Input.value = username;
+  //     }
+  //   })
+  //   .catch((error) => {
+  //     console.error('Error fetching profile info', error);
+  //   });
+
+  // 나머지 인원 입력 필드 생성
+  for (let i = 1; i < players; i++) {
+    playerInputs.innerHTML += `
+      <div class="mb-3">
+        <label class="form-label">User ${i + 1}</label>
+        <input type="text" class="form-control" placeholder="Enter username">
+      </div>
+    `;
+  }
+
+  // 플레이어 이름 입력할 때마다 저장
+  const inputs = playerInputs.querySelectorAll('input:not([disabled])');
+  inputs.forEach((input) => {
+    input.addEventListener('input', () => saveOptionsToSessionStorage(container));
+  });
+}
+
+// 선택 사항을 sessionStorage에 저장하는 함수
+function saveOptionsToSessionStorage(container) {
+  const players = container.querySelector('.btn-group .active[data-players]')?.getAttribute('data-players') || '2';
+  const paddleSize = container.querySelectorAll('.btn-group')[1].querySelector('.active')?.textContent;
+  const ballSpeed = container.querySelectorAll('.btn-group')[2].querySelector('.active')?.textContent;
+  const obstacles = container.querySelectorAll('.btn-group')[3].querySelector('.active')?.textContent;
+
+  // 플레이어 이름들을 배열로 수집
+  const playerInputs = container.querySelectorAll('#playerInputs input');
+  const usernameArr = [...playerInputs].map(input => input.value);
+
+  const options = {
+    players,
+    paddleSize,
+    ballSpeed,
+    obstacles,
+  };
+
+  sessionStorage.setItem('game_option', JSON.stringify(options));
+  sessionStorage.setItem('username', JSON.stringify(usernameArr));
+}
+
+// 입력값 검증 함수
+function validateInputs(container) {
+  const inputs = container.querySelectorAll('#playerInputs input:not([disabled])');
+  return [...inputs].every(input => input.value.trim() !== '');
 }
 
 // 외부에서 사용할 수 있도록 GameOptionPage 함수 export

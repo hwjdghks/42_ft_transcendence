@@ -26,7 +26,7 @@ function GameTournamentPage() {
     sessionStorage.setItem("tournament_in_progress", "true");
   }
 
-  // 초기 matches 불러오기(이미 있는지 확인)
+  // 초기 matches 불러오기(없으면 createBracket)
   let matches = JSON.parse(sessionStorage.getItem('matches')) || createBracket(usernames);
 
   // bracket 첫 렌더링
@@ -153,7 +153,5 @@ function createBracket(players) {
   }
   return matches;
 }
-
-// window.GameTournamentPage = GameTournamentPage;
 
 export { GameTournamentPage };

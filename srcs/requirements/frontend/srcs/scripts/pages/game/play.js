@@ -1,4 +1,4 @@
-function PingPongGamePage(configJson) {
+function GamePlayPage(configJson) {
   const container = document.createElement("div");
   container.className = "game-container";
   container.innerHTML = `
@@ -69,7 +69,7 @@ function initializePingPongGame(configJson) {
   // 장애물 생성
   const obstacles = [];
   for (let i = 0; i < config.obstacleCount; i++) {
-    const obstacle = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), obstacleMaterial);
+    const obstacle = new THREE.Mesh(new THREE.BoxGeometry(1, 10, 1), obstacleMaterial);
     obstacle.position.set(
       (Math.random() * 20) - 10,
       (Math.random() * (config.boundaryY * 2 - 2)) - (config.boundaryY - 1),
@@ -217,6 +217,16 @@ function initializePingPongGame(configJson) {
     // 세션스토리지 갱신
     sessionStorage.setItem('matches', JSON.stringify(matches));
 
+    // 임시로 로컬에 저장 (추후 fetch로 백앤드에 넘겨주기)
+    const gameResult = {
+      winner: winnerName,
+      score: { player1: gameScore.player1, player2: gameScore.player2 },
+      match: currentMatch,
+      timestamp: Date.now()
+    };
+    localStorage.setItem('lastGameResult', JSON.stringify(gameResult));
+    console.log('경기 결과가 로컬 스토리지에 저장되었습니다:', gameResult);
+
     // 토너먼트로 돌아가기
     document.getElementById('exitButton').addEventListener('click', () => {
       window.location.hash = '#gameplay/tournament';
@@ -258,4 +268,4 @@ function setupThreeJS(config) {
   return { scene, camera, renderer, paddleMaterial, ballMaterial, obstacleMaterial };
 }
 
-export { PingPongGamePage };
+export { GamePlayPage };
