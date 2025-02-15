@@ -1,12 +1,49 @@
-function GamePlayPage(configJson) {
+function PingPongGamePage(configJson) {
   const container = document.createElement("div");
   container.className = "game-container";
   container.innerHTML = `
+      <style>
+        .game-container { 
+            margin-top: 60px;
+            width: 600px; 
+            height: 600px; 
+            position: relative;
+        }
+        #scoreBoard {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #fff;
+            font-family: Arial, sans-serif;
+            font-size: 24px;
+            z-index: 10;
+        }
+        #gameContainer {
+            width: 600px; 
+            height: 600px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        canvas { display: block; }
+        #winnerMessage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: yellow;
+            font-family: Arial, sans-serif;
+            font-size: 36px;
+            z-index: 20;
+            display: none;
+        }
+      </style>
       <div id="scoreBoard">Player1: 0 | Player2: 0</div>
       <div id="gameContainer"></div>
       <div id="winnerMessage"></div>
   `;
-
+  
   // DOM이 완전히 준비된 후에 게임 초기화
   setTimeout(() => {
     initializePingPongGame(configJson);
@@ -16,8 +53,10 @@ function GamePlayPage(configJson) {
 }
 
 function initializePingPongGame(configJson) {
-  // 현재 매치 정보 불러오기 (필요에 따라 사용)
+  // 현재 경기 정보 불러오기 (여기에는 gameId가 포함되어 있음)
   const currentMatch = JSON.parse(sessionStorage.getItem('currentMatch') || '{}');
+  const roundIndex = currentMatch.roundIndex ?? 0;
+  const matchIndex = currentMatch.matchIndex ?? 0;
 
   // 기본 옵션
   const defaultConfig = {
@@ -29,23 +68,38 @@ function initializePingPongGame(configJson) {
     mapSkin: 0x001133,
     obstacleCount: 2
   };
-
-  // 전달된 config 병합
   let config = { ...defaultConfig };
   if (configJson) {
-    let parsed;
-    if (typeof configJson === 'string') {
-      parsed = JSON.parse(configJson);
-    } else {
-      parsed = configJson;
+    try {
+      const parsed = typeof configJson === 'string' ? JSON.parse(configJson) : configJson;
+      config = { ...config, ...parsed };
+    } catch (e) {
+      console.error("Invalid config JSON, using default config:", e);
     }
-    config = { ...config, ...parsed };
   }
 
-  // Three.js 관련 초기화는 별도의 함수로 분리
-  const { scene, camera, renderer, paddleMaterial, ballMaterial, obstacleMaterial } = setupThreeJS(config);
+  const container = document.getElementById('gameContainer');
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(config.mapSkin);
 
-  // 패들 생성 (Player1 vs Player2)
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+  camera.position.set(0, 0, 30);
+  camera.lookAt(0, 0, 0);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(600, 600, false);
+  container.appendChild(renderer.domElement);
+
+  const ambientLight = new THREE.AmbientLight(0xaaaaaa);
+  scene.add(ambientLight);
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+  directionalLight.position.set(0, 1, 1);
+  scene.add(directionalLight);
+
+  const paddleMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+  const ballMaterial = new THREE.MeshPhongMaterial({ color: 0xffdd00 });
+  const obstacleMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+
   const leftPaddle = new THREE.Mesh(
     new THREE.BoxGeometry(config.paddleSize.width, config.paddleSize.height, config.paddleSize.depth),
     paddleMaterial
@@ -60,16 +114,14 @@ function initializePingPongGame(configJson) {
   rightPaddle.position.set(12, 0, 0);
   scene.add(rightPaddle);
 
-  // 공 생성
   const ball = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), ballMaterial);
   ball.position.set(0, 0, 0);
   scene.add(ball);
   const ballVelocity = new THREE.Vector3(config.ballSpeed, config.ballSpeed, 0);
 
-  // 장애물 생성
   const obstacles = [];
   for (let i = 0; i < config.obstacleCount; i++) {
-    const obstacle = new THREE.Mesh(new THREE.BoxGeometry(1, 10, 1), obstacleMaterial);
+    const obstacle = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), obstacleMaterial);
     obstacle.position.set(
       (Math.random() * 20) - 10,
       (Math.random() * (config.boundaryY * 2 - 2)) - (config.boundaryY - 1),
@@ -79,7 +131,6 @@ function initializePingPongGame(configJson) {
     obstacles.push(obstacle);
   }
 
-  // 키보드 입력 처리
   const keysPressed = {};
   window.addEventListener('keydown', (e) => { keysPressed[e.code] = true; });
   window.addEventListener('keyup', (e) => { keysPressed[e.code] = false; });
@@ -90,7 +141,6 @@ function initializePingPongGame(configJson) {
   function update() {
     if (gameOver) return;
 
-    // 패들 이동 (W, S for Player1 / I, K for Player2)
     if (keysPressed['KeyW'] && leftPaddle.position.y < config.boundaryY - config.paddleSize.height / 2) {
       leftPaddle.position.y += config.paddleSpeed;
     }
@@ -104,17 +154,13 @@ function initializePingPongGame(configJson) {
       rightPaddle.position.y -= config.paddleSpeed;
     }
 
-    // 공 이동
     ball.position.add(ballVelocity);
 
-    // 상하 경계 반사
     if (ball.position.y + 0.5 > config.boundaryY || ball.position.y - 0.5 < -config.boundaryY) {
       ballVelocity.y = -ballVelocity.y;
     }
 
-    // 좌우 경계 (득점 처리)
     if (ball.position.x - 0.5 < -13) {
-      // Player2 득점
       gameScore.player2++;
       if (gameScore.player2 >= config.winningScore) {
         endGame("Player 2 Wins!");
@@ -122,7 +168,6 @@ function initializePingPongGame(configJson) {
       }
       resetBall(1);
     } else if (ball.position.x + 0.5 > 13) {
-      // Player1 득점
       gameScore.player1++;
       if (gameScore.player1 >= config.winningScore) {
         endGame("Player 1 Wins!");
@@ -131,7 +176,6 @@ function initializePingPongGame(configJson) {
       resetBall(-1);
     }
 
-    // 패들과의 충돌 처리
     if (
       ball.position.x - 0.5 < leftPaddle.position.x + config.paddleSize.width / 2 &&
       Math.abs(ball.position.y - leftPaddle.position.y) < config.paddleSize.height / 2 + 0.5
@@ -145,7 +189,6 @@ function initializePingPongGame(configJson) {
       ballVelocity.x = -Math.abs(ballVelocity.x);
     }
 
-    // 장애물과 충돌 처리
     obstacles.forEach(obstacle => {
       const ballBox = new THREE.Box3().setFromObject(ball);
       const obstacleBox = new THREE.Box3().setFromObject(obstacle);
@@ -155,7 +198,6 @@ function initializePingPongGame(configJson) {
       }
     });
 
-    // 점수판 업데이트
     document.getElementById('scoreBoard').innerText = `Player1: ${gameScore.player1} | Player2: ${gameScore.player2}`;
   }
 
@@ -168,30 +210,15 @@ function initializePingPongGame(configJson) {
     );
   }
 
-  // 애니메이션 루프 실행
-  animate();
-
-  // 애니메이션 함수
-  function animate() {
-    if (!gameOver) {
-      requestAnimationFrame(animate);
-    }
-    update();
-    renderer.render(scene, camera);
-  }
-
-  // 게임 종료 처리 함수
   function endGame(message) {
     gameOver = true;
     const winnerMessage = document.getElementById('winnerMessage');
 
-    // 세션스토리지에서 매치 정보 불러오기
     const currentMatch = JSON.parse(sessionStorage.getItem('currentMatch'));
     const matches = JSON.parse(sessionStorage.getItem('matches')) || [];
 
     let winnerName = message.includes("Player 1") ? currentMatch.player1 : currentMatch.player2;
-    
-    // 승리 메시지 표시
+
     winnerMessage.innerHTML = `
       <div style="text-align: center;">
         <div style="font-size: 24px; margin-bottom: 10px;">${winnerName} 승리!</div>
@@ -201,7 +228,6 @@ function initializePingPongGame(configJson) {
     `;
     winnerMessage.style.display = 'block';
 
-    // 매치 정보 업데이트
     const matchIndex = matches.findIndex(m => 
       m.player1 === currentMatch.player1 && 
       m.player2 === currentMatch.player2
@@ -214,58 +240,28 @@ function initializePingPongGame(configJson) {
       };
     }
 
-    // 세션스토리지 갱신
+    // 경기 종료 시 현재 경기의 id를 finishedGames에 기록
+    let finishedGames = JSON.parse(sessionStorage.getItem('finishedGames')) || [];
+    if (currentMatch.id) {
+      finishedGames.push(currentMatch.id);
+      sessionStorage.setItem('finishedGames', JSON.stringify(finishedGames));
+    }
+
     sessionStorage.setItem('matches', JSON.stringify(matches));
 
-    // 임시로 로컬에 저장 (추후 fetch로 백앤드에 넘겨주기)
-    const gameResult = {
-      winner: winnerName,
-      score: { player1: gameScore.player1, player2: gameScore.player2 },
-      match: currentMatch,
-      timestamp: Date.now()
-    };
-    localStorage.setItem('lastGameResult', JSON.stringify(gameResult));
-    console.log('경기 결과가 로컬 스토리지에 저장되었습니다:', gameResult);
-
-    // 토너먼트로 돌아가기
     document.getElementById('exitButton').addEventListener('click', () => {
       window.location.hash = '#gameplay/tournament';
     });
   }
+
+  function animate() {
+    if (!gameOver) {
+      requestAnimationFrame(animate);
+    }
+    update();
+    renderer.render(scene, camera);
+  }
+  animate();
 }
 
-// Three.js 초기화 및 설정을 위한 별도 함수
-function setupThreeJS(config) {
-  // 게임 컨테이너
-  const container = document.getElementById('gameContainer');
-
-  // 씬 생성 및 배경 색상 설정
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(config.mapSkin);
-
-  // 카메라 생성 및 설정
-  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
-  camera.position.set(0, 0, 30);
-  camera.lookAt(0, 0, 0);
-
-  // 렌더러 생성 및 사이즈 설정
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(600, 600, false);
-  container.appendChild(renderer.domElement);
-
-  // 조명 추가
-  const ambientLight = new THREE.AmbientLight(0xaaaaaa);
-  scene.add(ambientLight);
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-  directionalLight.position.set(0, 1, 1);
-  scene.add(directionalLight);
-
-  // 재질 생성
-  const paddleMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
-  const ballMaterial = new THREE.MeshPhongMaterial({ color: 0xffdd00 });
-  const obstacleMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
-
-  return { scene, camera, renderer, paddleMaterial, ballMaterial, obstacleMaterial };
-}
-
-export { GamePlayPage };
+export { PingPongGamePage };
