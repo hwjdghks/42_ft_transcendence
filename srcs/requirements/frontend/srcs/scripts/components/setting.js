@@ -1,4 +1,5 @@
 // setting.js
+import { createDeleteAccountModal } from './deleteAccountModal.js';
 
 function renderSettings() {
     const container = document.createElement('div');
@@ -34,13 +35,25 @@ function renderSettings() {
           <!-- Buttons Section -->
           <button class="btn btn-purple w-100 mb-2">Change data</button>
           <button class="btn btn-outline-primary w-100 mb-2" id="logoutBtn">Log out</button>
-          <button class="btn btn-danger w-100">Delete account</button>
+          <button class="btn btn-danger w-100" id="deleteAccountBtn">Delete account</button>
           <div id="setting-message" class="mt-3"></div>
       </div>
     `;
 
     const logoutBtn = container.querySelector('#logoutBtn');
     logoutBtn.addEventListener('click', handleLogout);
+
+    // 모달이 없으면 생성
+    if (!document.getElementById('deleteAccountModal')) {
+        createDeleteAccountModal();
+    }
+
+    // Delete Account 버튼 클릭 시 모달 표시
+    const deleteAccountBtn = container.querySelector('#deleteAccountBtn');
+    deleteAccountBtn.addEventListener('click', () => {
+        const modal = new bootstrap.Modal(document.getElementById('deleteAccountModal'));
+        modal.show();
+    });
   
     return container;
   }
