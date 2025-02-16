@@ -1,19 +1,42 @@
 const navbar = document.getElementById('navbar');
 
-navbar.innerHTML = `
-  <nav>
-    <div>
-      <div>
-        <img src="../static/logo.png" alt="Logo">
-        <a href="#profile" class="nav-link protected-link">Profile</a>
-        <a href="#gameplay/option" class="nav-link protected-link">GamePlay</a>
-      </div>
-    </div>
-  </nav>
-`;
-
 function isLoggedIn() {
-  return sessionStorage.getItem('jwtToken') !== null;
+  const token = sessionStorage.getItem('username');
+  console.log("🔹 [isLoggedIn] JWT Token 상태:", token);
+  return token !== null && token !== "undefined"; 
+}
+
+
+function updateNavbar() {
+  const navbar = document.getElementById('navbar');
+
+  navbar.innerHTML = `
+    <nav>
+      <div>
+        <div>
+          <img src="../static/logo.png" alt="Logo">
+          <a href="#profile" class="nav-link protected-link">Profile</a>
+          <a href="#gameplay/option" class="nav-link protected-link">GamePlay</a>
+        </div>
+      </div>
+    </nav>
+  `;
+
+  console.log("🔹 [updateNavbar] 네비게이션 업데이트 완료");
+
+  document.querySelectorAll('.protected-link').forEach(link => {
+      link.addEventListener('click', (event) => {
+          console.log("🔹 [protected-link] 클릭됨, 로그인 상태:", isLoggedIn());
+
+          if (!isLoggedIn()) {
+              event.preventDefault();
+              alert("로그인이 필요합니다.");
+              window.location.hash = "#login";
+          }
+      });
+  });
+
+  updateActiveLink();
 }
 
 function updateActiveLink() {
@@ -23,15 +46,5 @@ function updateActiveLink() {
   });
 }
 
-document.querySelectorAll('.protected-link').forEach(link => {
-  link.addEventListener('click', (event) => {
-    if (!isLoggedIn()) {
-      event.preventDefault();
-      alert("로그인이 필요합니다.");
-      window.location.hash = "#login";
-    }
-  });
-});
-
-updateActiveLink();
-window.addEventListener('hashchange', updateActiveLink);
+updateNavbar();
+window.addEventListener('hashchange', updateNavbar);

@@ -46,13 +46,17 @@ export function createDeleteAccountModal() {
 
     document.body.appendChild(modal);
 
+    // ✅ Bootstrap 모달 객체 생성
+    const bootstrapModal = new bootstrap.Modal(document.getElementById('deleteAccountModal'));
+
     // 이벤트 리스너 설정
     const confirmUsernameInput = modal.querySelector('#confirmUsername');
     const confirmDeleteBtn = modal.querySelector('#confirmDelete');
     const confirmErrorText = modal.querySelector('#confirmError');
 
     confirmUsernameInput.addEventListener('input', () => {
-        const username = document.getElementById('username')?.value || '';
+        const username = sessionStorage.getItem('username');
+        console.log(username);
         if (confirmUsernameInput.value === username) {
             confirmUsernameInput.classList.remove('is-invalid');
             confirmUsernameInput.classList.add('is-valid');
@@ -70,14 +74,30 @@ export function createDeleteAccountModal() {
         try {
             const response = await fetchAccountDeletion();
             alert(response.message || 'Account deleted successfully.');
-            
+    
             sessionStorage.clear();
-            window.location.href = '#login';
+    
+            const modalElement = document.getElementById('deleteAccountModal');
+            const bootstrapModal = bootstrap.Modal.getInstance(modalElement);
+    
+            if (bootstrapModal) {
+                bootstrapModal.hide();
+                bootstrapModal.dispose();
+            }
+    
+            setTimeout(() => {
+                if (modalElement) {
+                    modalElement.remove();
+                }
+                window.location.href = '#login';
+            }, 500);
+    
         } catch (error) {
             alert('Failed to delete account. Please try again.');
             console.error('Account deletion error:', error);
         }
     });
+    
 
     return modal;
 }
