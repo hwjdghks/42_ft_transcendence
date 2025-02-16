@@ -5,30 +5,33 @@ navbar.innerHTML = `
     <div>
       <div>
         <img src="../static/logo.png" alt="Logo">
-        <a href="#profile" class="nav-link">Profile</a>
-        <a href="#gameplay/option" class="nav-link">GamePlay</a>
+        <a href="#profile" class="nav-link protected-link">Profile</a>
+        <a href="#gameplay/option" class="nav-link protected-link">GamePlay</a>
       </div>
     </div>
   </nav>
 `;
 
+function isLoggedIn() {
+  return sessionStorage.getItem('jwtToken') !== null;
+}
+
 function updateActiveLink() {
   const currentHash = window.location.hash;
   document.querySelectorAll('.nav-link').forEach(link => {
-    if (link.getAttribute('href') === currentHash) {
-      link.classList.add('active');
-    } else {
-      link.classList.remove('active');
-    }
+    link.classList.toggle('active', link.getAttribute('href') === currentHash);
   });
 }
 
+document.querySelectorAll('.protected-link').forEach(link => {
+  link.addEventListener('click', (event) => {
+    if (!isLoggedIn()) {
+      event.preventDefault();
+      alert("로그인이 필요합니다.");
+      window.location.hash = "#login";
+    }
+  });
+});
+
 updateActiveLink();
 window.addEventListener('hashchange', updateActiveLink);
-
-
-
-// const nextButton = document.getElementById('next-button');
-// nextButton.addEventListener('click', () => {
-//   window.location.hash = '#gameplay'; // 특정 해시로 이동
-// });
