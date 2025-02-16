@@ -6,6 +6,7 @@ async function handleLoginSubmit(event) {
 
     try {
         const response = await fetchLogin({ email, password });
+        sessionStorage.setItem('jwtToken', response.token);
         showMessage(response.message, 'success');
     } catch (error) {
         showMessage('An error occurred. Please try again later.', 'error');
