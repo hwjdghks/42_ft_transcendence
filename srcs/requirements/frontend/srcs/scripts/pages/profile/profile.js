@@ -50,7 +50,7 @@ function updateProfilePage(data) {
 async function fetchProfileData() {
     try {
         const token = sessionStorage.getItem('jwtToken');
-        const response = await fetch('http://localhost/api/users/profile', {
+        const response = await fetch('https://localhost/api/users/profile/', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -182,7 +182,7 @@ function createProfilePage() {
         });
     });
 
-    // fetchProfileData(); /*실행 시 주석 해제*/
+    fetchProfileData();
 
     return container;
 }
