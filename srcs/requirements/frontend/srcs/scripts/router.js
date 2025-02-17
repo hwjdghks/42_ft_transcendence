@@ -3,7 +3,7 @@ import { LoginPage } from './pages/authorization/login.js';
 import { SignupPage } from './pages/authorization/signup.js';
 import { GameOptionPage } from './pages/game/option.js';
 import { GameTournamentPage } from './pages/game/tournament.js';
-import { GamePlayPage } from './pages/gmae/play.js';
+import { GamePlayPage } from './pages/game/play.js';
 
 const NotFoundPage = () => `
   <div class="not-found">
@@ -17,9 +17,9 @@ const NotFoundPage = () => `
 const pages = {
   login: () => LoginPage(),
   signup: () => SignupPage(),
-  "gameplay/option": GameOptionPage(),
-  "gameplay/tournament": GameTournamentPage(),
-  "gameplay/play": GamePlayPage(),
+  "gameplay/option": () => GameOptionPage(),
+  "gameplay/tournament": () => GameTournamentPage(),
+  "gameplay/play": () => GamePlayPage(),
   profile: () => window.createProfilePage().outerHTML,
 };
 
@@ -96,10 +96,9 @@ function router() {
     return;
   }
 
-  // 동적 경로이면 getPingPongGamePage()를 호출
   let renderPage;
   if (hash.startsWith('gameplay/play-')) {
-    renderPage = () => window.getPingPongGamePage();
+    renderPage = () => GamePlayPage();
   } else {
     renderPage = pages[hash] || pages.login;
   }

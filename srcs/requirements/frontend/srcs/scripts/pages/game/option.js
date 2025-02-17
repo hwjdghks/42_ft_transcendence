@@ -77,26 +77,27 @@ function GameOptionPage() {
   const btnGroups = container.querySelectorAll('.btn-group');
   btnGroups.forEach((btnGroup) => {
     btnGroup.addEventListener('click', (event) => {
-      // <button> 요소가 클릭된 경우만 처리
       if (event.target.tagName === 'BUTTON') {
         // 같은 그룹 내 모든 버튼의 active 제거
         btnGroup.querySelectorAll('button').forEach(btn => {
           btn.classList.remove('active', 'btn-primary');
           btn.classList.add('btn-outline-primary');
         });
-
+    
         // 클릭된 버튼만 active 적용
         event.target.classList.add('active', 'btn-primary');
         event.target.classList.remove('btn-outline-primary');
-
-        // 플레이어 인원 수 버튼인 경우, data-players 값을 숫자로 변환하여 입력 필드 렌더링
-        const players = parseInt(event.target.getAttribute('data-players'));
-        renderPlayerInputs(container, players);
-
+    
+        // data-players 속성이 있는 버튼인 경우에만 플레이어 인풋을 렌더링합니다.
+        if (event.target.hasAttribute('data-players')) {
+          const players = parseInt(event.target.getAttribute('data-players'));
+          renderPlayerInputs(container, players);
+        }
+    
         // 선택 사항 저장
         saveOptionsToSessionStorage(container);
       }
-    });
+    });    
   });
 
   // 초기 2인용 렌더링
