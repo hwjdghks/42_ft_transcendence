@@ -128,7 +128,6 @@
 }
 
 .btn-danger {
-    background-color: #6f42c1;
     color: white;
     border: none;
 }
@@ -154,4 +153,13 @@ input, select {
 
 .bg-purple {
     background-color: #6f42c1;
+}
+
+.modal-title {
+    font-weight: bold;  /* 글씨 두껍게 */
+    font-size: 1.5rem;  /* 적당한 크기 */
+}
+
+.text-purple {
+    color: #6f42c1 !important;
 }
