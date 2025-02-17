@@ -1,39 +1,28 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const signupForm = document.getElementById('signup-form');
+async function handleSignupSubmit(event) {
+    event.preventDefault(); 
 
-    if (signupForm) {
-        signupForm.addEventListener('submit', async (event) => { 
-            event.preventDefault(); 
+    const username = document.getElementById('username').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
 
-            const username = document.getElementById('username').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirm_password').value;
-
-            if (password !== confirmPassword) {
-                showMessage('Passwords do not match. Please try again.', 'error');
-                return; 
-            }
-
-            try {
-                const response = await fetchSignup({ username, email, password });
-                if (response.success) {
-                    showMessage('Signup successful! Verification code sent to your email.', 'success');
-                    signupForm.reset();
-                } else {
-                    showMessage(response.message || 'Signup failed. Please try again.', 'error');
-                }
-            } catch (error) {
-                showMessage('An error occurred. Please try again later.', 'error');
-                console.error(error);
-            }
-        });
+    if (password !== confirmPassword) {
+        showMessage('Passwords do not match. Please try again.', 'error');
+        return; 
     }
-});
+
+    try {
+        const response = await fetchSignup({ username, email, password });
+        showMessage(response.message, 'success');
+    } catch (error) {
+        showMessage('An error occurred. Please try again later.', 'error');
+        console.error(error);
+    }
+}
 
 // Fetch 함수
 async function fetchSignup(data) {
-    const response = await fetch('http://localhost/api/users/signup', {
+    const response = await fetch('https://localhost/api/users/signup/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -58,6 +47,13 @@ function showMessage(message, type) {
 }
 
 export function SignupPage() {
+    setTimeout(() => {
+        const signupForm = document.getElementById('signup-form');
+        if (signupForm) {
+            signupForm.addEventListener('submit', handleSignupSubmit);
+        }
+    }, 0);
+
     return `
         <div class="signup-page">
             <div class="signup-container">

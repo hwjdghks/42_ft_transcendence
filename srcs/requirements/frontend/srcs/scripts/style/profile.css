@@ -77,7 +77,6 @@
     border: none;
     border-radius: 10px !important;
 }
-
 .accordion-button:not(.collapsed) {
     background-color: #fff;
     box-shadow: none;
@@ -129,7 +128,7 @@
 }
 
 .btn-danger {
-    background-color: #dc3545;
+    background-color: #6f42c1;
     color: white;
     border: none;
 }
