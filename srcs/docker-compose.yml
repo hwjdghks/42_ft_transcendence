@@ -24,6 +24,7 @@ services:
       - db
     environment:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       DATABASE_URL: ${DJANGO_URL}
     volumes:
       - profile:/app/media/profile_images
