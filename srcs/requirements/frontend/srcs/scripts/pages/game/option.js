@@ -1,7 +1,7 @@
-// 게임 옵션 페이지 생성 함수
-function GameOptionPage() {
+function getGameOptionPage() {
   const container = document.createElement('div');
   container.className = 'container py-5';
+
   container.innerHTML = `
       <!-- Header Section -->
       <div class="d-flex justify-content-between align-items-center mb-4">
@@ -73,42 +73,67 @@ function GameOptionPage() {
       </div>
   `;
 
-  // .btn-group에 이벤트 리스너 설정
+  // === 버튼 그룹 클릭 시 active 토글 로직 ===
   const btnGroups = container.querySelectorAll('.btn-group');
-  btnGroups.forEach((btnGroup) => {
+  btnGroups.forEach(btnGroup => {
     btnGroup.addEventListener('click', (event) => {
       if (event.target.tagName === 'BUTTON') {
-        // 같은 그룹 내 모든 버튼의 active 제거
         btnGroup.querySelectorAll('button').forEach(btn => {
           btn.classList.remove('active', 'btn-primary');
           btn.classList.add('btn-outline-primary');
         });
-    
-        // 클릭된 버튼만 active 적용
         event.target.classList.add('active', 'btn-primary');
         event.target.classList.remove('btn-outline-primary');
-    
-        // data-players 속성이 있는 버튼인 경우에만 플레이어 인풋을 렌더링합니다.
-        if (event.target.hasAttribute('data-players')) {
-          const players = parseInt(event.target.getAttribute('data-players'));
-          renderPlayerInputs(container, players);
+
+        // 플레이어 인원수 버튼을 클릭했을 때만
+        const players = parseInt(event.target.getAttribute('data-players'));
+        if (!isNaN(players)) {
+          renderPlayerInputs(players);
         }
-    
-        // 선택 사항 저장
-        saveOptionsToSessionStorage(container);
+
+        // 선택 사항을 저장
+        saveOptionsToSessionStorage();
       }
-    });    
+    });
   });
 
-  // 초기 2인용 렌더링
-  renderPlayerInputs(container, 2);
+  function renderPlayerInputs(players) {
+    const playerInputs = container.querySelector('#playerInputs');
+    playerInputs.innerHTML = '';
 
-  // Next 버튼 이벤트 설정
+    // User 1 (고정, 본인 이름이라 가정. 실제 로그인 연동 시 수정)
+    playerInputs.innerHTML += `
+      <div class="mb-3">
+        <label class="form-label">User 1</label>
+        <input type="text" class="form-control" placeholder="username" value="Me" disabled>
+      </div>
+    `;
+
+    // 나머지 인원 입력
+    for (let i = 1; i < players; i++) {
+      playerInputs.innerHTML += `
+        <div class="mb-3">
+          <label class="form-label">User ${i + 1}</label>
+          <input type="text" class="form-control" placeholder="Enter username">
+        </div>
+      `;
+    }
+
+    // 플레이어 이름 입력할 때마다 저장
+    const inputs = playerInputs.querySelectorAll('input:not([disabled])');
+    inputs.forEach(input => {
+      input.addEventListener('input', saveOptionsToSessionStorage);
+    });
+  }
+
+  // 처음에는 2인용(기본)으로 렌더링
+  renderPlayerInputs(2);
+
+  // Next 버튼
   const nextButton = container.querySelector('#game-option-next');
   nextButton.addEventListener('click', () => {
-    if (validateInputs(container)) {
-      saveOptionsToSessionStorage(container);
-      sessionStorage.setItem('tournament_in_progress', 'true');
+    if (validateInputs()) {
+      saveOptionsToSessionStorage();
       // 토너먼트 페이지로 이동
       window.location.hash = '#gameplay/tournament';
     } else {
@@ -116,79 +141,36 @@ function GameOptionPage() {
     }
   });
 
+  function saveOptionsToSessionStorage() {
+    const players = container.querySelector('.btn-group .active[data-players]')?.getAttribute('data-players') || '2';
+    const paddleSize = container.querySelectorAll('.btn-group')[1].querySelector('.active')?.textContent;
+    const ballSpeed = container.querySelectorAll('.btn-group')[2].querySelector('.active')?.textContent;
+    const obstacles = container.querySelectorAll('.btn-group')[3].querySelector('.active')?.textContent;
+
+    // 플레이어 이름들을 배열 형태로 수집
+    const playerInputs = container.querySelectorAll('#playerInputs input');
+    const usernameArr = [...playerInputs].map(input => input.value);
+
+    // game_option 예시 (원하면 확장 가능)
+    const options = {
+      players,
+      paddleSize,
+      ballSpeed,
+      obstacles,
+    };
+    // 필요한 경우 유지
+    sessionStorage.setItem('game_option', JSON.stringify(options));
+
+    // Tournament 페이지에서 사용할 플레이어 이름 ()
+    sessionStorage.setItem('username', JSON.stringify(usernameArr));
+  }
+
+  function validateInputs() {
+    const inputs = container.querySelectorAll('#playerInputs input:not([disabled])');
+    return [...inputs].every(input => input.value.trim() !== '');
+  }
+
   return container;
 }
 
-// 플레이어 입력 필드를 렌더링하는 함수
-function renderPlayerInputs(container, players) {
-  const playerInputs = container.querySelector('#playerInputs');
-  playerInputs.innerHTML = '';
-
-  // User 1 (자기 이름으로 고정. 추후 fetch로 받아오기)
-  playerInputs.innerHTML += `
-    <div class="mb-3">
-      <label class="form-label">User 1</label>
-      <input type="text" class="form-control" placeholder="username" value="Me" disabled>
-    </div>
-  `;
-
-  // api로 받아올 경우 아래 주석 해제
-  // profileAPI.getProfileInfo()
-  //   .then((profileData) => {
-  //     const username = profileData.username;
-  //     const user1Input = container.querySelector('#user1-container input');
-  //     if (user1Input) {
-  //       user1Input.value = username;
-  //     }
-  //   })
-  //   .catch((error) => {
-  //     console.error('Error fetching profile info', error);
-  //   });
-
-  // 나머지 인원 입력 필드 생성
-  for (let i = 1; i < players; i++) {
-    playerInputs.innerHTML += `
-      <div class="mb-3">
-        <label class="form-label">User ${i + 1}</label>
-        <input type="text" class="form-control" placeholder="Enter username">
-      </div>
-    `;
-  }
-
-  // 플레이어 이름 입력할 때마다 저장
-  const inputs = playerInputs.querySelectorAll('input:not([disabled])');
-  inputs.forEach((input) => {
-    input.addEventListener('input', () => saveOptionsToSessionStorage(container));
-  });
-}
-
-// 선택 사항을 sessionStorage에 저장하는 함수
-function saveOptionsToSessionStorage(container) {
-  const players = container.querySelector('.btn-group .active[data-players]')?.getAttribute('data-players') || '2';
-  const paddleSize = container.querySelectorAll('.btn-group')[1].querySelector('.active')?.textContent;
-  const ballSpeed = container.querySelectorAll('.btn-group')[2].querySelector('.active')?.textContent;
-  const obstacles = container.querySelectorAll('.btn-group')[3].querySelector('.active')?.textContent;
-
-  // 플레이어 이름들을 배열로 수집
-  const playerInputs = container.querySelectorAll('#playerInputs input');
-  const usernameArr = [...playerInputs].map(input => input.value);
-
-  const options = {
-    players,
-    paddleSize,
-    ballSpeed,
-    obstacles,
-  };
-
-  sessionStorage.setItem('game_option', JSON.stringify(options));
-  sessionStorage.setItem('username', JSON.stringify(usernameArr));
-}
-
-// 입력값 검증 함수
-function validateInputs(container) {
-  const inputs = container.querySelectorAll('#playerInputs input:not([disabled])');
-  return [...inputs].every(input => input.value.trim() !== '');
-}
-
-// 외부에서 사용할 수 있도록 GameOptionPage 함수 export
-export { GameOptionPage };
+window.getGameOptionPage = getGameOptionPage;
