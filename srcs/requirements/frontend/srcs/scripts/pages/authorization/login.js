@@ -6,7 +6,15 @@ async function handleLoginSubmit(event) {
 
     try {
         const response = await fetchLogin({ email, password });
+        //sessionStorage.setItem('jwtToken', response.token);
+        sessionStorage.setItem('username', response.username);
         showMessage(response.message, 'success');
+
+        setTimeout(() => {
+            window.location.href = '#profile';
+        }, 1000);
+
+        
     } catch (error) {
         showMessage('An error occurred. Please try again later.', 'error');
         console.error('Login error:', error);

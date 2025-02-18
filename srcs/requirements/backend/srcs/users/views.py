@@ -36,7 +36,7 @@ def signin(request: HttpRequest) -> JsonResponse:
     user = authenticate(email=email, password=password)
     if user is not None:
         login(request, user)
-        return JsonResponse({'message': 'Signed in successfully'}, status=200)
+        return JsonResponse({'message': 'Signed in successfully', 'username': user.username}, status=200)
     return JsonResponse({'error': 'Invalid credentials'}, status=400)
 
 @csrf_exempt

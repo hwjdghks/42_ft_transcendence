@@ -14,6 +14,11 @@ async function handleSignupSubmit(event) {
     try {
         const response = await fetchSignup({ username, email, password });
         showMessage(response.message, 'success');
+
+        setTimeout(() => {
+            window.location.hash = "#login";
+        }, 500); 
+
     } catch (error) {
         showMessage('An error occurred. Please try again later.', 'error');
         console.error(error);
