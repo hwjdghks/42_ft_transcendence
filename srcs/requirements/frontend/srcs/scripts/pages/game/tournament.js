@@ -112,6 +112,7 @@ function GameTournamentPage() {
       } else {
         alert(`🏆 최종 우승자: ${winners[0]} 🏆`);
         resetTournamentSession();
+        window.location.hash = '#gameplay/option';
       }
     }
   });
