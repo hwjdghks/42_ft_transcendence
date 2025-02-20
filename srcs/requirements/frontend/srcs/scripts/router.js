@@ -37,8 +37,7 @@ function router() {
 
   // 동적 경로 체크: URL이 "gameplay/play-<id>" 형태인 경우
   if (hash.startsWith('gameplay/play-')) {
-    const parts = hash.split('-');
-    const gameIdFromURL = parts[parts.length - 1];
+    const gameIdFromURL = hash.substring('gameplay/play-'.length);
 
     // 현재 진행 중인 경기(currentMatch)가 있는지 확인
     const currentMatchStr = sessionStorage.getItem('currentMatch');

@@ -91,15 +91,12 @@ function GameTournamentPage() {
     return `${hex.substr(0, 8)}-${hex.substr(8, 4)}-${hex.substr(12, 4)}-${hex.substr(16, 4)}-${hex.substr(20, 12)}`;
   }
   
-  console.log(generateUUID());
-  
-
   nextButton.addEventListener('click', () => {
     const nextMatch = matches.find(match => !match.winner);
 
     if (nextMatch) {
       // 랜덤 id 부여
-      const gameId = generateGameId();
+      const gameId = generateUUID();
       nextMatch.id = gameId;
       sessionStorage.setItem('currentMatch', JSON.stringify(nextMatch));
       sessionStorage.setItem('matches', JSON.stringify(matches));

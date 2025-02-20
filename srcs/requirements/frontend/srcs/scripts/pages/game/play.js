@@ -1,4 +1,7 @@
 function GamePlayPage(configJson) {
+  if (!configJson) {
+    configJson = sessionStorage.getItem('game_option');
+  }
   const container = document.createElement("div");
   container.className = "game-container";
   container.innerHTML = `
