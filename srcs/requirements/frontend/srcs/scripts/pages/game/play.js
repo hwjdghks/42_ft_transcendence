@@ -45,7 +45,30 @@ function initializePingPongGame(parentContainer, configJson) {
   if (configJson) {
     try {
       const parsed = typeof configJson === 'string' ? JSON.parse(configJson) : configJson;
-      config = { ...config, ...parsed };
+
+      // 1) 공 속도
+      //    예) session 값(1.75)을 기본 값(0.6)에 곱하는 식 등
+      if (parsed.ballSpeed) {
+        config.ballSpeed = defaultConfig.ballSpeed * parsed.ballSpeed;
+      }
+
+      // 2) 패들 크기
+      //    sessionStorage에는 단일 숫자(멀티플라이어)만 있으므로, 기본 높이에 곱해서 최종 height를 만든다.
+      if (parsed.paddleSize) {
+        config.paddleSize = {
+          ...defaultConfig.paddleSize,
+          height: defaultConfig.paddleSize.height * parsed.paddleSize,
+        };
+      }
+
+      // 3) 장애물 수
+      if (parsed.obstacles) {
+        config.obstacleCount = parsed.obstacles;
+      }
+
+      // 4) 그 외 필요한 옵션이 있다면 여기서 반영
+      //    ex) players, winningScore 등등
+      
     } catch (e) {
       console.error("Invalid config JSON, using default config:", e);
     }
@@ -62,6 +85,9 @@ function initializePingPongGame(parentContainer, configJson) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(600, 600, false);
   gameContainer.appendChild(renderer.domElement);
+
+  renderer.domElement.tabIndex = 0;
+  renderer.domElement.focus();
 
   // 조명 추가
   const ambientLight = new THREE.AmbientLight(0xaaaaaa);
@@ -112,7 +138,11 @@ function initializePingPongGame(parentContainer, configJson) {
 
   // 키 입력 이벤트 처리
   const keysPressed = {};
-  window.addEventListener('keydown', (e) => { keysPressed[e.code] = true; });
+  window.addEventListener('keydown', (e) => {
+    console.log('Pressed:', e.code);
+    keysPressed[e.code] = true;
+  });
+  
   window.addEventListener('keyup', (e) => { keysPressed[e.code] = false; });
 
   let gameScore = { player1: 0, player2: 0 };
