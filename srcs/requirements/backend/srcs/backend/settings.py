@@ -159,3 +159,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # default user model
 
 AUTH_USER_MODEL = "users.User"
+
+# SMTP 설정
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"  # Gmail SMTP 서버
+EMAIL_PORT = 587  # TLS 포트 (보통 587)
+EMAIL_USE_TLS = True  # TLS 사용 여부
+EMAIL_USE_SSL = False  # SSL 사용 여부
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER") # 이메일 계정 (발신자)
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD") # 앱 비밀번호 또는 SMTP 비밀번호
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # 기본 발신자 이메일

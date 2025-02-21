@@ -4,6 +4,7 @@ import { SignupPage } from './pages/authorization/signup.js';
 import { GameOptionPage } from './pages/game/option.js';
 import { GameTournamentPage } from './pages/game/tournament.js';
 import { GamePlayPage } from './pages/game/play.js';
+import { SignupVerificationPage } from './pages/authorization/signupVerification.js';
 
 const NotFoundPage = () => `
   <div class="not-found">
@@ -17,6 +18,7 @@ const NotFoundPage = () => `
 const pages = {
   login: () => LoginPage(),
   signup: () => SignupPage(),
+  "signup-verification": () => SignupVerificationPage(),
   "gameplay/option": () => GameOptionPage(),
   "gameplay/tournament": () => GameTournamentPage(),
   "gameplay/play": () => GamePlayPage(),
