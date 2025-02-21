@@ -21,6 +21,20 @@ async function handleLoginSubmit(event) {
     }
 }
 
+document.addEventListener("DOMContentLoaded", function () {
+    const authButton = document.getElementById("auth-btn");
+    if (authButton) {
+        authButton.addEventListener("click", function () {
+            const oauthURL = "https://intra.42.fr/oauth/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=code";
+            window.open(oauthURL, "_blank", "width=600,height=700");
+        });
+    } else {
+        console.error("Error: Element with ID 'auth-btn' not found.");
+    }
+});
+
+
+
 async function fetchLogin(data) {
     const response = await fetch('https://localhost/api/users/signin/', {
         method: 'POST',
@@ -51,6 +65,16 @@ export function LoginPage() {
         if (loginForm) {
             loginForm.addEventListener('submit', handleLoginSubmit);
         }
+
+        const authButton = document.getElementById("auth-btn");
+        if (authButton) {
+            authButton.addEventListener("click", function () {
+                const oauthURL = "https://intra.42.fr/";
+                window.open(oauthURL, "_blank", "width=600,height=700");
+            });
+        } else {
+            console.error("Error: Element with ID 'auth-btn' not found.");
+        }
     }, 0);
 
     return `
@@ -67,6 +91,11 @@ export function LoginPage() {
                         <input type="password" class="form-control" id="password" placeholder="Enter your password">
                     </div>
                     <button type="submit" class="btn login-btn">Submit</button>
+
+                    <button type="button" class="btn auth-btn mt-2" id="auth-btn">
+                        Authorization with
+                        <img src="../../static/42logo.jpg" alt="Auth Icon" class="auth-icon">
+                    </button>
                 </form>
                 <div id="login-message" class="mt-3"></div>
                 <a href="/#signup" class="btn btn-link mt-3">Sign up</a>
@@ -74,3 +103,4 @@ export function LoginPage() {
         </div>
     `;
 }
+
