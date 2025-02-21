@@ -1,7 +1,15 @@
-// SignupVerificationPage.js
 import { fetchOTPVerify, showMessage } from './signupApi.js';
 
 export function SignupVerificationPage() {
+  // 페이지 로딩 시 JWT 토큰 확인
+  async function verifyTokenOnLoad() {
+    const existingToken = sessionStorage.getItem("signup_fa");
+    if (!existingToken) {
+      alert("접근 할 수 없는 페이지 입니다.");
+      window.location.hash = '#signup';
+    }
+  }
+
   // "Sign Up" 버튼 클릭 시 호출
   async function handleVerificationSubmit(event) {
     event.preventDefault();
@@ -23,7 +31,7 @@ export function SignupVerificationPage() {
       sessionStorage.setItem('signup_fa', verifyResponse.token);
       showMessage(verifyResponse.message || 'Signup successful!', 'success');
 
-      // 가입 완료 후 이동
+      // 가입 완료 후 로그인 페이지로 이동
       setTimeout(() => {
         window.location.hash = '#login';
       }, 500);
@@ -33,6 +41,10 @@ export function SignupVerificationPage() {
     }
   }
 
+  // 페이지 로딩 시 토큰 확인 실행
+  verifyTokenOnLoad();
+
+  // 이벤트 바인딩
   setTimeout(() => {
     const verificationForm = document.getElementById('verification-form');
     if (verificationForm) {
