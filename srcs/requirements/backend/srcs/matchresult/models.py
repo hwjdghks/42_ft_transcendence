@@ -1,0 +1,19 @@
+from django.db import models
+from django.core.validators import MinValueValidator
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class MatchResult(models.Model):
+    email = models.ForeignKey(User, on_delete=models.CASCADE, related_name='match_results')
+    username = models.CharField(max_length=20)
+    guestname = models.CharField(max_length=20)
+    user_score = models.IntegerField(default=0, validators=[MinValueValidator(0)]) # 기본값을 0으로 지정 및 최소값을 0으로 지정
+    guest_score = models.IntegerField(default=0, validators=[MinValueValidator(0)])# 기본값을 0으로 지정 및 최소값을 0으로 지정
+    match_date = models.DateTimeField(auto_now_add=True)
+    game_result = models.CharField(max_length=5, choices=[('win', 'Win'), ('lose', 'Lose'), ('draw', 'Draw')])
+    session_id = models.UUIDField(primary_key=True, unique=True)  # 자동 생성하지 않고 외부에서 값을 지정합니다.
+    
+    class Meta:
+        db_table = 'matchresult'  # 실제 테이블 이름을 'matchresult'로 명시적 지정
+        ordering = ['-match_date']  # 기본 내림차순 정렬 (최신 데이터 우선)

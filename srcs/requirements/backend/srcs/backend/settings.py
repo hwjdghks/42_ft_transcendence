@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',
     'authentication',
+    'matchresult' ,
 ]
 
 MIDDLEWARE = [
