@@ -162,24 +162,46 @@ function renderPlayerInputs(container, players) {
   });
 }
 
-// 선택 사항을 sessionStorage에 저장하는 함수
 function saveOptionsToSessionStorage(container) {
-  const players = container.querySelector('.btn-group .active[data-players]')?.getAttribute('data-players') || '2';
-  const paddleSize = container.querySelectorAll('.btn-group')[1].querySelector('.active')?.textContent;
-  const ballSpeed = container.querySelectorAll('.btn-group')[2].querySelector('.active')?.textContent;
-  const obstacles = container.querySelectorAll('.btn-group')[3].querySelector('.active')?.textContent;
-
-  // 플레이어 이름들을 배열로 수집
+  // 1. 플레이어 수 (data-players 속성이 있는 버튼에서 가져옴)
+  const playersElement = container.querySelector('.btn-group .active[data-players]');
+  const players = playersElement ? parseInt(playersElement.getAttribute('data-players'), 10) : 2;
+  
+  // 2. 패들 사이즈: 텍스트가 "x1", "x1.25" 등으로 되어 있을 수 있으므로 "x" 제거 후 숫자형으로 변환
+  const rawPaddleSize = container
+    .querySelectorAll('.btn-group')[1]
+    .querySelector('.active')?.textContent.trim() || "1";
+  const paddleMultiplier = rawPaddleSize.startsWith('x')
+    ? parseFloat(rawPaddleSize.substring(1))
+    : parseFloat(rawPaddleSize);
+  
+  // 3. 공 속도: 텍스트가 "x1", "x1.25" 등으로 되어 있을 수 있으므로 "x" 제거 후 숫자형으로 변환
+  const rawBallSpeed = container
+    .querySelectorAll('.btn-group')[2]
+    .querySelector('.active')?.textContent.trim() || "1";
+  const ballSpeed = rawBallSpeed.startsWith('x')
+    ? parseFloat(rawBallSpeed.substring(1))
+    : parseFloat(rawBallSpeed);
+  
+  // 4. 장애물 수: 정수형으로 변환
+  const obstaclesElement = container
+    .querySelectorAll('.btn-group')[3]
+    .querySelector('.active');
+  const obstacles = obstaclesElement ? parseInt(obstaclesElement.textContent.trim(), 10) : 1;
+  
+  // 5. 플레이어 이름 배열: 첫 번째 입력은 고정값("Me")일 수 있으므로 모든 인풋에서 값 추출
   const playerInputs = container.querySelectorAll('#playerInputs input');
-  const usernameArr = [...playerInputs].map(input => input.value);
-
+  const usernameArr = Array.from(playerInputs).map(input => input.value.trim());
+  
+  // 옵션 객체 구성 (paddleSize와 ballSpeed는 숫자형 multiplier로 저장)
   const options = {
     players,
-    paddleSize,
+    paddleSize: paddleMultiplier,
     ballSpeed,
     obstacles,
   };
-
+  
+  // sessionStorage에 JSON 문자열로 저장
   sessionStorage.setItem('game_option', JSON.stringify(options));
   sessionStorage.setItem('username', JSON.stringify(usernameArr));
 }
