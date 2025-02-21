@@ -33,8 +33,8 @@ def signup(request: HttpRequest) -> JsonResponse:
         return response
 
     user = User.objects.create_user(username=username, email=email, password=password)
-    # user.is_active = False 원래 False로 해야되나 frontend mail인증기능 아직 미구현으로 True로 메일인증없이 넘어가게 임시조치
-    user.is_active = True
+    user.is_active = False #원래 False로 해야되나 frontend mail인증기능 아직 미구현으로 True로 메일인증없이 넘어가게 임시조치
+    # user.is_active = True
     user.save()
     token = generate_jwt(user, 1)
     return JsonResponse({'message': 'User created successfully', 'token': token}, status=201)
@@ -48,8 +48,8 @@ def signin(request: HttpRequest) -> JsonResponse:
 
     user = authenticate(email=email, password=password)
     if user is not None:
-        # token = generate_jwt(user, 1) // 원래 1fa -> 2fa 해야되나 frontend mail인증창 미구현으로 바로 2fa발급되게 조치
-        token = generate_jwt(user, 2)
+        token = generate_jwt(user, 1) #// 원래 1fa -> 2fa 해야되나 frontend mail인증창 미구현으로 바로 2fa발급되게 조치
+        # token = generate_jwt(user, 2)
         return JsonResponse({'message': 'Signed in successfully', 'token': token}, status=200)
     return JsonResponse({'error': 'Invalid credentials'}, status=400)
 
