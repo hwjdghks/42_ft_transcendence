@@ -6,7 +6,6 @@ async function handleSignupSubmit(event) {
     const existingToken = sessionStorage.getItem("signup_fa");
 
     if (!existingToken) {
-        // Step 1: Send Code
         const username = document.getElementById('username').value.trim();
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
@@ -18,21 +17,50 @@ async function handleSignupSubmit(event) {
         }
 
         try {
-            const requestData = { username, email, password };
-            const response = await fetchOTPRequest(requestData);
-            sessionStorage.setItem('signup_fa', response.token); //1FA 토큰 저장
+            const signupResponse = await fetchSignup({ username, email, password });
+            console.log("Signup Response:", signupResponse);
+            sessionStorage.setItem('signup_fa', signupResponse.token); // 1차 토큰 저장
             cachedUserData = { username, email, password };
-            showMessage(response.message || 'OTP has been sent. Check your email.', 'success');
 
-            document.getElementById('otp-container').style.display = 'block'; //Verify 입력칸 표시
-            document.getElementById('signup-btn').textContent = 'Signup';
+            console.log("OTP request...");
+            const otpResponse = await fetchOTPRequest(signupResponse.token);
+            console.log("OTP Response:", otpResponse); 
+            showMessage(otpResponse.message || 'OTP has been sent. Check your email.', 'success');
+
+            /*
+            setTimeout(() => {
+                const otpContainer = document.getElementById('otp-container');
+                const signupBtn = document.getElementById('signup-btn');
+            
+                if (!otpContainer) {
+                    console.error("OTP container not found!");
+                    return;
+                }
+            
+                console.log("Before change:", getComputedStyle(otpContainer).display);
+            
+                // 기존 `!important` 스타일 적용 방지
+                otpContainer.classList.remove("hidden");
+                otpContainer.classList.add("active");
+
+            
+                // 직접 스타일 변경
+                otpContainer.style.display = "block"; 
+                otpContainer.style.visibility = "visible";
+                otpContainer.style.opacity = "1";
+            
+                console.log("After change:", getComputedStyle(otpContainer).display);
+            
+                if (signupBtn) signupBtn.textContent = 'Verify';
+            }, 100);*/
+            
+            
+
         } catch (error) {
             console.error(error);
-            showMessage('Failed to send OTP code. Please try again.', 'error');
-            return ;
+            showMessage(error.message || 'Signup failed. Please try again.', 'error');
         }
     } else {
-        // Step 2: Verify Code + Final Signup
         const otp = document.getElementById('otp').value.trim();
         if (!otp) {
             showMessage('Please enter your OTP code.', 'error');
@@ -42,71 +70,73 @@ async function handleSignupSubmit(event) {
         try {
             const verifyResponse = await fetchOTPVerify(existingToken, otp);
             sessionStorage.setItem('signup_fa', verifyResponse.token);
-
-            const signupResponse = await fetchSignup(cachedUserData);
-            showMessage(signupResponse.message || 'Sign up successful!', 'success');
-
+            showMessage(verifyResponse.message || 'Signup successful!', 'success');
             setTimeout(() => {
                 window.location.hash = '#login';
             }, 500);
         } catch (error) {
             console.error(error);
-            showMessage('OTP verification failed or signup failed. Please try again.', 'error');
+            showMessage(error.message || 'OTP verification failed. Please try again.', 'error');
         }
     }
 }
 
-async function fetchOTPRequest(data) {
-    const token = sessionStorage.getItem("signup_fa") || "";
-    const response = await fetch('https://localhost/api/auth/2fa/signup/request/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(
-            {
-                username: data.username,
-                email: data.email,
-                password: data.password,
-                token: token
-            }
-        )
-    });
-
-    if (!response.ok) throw new Error('Failed to request 2FA OTP');
-    return await response.json();
-}
-
-async function fetchOTPVerify(token, otp) {
-    const response = await fetch('https://localhost/api/auth/2fa/signup/verify/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            token,
-            otp
-        }),
-    });
-    if (!response.ok) throw new Error('Failed to verify OTP');
-    return await response.json();
-}
 
 async function fetchSignup(data) {
-    const token = sessionStorage.getItem("signup_fa") || "";
+    console.log("Signup Request Data:", JSON.stringify(data, null, 2));
     const response = await fetch('https://localhost/api/users/signup/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            ...data,
-            token: token
-        }),
+        body: JSON.stringify(data),
     });
 
+    const responseData = await response.json();
+    console.log("Signup API Response:", responseData);
+
     if (!response.ok) {
-        throw new Error('Failed to sign up');
+        throw new Error(responseData.error || "Signup failed"); 
     }
 
-    return await response.json();
+    return responseData;
 }
+
+
+async function fetchOTPRequest(token) {
+    const response = await fetch('https://localhost/api/auth/2fa/signup/request/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({})
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) throw new Error(responseData.error || "OTP request failed");
+    return responseData;
+}
+
+
+async function fetchOTPVerify(token, otp) {
+    const response = await fetch('https://localhost/api/auth/2fa/signup/verify/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ otp })
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) throw new Error(responseData.error || "OTP verification failed");
+    return responseData;
+}
+
+
 
 function showMessage(message, type) {
     const messageDiv = document.getElementById('signup-message');
@@ -145,7 +175,7 @@ export function SignupPage() {
                         <label for="confirm_password" class="form-label">Confirm Password</label>
                         <input type="password" class="form-control" id="confirm_password" placeholder="Confirm your password">
                     </div>
-                    <div class="mb-3" id="otp-container" style="display: none;">
+                    <div class="mb-3" id="otp-container">
                         <label for="otp" class="form-label">Verify Code</label>
                         <input type="text" class="form-control" id="otp" placeholder="Enter OTP code">
                     </div>
