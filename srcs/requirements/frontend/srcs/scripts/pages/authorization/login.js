@@ -1,106 +1,54 @@
+// login.js
+import { fetchLogin, fetchLoginOTPRequest, showMessage } from './loginApi.js';
+
 async function handleLoginSubmit(event) {
-    event.preventDefault();
+  event.preventDefault();
 
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
 
-    try {
-        const response = await fetchLogin({ email, password });
-        //sessionStorage.setItem('jwtToken', response.token);
-        sessionStorage.setItem('username', response.username);
-        showMessage(response.message, 'success');
+  try {
+    const response = await fetchLogin({ email, password });
+    sessionStorage.setItem('login_1fa', response.token);
 
-        setTimeout(() => {
-            window.location.href = '#profile';
-        }, 1000);
+    const otpResponse = await fetchLoginOTPRequest(response.token);
+    showMessage(otpResponse.message || 'OTP has been sent. Check your email.', 'success');
 
-        
-    } catch (error) {
-        showMessage('An error occurred. Please try again later.', 'error');
-        console.error('Login error:', error);
-    }
-}
+    sessionStorage.setItem('login_fa', response.token);
 
-document.addEventListener("DOMContentLoaded", function () {
-    const authButton = document.getElementById("auth-btn");
-    if (authButton) {
-        authButton.addEventListener("click", function () {
-            const oauthURL = "https://intra.42.fr/oauth/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=code";
-            window.open(oauthURL, "_blank", "width=600,height=700");
-        });
-    } else {
-        console.error("Error: Element with ID 'auth-btn' not found.");
-    }
-});
-
-
-
-async function fetchLogin(data) {
-    const response = await fetch('https://localhost/api/users/signin/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-        throw new Error('Login failed');
-    }
-
-    return await response.json();
-}
-
-function showMessage(message, type) {
-    const messageDiv = document.getElementById('login-message');
-    if (!messageDiv) return;
-
-    messageDiv.textContent = message;
-    messageDiv.className = `alert ${type === 'success' ? 'alert-success' : 'alert-danger'}`;
+    window.location.hash = '#login-verification';
+  } catch (error) {
+    showMessage(error.message || 'An error occurred. Please try again later.', 'error');
+    console.error('Login error:', error);
+  }
 }
 
 export function LoginPage() {
-    setTimeout(() => {
-        const loginForm = document.getElementById('login-form');
-        if (loginForm) {
-            loginForm.addEventListener('submit', handleLoginSubmit);
-        }
+  setTimeout(() => {
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+      loginForm.addEventListener('submit', handleLoginSubmit);
+    }
+  }, 0);
 
-        const authButton = document.getElementById("auth-btn");
-        if (authButton) {
-            authButton.addEventListener("click", function () {
-                const oauthURL = "https://intra.42.fr/";
-                window.open(oauthURL, "_blank", "width=600,height=700");
-            });
-        } else {
-            console.error("Error: Element with ID 'auth-btn' not found.");
-        }
-    }, 0);
-
-    return `
-        <div class="login-page">
-            <div class="login-container">
-                <h1 class="login-heading">Login</h1>
-                <form class="mt-3" id="login-form">
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email address</label>
-                        <input type="email" class="form-control" id="email" placeholder="Enter your email">
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" placeholder="Enter your password">
-                    </div>
-                    <button type="submit" class="btn login-btn">Submit</button>
-
-                    <button type="button" class="btn auth-btn mt-2" id="auth-btn">
-                        Authorization with
-                        <img src="../../static/42logo.jpg" alt="Auth Icon" class="auth-icon">
-                    </button>
-                </form>
-                <div id="login-message" class="mt-3"></div>
-                <a href="/#signup" class="btn btn-link mt-3">Sign up</a>
-            </div>
-        </div>
-    `;
+  return `
+    <div class="login-page">
+      <div class="login-container">
+        <h1 class="login-heading">Login</h1>
+        <form class="mt-3" id="login-form">
+          <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="email" placeholder="Enter your email">
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" placeholder="Enter your password">
+          </div>
+          <button type="submit" class="btn login-btn">Submit</button>
+        </form>
+        <div id="login-message" class="mt-3"></div>
+        <a href="/#signup" class="btn btn-link mt-3">Sign up</a>
+      </div>
+    </div>
+  `;
 }
-
