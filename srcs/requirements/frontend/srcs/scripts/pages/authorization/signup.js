@@ -1,9 +1,6 @@
-// SignupPage.js
-import { fetchSignup, fetchOTPRequest, showMessage } from './signupApi.js'; // 공통 함수 모듈화 예시
-// 만약 기존처럼 이 파일 안에 다 작성하고 싶다면 import 대신 기존 함수를 그대로 두면 됨.
+import { fetchSignup, fetchOTPRequest, showMessage } from './signupApi.js';
 
 export function SignupPage() {
-  // "Send Code" 버튼 클릭 시 호출
   async function handleSendCodeSubmit(event) {
     event.preventDefault();
 
@@ -18,30 +15,23 @@ export function SignupPage() {
     }
 
     try {
-      // 1. 회원가입
       const signupResponse = await fetchSignup({ username, email, password });
       console.log("Signup Response:", signupResponse);
 
-      // 2. 1차 토큰 저장
-      sessionStorage.setItem('signup_fa', signupResponse.token);
+      // 임시 토큰으로 저장
+      sessionStorage.setItem('fa_temp_token', signupResponse.token);
 
-      // 3. OTP 요청
       const otpResponse = await fetchOTPRequest(signupResponse.token);
       console.log("OTP Response:", otpResponse);
       showMessage(otpResponse.message || 'OTP has been sent. Check your email.', 'success');
 
-      // 4. 다음 페이지(Verification)로 이동
       window.location.hash = '#signup-verification'; 
-      // 해시 라우팅을 사용한다면 이렇게, 
-      // 아니면 window.location = '/signup-verification.html' 같은 식으로 페이지 이동
-
     } catch (error) {
       console.error(error);
       showMessage(error.message || 'Signup failed. Please try again.', 'error');
     }
   }
 
-  // 페이지 로딩 후 이벤트 바인딩
   setTimeout(() => {
     const signupForm = document.getElementById('signup-form');
     if (signupForm) {
@@ -49,7 +39,6 @@ export function SignupPage() {
     }
   }, 0);
 
-  // Signup 페이지의 UI 렌더
   return `
     <div class="signup-page">
       <div class="signup-container">
