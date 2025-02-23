@@ -65,9 +65,6 @@ function initializePingPongGame(parentContainer, configJson) {
       if (parsed.obstacles) {
         config.obstacleCount = parsed.obstacles;
       }
-
-      // 4) 그 외 필요한 옵션이 있다면 여기서 반영
-      //    ex) players, winningScore 등등
       
     } catch (e) {
       console.error("Invalid config JSON, using default config:", e);
@@ -288,7 +285,7 @@ async function endGame(message) {
     // 필요시 추가 데이터를 여기에 포함할 수 있음
   };
 
-  // API 호출: JWT 토큰은 세션스토리지에서 가져와 Authorization 헤더에 담음
+  // API 호출: (fa_token) 토큰은 세션스토리지에서 가져와 Authorization 헤더에 담음
   try {
     const token = sessionStorage.getItem('fa_token');
     const response = await fetch('https://localhost/api/match/add/', {
