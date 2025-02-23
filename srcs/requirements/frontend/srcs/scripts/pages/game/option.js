@@ -1,3 +1,24 @@
+async function fetchProfileUsername() {
+  const token = sessionStorage.getItem('fa_token');
+  try {
+    const response = await fetch('https://localhost/api/users/profile/', {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return data.username || "Me";
+    } else {
+      console.error("프로필 username을 가져오지 못했습니다.");
+    }
+  } catch (error) {
+    console.error("프로필 username 호출 에러:", error);
+  }
+  return "Me"; // 기본값
+}
+
 // 게임 옵션 페이지 생성 함수
 function GameOptionPage() {
   const container = document.createElement('div');
@@ -124,43 +145,51 @@ function renderPlayerInputs(container, players) {
   const playerInputs = container.querySelector('#playerInputs');
   playerInputs.innerHTML = '';
 
-  // User 1 (자기 이름으로 고정. 추후 fetch로 받아오기)
-  playerInputs.innerHTML += `
-    <div class="mb-3">
-      <label class="form-label">User 1</label>
-      <input type="text" class="form-control" placeholder="username" value="Me" disabled>
-    </div>
-  `;
+  // 첫 번째 입력 필드 생성 (기본값은 "Me")
+  const firstDiv = document.createElement('div');
+  firstDiv.className = 'mb-3';
+  const firstLabel = document.createElement('label');
+  firstLabel.className = 'form-label';
+  firstLabel.textContent = 'User 1';
+  const firstInput = document.createElement('input');
+  firstInput.type = 'text';
+  firstInput.className = 'form-control';
+  firstInput.placeholder = 'username';
+  firstInput.disabled = true;
+  firstInput.value = 'Me'; // 초기 기본값
 
-  // api로 받아올 경우 아래 주석 해제
-  // profileAPI.getProfileInfo()
-  //   .then((profileData) => {
-  //     const username = profileData.username;
-  //     const user1Input = container.querySelector('#user1-container input');
-  //     if (user1Input) {
-  //       user1Input.value = username;
-  //     }
-  //   })
-  //   .catch((error) => {
-  //     console.error('Error fetching profile info', error);
-  //   });
+  firstDiv.appendChild(firstLabel);
+  firstDiv.appendChild(firstInput);
+  playerInputs.appendChild(firstDiv);
 
-  // 나머지 인원 입력 필드 생성
+  // 비동기로 프로필 API를 호출하여 username 업데이트
+  fetchProfileUsername().then(username => {
+    firstInput.value = username;
+  });
+
+  // 나머지 플레이어 입력 필드 생성
   for (let i = 1; i < players; i++) {
-    playerInputs.innerHTML += `
-      <div class="mb-3">
-        <label class="form-label">User ${i + 1}</label>
-        <input type="text" class="form-control" placeholder="Enter username">
-      </div>
-    `;
+    const div = document.createElement('div');
+    div.className = 'mb-3';
+    const label = document.createElement('label');
+    label.className = 'form-label';
+    label.textContent = `User ${i + 1}`;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'form-control';
+    input.placeholder = 'Enter username';
+    div.appendChild(label);
+    div.appendChild(input);
+    playerInputs.appendChild(div);
   }
 
-  // 플레이어 이름 입력할 때마다 저장
+  // 플레이어 이름 입력 시 옵션 저장 이벤트 설정
   const inputs = playerInputs.querySelectorAll('input:not([disabled])');
   inputs.forEach((input) => {
     input.addEventListener('input', () => saveOptionsToSessionStorage(container));
   });
 }
+
 
 function saveOptionsToSessionStorage(container) {
   // 1. 플레이어 수 (data-players 속성이 있는 버튼에서 가져옴)
