@@ -1,8 +1,7 @@
 from django.urls import path
-from .views import oauth_signin, oauth_callback, test
+from .views import oauth_signin, oauth_callback
 
 urlpatterns = [
-    path('oauth/signin/', oauth_signin, name='oauth_signin'),
-    path('oauth/oauth-callback/', oauth_callback, name='oauth_callback'),
-    path('test/', test, name='test'),
+    path('42intra/signin/', oauth_signin, name='oauth_signin'),
+    path('42intra/oauth-callback/', oauth_callback, name='oauth_callback'),
 ]
