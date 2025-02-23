@@ -4,6 +4,7 @@ import { SignupPage } from './pages/authorization/signup.js';
 import { GameOptionPage } from './pages/game/option.js';
 import { GameTournamentPage } from './pages/game/tournament.js';
 import { GamePlayPage } from './pages/game/play.js';
+import { SignupVerificationPage } from './pages/authorization/signupVerification.js';
 
 const NotFoundPage = () => `
   <div class="not-found">
@@ -17,6 +18,7 @@ const NotFoundPage = () => `
 const pages = {
   login: () => LoginPage(),
   signup: () => SignupPage(),
+  "signup-verification": () => SignupVerificationPage(),
   "gameplay/option": () => GameOptionPage(),
   "gameplay/tournament": () => GameTournamentPage(),
   "gameplay/play": () => GamePlayPage(),
@@ -37,8 +39,7 @@ function router() {
 
   // 동적 경로 체크: URL이 "gameplay/play-<id>" 형태인 경우
   if (hash.startsWith('gameplay/play-')) {
-    const parts = hash.split('-');
-    const gameIdFromURL = parts[parts.length - 1];
+    const gameIdFromURL = hash.substring('gameplay/play-'.length);
 
     // 현재 진행 중인 경기(currentMatch)가 있는지 확인
     const currentMatchStr = sessionStorage.getItem('currentMatch');

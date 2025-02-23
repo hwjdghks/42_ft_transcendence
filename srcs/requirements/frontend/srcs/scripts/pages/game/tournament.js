@@ -74,16 +74,29 @@ function GameTournamentPage() {
   nextButton.className = 'btn btn-primary mt-4';
 
   // 랜덤 id 생성 함수
-  function generateGameId() {
-    return Math.random().toString(36).substr(2, 4);
+  function generateUUID() {
+    // 16바이트의 Uint8Array를 생성
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+  
+    // 버전 4를 지정 (UUID의 7번째 바이트의 상위 4비트를 0100으로 설정)
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    // RFC4122 변형을 지정 (9번째 바이트의 상위 2비트를 10으로 설정)
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  
+    // 16진수 문자열로 변환 후 UUID 형식(8-4-4-4-12)으로 포맷팅
+    const hex = Array.from(bytes)
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    return `${hex.substr(0, 8)}-${hex.substr(8, 4)}-${hex.substr(12, 4)}-${hex.substr(16, 4)}-${hex.substr(20, 12)}`;
   }
-
+  
   nextButton.addEventListener('click', () => {
     const nextMatch = matches.find(match => !match.winner);
 
     if (nextMatch) {
       // 랜덤 id 부여
-      const gameId = generateGameId();
+      const gameId = generateUUID();
       nextMatch.id = gameId;
       sessionStorage.setItem('currentMatch', JSON.stringify(nextMatch));
       sessionStorage.setItem('matches', JSON.stringify(matches));
@@ -99,6 +112,7 @@ function GameTournamentPage() {
       } else {
         alert(`🏆 최종 우승자: ${winners[0]} 🏆`);
         resetTournamentSession();
+        window.location.hash = '#gameplay/option';
       }
     }
   });

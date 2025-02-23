@@ -24,6 +24,8 @@ services:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       DATABASE_URL: ${DJANGO_URL}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
     volumes:
       - profile:/app/media/profile_images
     networks:
