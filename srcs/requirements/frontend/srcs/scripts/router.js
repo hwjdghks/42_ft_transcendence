@@ -2,6 +2,7 @@
 import { LoginPage } from './pages/authorization/login.js';
 import { SignupPage } from './pages/authorization/signup.js';
 import { GameOptionPage } from './pages/game/option.js';
+import { ProfilePage } from './pages/profile/profile.js';
 import { GameTournamentPage } from './pages/game/tournament.js';
 import { GamePlayPage } from './pages/game/play.js';
 import { SignupVerificationPage } from './pages/authorization/signupVerification.js';
@@ -23,7 +24,7 @@ const pages = {
   "gameplay/option": () => GameOptionPage(),
   "gameplay/tournament": () => GameTournamentPage(),
   "gameplay/play": () => GamePlayPage(),
-  profile: () => window.createProfilePage().outerHTML,
+  "profile": () => ProfilePage()
 };
 
 function router() {
