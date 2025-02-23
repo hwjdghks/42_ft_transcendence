@@ -1,0 +1,83 @@
+import json
+import pytz
+
+from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.csrf import csrf_exempt
+from authentication.views import jwt_required
+from django.http import JsonResponse
+from django.http import HttpRequest
+from .models import MatchResult
+from users.models import User
+from django.utils import timezone
+
+
+@require_GET
+@jwt_required
+def search(request: HttpRequest) -> JsonResponse:
+    user: User = request.user
+
+    data = json.loads(request.body)
+    session_id = data.get('session_id')
+    if MatchResult.objects.filter(session_id=session_id).exists():
+        return JsonResponse({'error': 'session is already finish'}, status=400)
+    return JsonResponse({'message': 'session is not finish'}, status=200)
+
+@require_GET
+@jwt_required
+def results(request: HttpRequest) -> JsonResponse:
+    user: User = request.user
+    
+    match_results = list(
+        MatchResult.objects.filter(email=user).values(
+            'username', 'guestname', 'user_score', 'guest_score', 'game_result', 'match_date'
+        )
+    )
+
+    seoul_tz = pytz.timezone('Asia/Seoul')
+
+    # match_date를 한국 시간으로 변환하여 문자열로 포맷팅
+    for result in match_results:
+        if result['match_date']:
+            local_dt = result['match_date'].astimezone(seoul_tz)
+            result['match_date'] = local_dt.strftime("%Y-%m-%d %H:%M:%S")
+
+    return JsonResponse({'match_results': match_results}, status=200)
+
+@csrf_exempt
+@require_POST
+@jwt_required
+def add(request: HttpRequest) -> JsonResponse:
+    user: User = request.user
+
+    try:
+        data = json.loads(request.body)
+
+        email = user.email
+        username = user.username
+        guestname = data.get('guestname')
+        user_score = data.get('user_score')
+        guest_score = data.get('guest_score')
+        game_result = data.get('game_result')
+        session_id = data.get('seesion_id')
+
+
+        if not all([session_id, user_score, guest_score is not None, guestname is not None, game_result]):
+            return JsonResponse({'error': 'Missing required fields'}, status=400)
+
+        match_result = MatchResult.objects.create(
+            email=user,
+            guestname=guestname,
+            user_score=user_score,
+            guest_score=guest_score,
+            game_result=game_result,
+            session_id=session_id,
+            username = username
+        )
+
+        return JsonResponse({'message': 'Match result saved successfully'}, status=201)
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+
+    except Exception as e:
+        return JsonResponse({'error': f'Internal Server Error: {str(e)}'}, status=500)
