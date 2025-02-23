@@ -2,7 +2,7 @@ import { fetchLoginOTPVerify, showMessage } from './loginApi.js';
 
 export function LoginVerificationPage() {
   async function verifyTokenOnLoad() {
-    const existingToken = sessionStorage.getItem("login_fa");
+    const existingToken = sessionStorage.getItem("fa_token");
     if (!existingToken) {
       alert("접근 할 수 없는 페이지 입니다.");
       window.location.hash = '#login';
@@ -12,7 +12,7 @@ export function LoginVerificationPage() {
   async function handleVerificationSubmit(event) {
     event.preventDefault();
   
-    const existingToken = sessionStorage.getItem("login_fa");
+    const existingToken = sessionStorage.getItem("fa_token");
     if (!existingToken) {
       showMessage('No token found. Please go back to login page.', 'error');
       return;
@@ -26,7 +26,7 @@ export function LoginVerificationPage() {
 
     try {
       const verifyResponse = await fetchLoginOTPVerify(existingToken, otp);
-      sessionStorage.setItem('login_fa', verifyResponse.token);
+      sessionStorage.setItem('fa_token', verifyResponse.token);
       showMessage(verifyResponse.message || 'Login successful!', 'success');
       setTimeout(() => {
         window.location.hash = '#profile';

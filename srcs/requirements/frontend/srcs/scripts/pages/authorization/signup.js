@@ -18,7 +18,7 @@ export function SignupPage() {
       const signupResponse = await fetchSignup({ username, email, password });
       console.log("Signup Response:", signupResponse);
 
-      sessionStorage.setItem('signup_fa', signupResponse.token);
+      sessionStorage.setItem('fa_token', signupResponse.token);
 
       const otpResponse = await fetchOTPRequest(signupResponse.token);
       console.log("OTP Response:", otpResponse);

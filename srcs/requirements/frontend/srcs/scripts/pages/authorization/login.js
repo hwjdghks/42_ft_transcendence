@@ -9,12 +9,12 @@ async function handleLoginSubmit(event) {
 
   try {
     const response = await fetchLogin({ email, password });
-    sessionStorage.setItem('login_1fa', response.token);
+    sessionStorage.setItem('fa_token', response.token);
 
     const otpResponse = await fetchLoginOTPRequest(response.token);
     showMessage(otpResponse.message || 'OTP has been sent. Check your email.', 'success');
 
-    sessionStorage.setItem('login_fa', response.token);
+    sessionStorage.setItem('fa_token', response.token);
 
     window.location.hash = '#login-verification';
   } catch (error) {

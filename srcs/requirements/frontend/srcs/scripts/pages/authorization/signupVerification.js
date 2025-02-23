@@ -2,7 +2,7 @@ import { fetchOTPVerify, showMessage } from './signupApi.js';
 
 export function SignupVerificationPage() {
   async function verifyTokenOnLoad() {
-    const existingToken = sessionStorage.getItem("signup_fa");
+    const existingToken = sessionStorage.getItem("fa_token");
     if (!existingToken) {
       alert("접근 할 수 없는 페이지 입니다.");
       window.location.hash = '#signup';
@@ -12,7 +12,7 @@ export function SignupVerificationPage() {
   async function handleVerificationSubmit(event) {
     event.preventDefault();
 
-    const existingToken = sessionStorage.getItem("signup_fa");
+    const existingToken = sessionStorage.getItem("fa_token");
     if (!existingToken) {
       showMessage('No token found. Please go back to signup page.', 'error');
       return;
@@ -26,7 +26,7 @@ export function SignupVerificationPage() {
 
     try {
       const verifyResponse = await fetchOTPVerify(existingToken, otp);
-      sessionStorage.setItem('signup_fa', verifyResponse.token);
+      sessionStorage.setItem('fa_token', verifyResponse.token);
       showMessage(verifyResponse.message || 'Signup successful!', 'success');
 
       setTimeout(() => {
