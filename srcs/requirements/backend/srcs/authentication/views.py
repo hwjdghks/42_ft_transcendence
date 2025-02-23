@@ -117,7 +117,12 @@ def check_signup_2fa(request: HttpRequest) -> JsonResponse:
 
 	if User.objects.filter(email=user.email, is_active=True).exists():
 		return JsonResponse({'error': 'Email already in signup'}, status=400)
-	if (verify_otp(user.otp, otp_code) == False):
+	try:
+		user_otp = user.otp
+	except UserOTP.DoesNotExist:
+		return JsonResponse({'error': 'otp 생성이 이루어지지 않았습니다.'}, status=401)
+
+	if (verify_otp(user_otp, otp_code) == False):
 		return JsonResponse({'error': '유효하지 않거나 만료된 OTP입니다.'}, status=401)
 	user.is_active = True
 	user.save()
@@ -134,7 +139,11 @@ def check_signin_2fa(request: HttpRequest) -> JsonResponse:
 
     if User.objects.filter(email=user.email, is_active=False).exists():
         return JsonResponse({'error': 'Users who are not two-factor authentication'}, status=400)
-    if (verify_otp(user.otp, otp_code) == False):
+    try:
+        user_otp = user.otp
+    except UserOTP.DoesNotExist:
+        return JsonResponse({'error': 'otp 생성이 이루어지지 않았습니다.'}, status=401)
+    if (verify_otp(user_otp, otp_code) == False):
         return JsonResponse({'error': '유효하지 않거나 만료된 OTP입니다.'}, status=401)
     token = generate_jwt(user, 2)
     return JsonResponse({'message': 'Signed in successfully', 'token': token}, status=200)

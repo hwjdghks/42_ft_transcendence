@@ -11,7 +11,7 @@ export function LoginVerificationPage() {
 
   async function handleVerificationSubmit(event) {
     event.preventDefault();
-
+  
     const existingToken = sessionStorage.getItem("login_fa");
     if (!existingToken) {
       showMessage('No token found. Please go back to login page.', 'error');
