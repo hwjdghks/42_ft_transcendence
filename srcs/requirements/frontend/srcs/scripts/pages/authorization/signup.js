@@ -18,14 +18,14 @@ export function SignupPage() {
       const signupResponse = await fetchSignup({ username, email, password });
       console.log("Signup Response:", signupResponse);
 
-      sessionStorage.setItem('fa_token', signupResponse.token);
+      // 임시 토큰으로 저장
+      sessionStorage.setItem('fa_temp_token', signupResponse.token);
 
       const otpResponse = await fetchOTPRequest(signupResponse.token);
       console.log("OTP Response:", otpResponse);
       showMessage(otpResponse.message || 'OTP has been sent. Check your email.', 'success');
 
       window.location.hash = '#signup-verification'; 
-
     } catch (error) {
       console.error(error);
       showMessage(error.message || 'Signup failed. Please try again.', 'error');

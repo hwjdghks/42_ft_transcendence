@@ -1,4 +1,3 @@
-// login.js
 import { fetchLogin, fetchLoginOTPRequest, showMessage } from './loginApi.js';
 
 async function handleLoginSubmit(event) {
@@ -9,12 +8,11 @@ async function handleLoginSubmit(event) {
 
   try {
     const response = await fetchLogin({ email, password });
-    sessionStorage.setItem('fa_token', response.token);
+    // 임시 토큰으로 저장
+    sessionStorage.setItem('fa_temp_token', response.token);
 
     const otpResponse = await fetchLoginOTPRequest(response.token);
     showMessage(otpResponse.message || 'OTP has been sent. Check your email.', 'success');
-
-    sessionStorage.setItem('fa_token', response.token);
 
     window.location.hash = '#login-verification';
   } catch (error) {
