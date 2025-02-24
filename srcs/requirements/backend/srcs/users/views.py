@@ -76,7 +76,8 @@ def upload_profile_image(request: HttpRequest) -> JsonResponse:
     if image:
         user.profile_image = image
         user.save()
-        return JsonResponse({'message': 'Profile image uploaded successfully'}, status=200)
+        return JsonResponse({'message': 'Profile image uploaded successfully',
+                             'profile_image_url': user.profile_image.url}, status=200)
     return JsonResponse({'error': 'No profile image provided'}, status=400)
 
 @require_GET

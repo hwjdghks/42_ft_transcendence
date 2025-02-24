@@ -93,7 +93,10 @@ def send_signup_2fa(request: HttpRequest) -> JsonResponse:
     if User.objects.filter(email=user.email, is_active=True).exists():
         return JsonResponse({'error': 'Email already in signup'}, status=400)
     
-    send_otp_email(user)
+    try:
+        send_otp_email(user)
+    except Exception as e:
+        return JsonResponse({'error': 'Failed to send OTP email'}, status=500)
     return JsonResponse({'message': 'OTP email sent successfully'}, status=200)
       
 @csrf_exempt
@@ -104,7 +107,10 @@ def send_signin_2fa(request: HttpRequest) -> JsonResponse:
     
 	if User.objects.filter(email=user.email, is_active=False).exists():
 		return JsonResponse({'error': 'Users who are not two-factor authentication'}, status=400)
-	send_otp_email(user)
+	try:
+		send_otp_email(user)
+	except Exception as e:
+		return JsonResponse({'error': 'Failed to send OTP email'}, status=500)
 	return JsonResponse({'message': 'email send your email in successfully'}, status=200)
 
 @csrf_exempt
