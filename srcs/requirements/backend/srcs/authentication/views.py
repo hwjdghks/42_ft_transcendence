@@ -10,7 +10,7 @@ from users.models import User
 
 def generate_jwt(user: User):
     payload = {
-        'id': user.email,
+        'id': user.id,
         'exp': datetime.datetime.now() + settings.JWT_EXPIRATION_DELTA,  # 만료 시간
         'iat': datetime.datetime.now()  # 발급 시간
     }
@@ -27,7 +27,7 @@ def jwt_required(view_func):
         token = auth_header.split(' ')[1]
         try:
             payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
-            request.user = User.objects.get(email=payload['id'])
+            request.user = User.objects.get(id=payload['id'])
         except jwt.ExpiredSignatureError:
             return JsonResponse({'error': '토큰이 만료되었습니다.'}, status=401)
         except jwt.DecodeError:
