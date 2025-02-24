@@ -198,14 +198,18 @@ export function ProfilePage() {
   }
   
   // [6] 프로필 데이터 반영 함수
-  function updateProfilePage(data) {
-    // 예시 data: { username: "...", stats: { totals: ..., wins: ..., losses: ..., draws: ... } }
-  
+  function updateProfilePage(data) {  
     const usernameElement = document.querySelector('.fs-2.fw-bold');
     if (usernameElement && data.username) {
         usernameElement.textContent = data.username;
     }
-  
+
+    // 프로필 이미지 업데이트
+    const profileImg = document.querySelector('.profile-img');
+    if (profileImg) {
+        profileImg.src = data.profile_image || '/static/profile.jpg';
+    }
+
     const stats = data.stats || {};
     const statElements = document.querySelectorAll('.stat-card + .text-center .fs-1.fw-bold');
     if (statElements.length >= 4) {
