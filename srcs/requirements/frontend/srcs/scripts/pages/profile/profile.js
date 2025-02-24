@@ -210,13 +210,12 @@ export function ProfilePage() {
         profileImg.src = data.profile_image || '/static/profile.jpg';
     }
 
-    const stats = data.stats || {};
     const statElements = document.querySelectorAll('.stat-card + .text-center .fs-1.fw-bold');
     if (statElements.length >= 4) {
-        statElements[0].textContent = stats.totals  || 0; // Totals
-        statElements[1].textContent = stats.wins    || 0; // Wins
-        statElements[2].textContent = stats.losses  || 0; // Losses
-        statElements[3].textContent = stats.draws   || 0; // Draws
+        statElements[0].textContent = data.total  || 0; // Totals
+        statElements[1].textContent = data.win    || 0; // Wins
+        statElements[2].textContent = data.lose  || 0; // Losses
+        statElements[3].textContent = data.draw   || 0; // Draws
     }
   }
   
