@@ -1,0 +1,17 @@
+from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class Friend(models.Model):
+    follower = models.ForeignKey(User, on_delete=models.CASCADE)
+    following = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['follower', 'following'], name='unique_follow')
+        ]
+
+class OnlineList(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    last_activate = models.DateTimeField(auto_now=True)
