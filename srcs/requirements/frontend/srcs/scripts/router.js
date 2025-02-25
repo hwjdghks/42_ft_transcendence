@@ -2,10 +2,11 @@
 import { LoginPage } from './pages/authorization/login.js';
 import { SignupPage } from './pages/authorization/signup.js';
 import { GameOptionPage } from './pages/game/option.js';
+import { ProfilePage } from './pages/profile/profile.js';
 import { GameTournamentPage } from './pages/game/tournament.js';
 import { GamePlayPage } from './pages/game/play.js';
 import { SignupVerificationPage } from './pages/authorization/signupVerification.js';
-
+import { LoginVerificationPage } from './pages/authorization/loginVerification.js';
 const NotFoundPage = () => `
   <div class="not-found">
     <h1>404 - Page Not Found</h1>
@@ -18,11 +19,12 @@ const NotFoundPage = () => `
 const pages = {
   login: () => LoginPage(),
   signup: () => SignupPage(),
+  "login-verification": () => LoginVerificationPage(),
   "signup-verification": () => SignupVerificationPage(),
   "gameplay/option": () => GameOptionPage(),
   "gameplay/tournament": () => GameTournamentPage(),
   "gameplay/play": () => GamePlayPage(),
-  profile: () => window.createProfilePage().outerHTML,
+  "profile": () => ProfilePage()
 };
 
 function router() {

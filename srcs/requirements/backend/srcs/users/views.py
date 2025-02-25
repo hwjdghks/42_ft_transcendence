@@ -9,6 +9,7 @@ from django.contrib.auth import authenticate
 
 from authentication.views import generate_jwt, jwt_required
 from .models import User
+from matchresult.models import MatchResult
 from .utils import check_existing_user
 
 @csrf_exempt
@@ -75,16 +76,28 @@ def upload_profile_image(request: HttpRequest) -> JsonResponse:
     if image:
         user.profile_image = image
         user.save()
-        return JsonResponse({'message': 'Profile image uploaded successfully'}, status=200)
+        return JsonResponse({'message': 'Profile image uploaded successfully',
+                             'profile_image_url': user.profile_image.url}, status=200)
     return JsonResponse({'error': 'No profile image provided'}, status=400)
 
 @require_GET
 @jwt_required(expected_factor_level=2)
 def get_profile(request: HttpRequest) -> JsonResponse:
     user: User = request.user
+
+    user_matches = MatchResult.objects.filter(email=user)
+    total_games = user_matches.count()
+    win = user_matches.filter(game_result='win').count()
+    lose = user_matches.filter(game_result='lose').count()
+    draw = user_matches.filter(game_result='draw').count()
+
     profile = {
         'email': user.email,
         'username': user.username,
-        'profile_image': user.profile_image.url if user.profile_image else None
+        'profile_image': user.profile_image.url if user.profile_image else None,
+        'total': total_games,
+        'win': win,
+        'lose': lose,
+        'draw': draw
     }
     return JsonResponse(profile, status=200)

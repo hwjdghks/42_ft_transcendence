@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'users',
     'authentication',
     'oauth',
+    'matchresult' ,
 ]
 
 MIDDLEWARE = [
