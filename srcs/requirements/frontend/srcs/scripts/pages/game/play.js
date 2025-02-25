@@ -243,18 +243,14 @@ function initializePingPongGame(parentContainer, configJson) {
   }
 
   async function endGame(message) {
-    // 게임 종료 플래그 설정
     gameOver = true;
     const winnerMessage = document.getElementById('winnerMessage');
   
-    // 세션에서 현재 매치 정보와 매치 목록을 불러옴
     const currentMatch = JSON.parse(sessionStorage.getItem('currentMatch'));
     const matches = JSON.parse(sessionStorage.getItem('matches')) || [];
   
-    // 로그인한 사용자의 이름을 가져옵니다.
     const profileUsername = await getProfileUsername();
-  
-    // 현재 경기에서 자신이 어느 플레이어인지 결정합니다.
+
     let userScore, opponentScore, opponentName, winnerName;
     if (currentMatch.player1 === profileUsername) {
       userScore = gameScore.player1;
@@ -318,15 +314,14 @@ function initializePingPongGame(parentContainer, configJson) {
   
     // 백엔드에 전송할 데이터 구성
     const matchResultData = {
-      seesion_id: currentMatch.id, // 백엔드 코드에 맞춰 'seesion_id' 사용 (오타 유지)
+      session_id: currentMatch.id,
       guestname: opponentName,
       user_score: userScore,
       guest_score: opponentScore,
       game_result: gameResult,
     };
   
-    // 백엔드로 결과 전송:
-    // 여기서는 예시로, 현재 경기의 player1이 프로필 username과 일치하는 경우에만 결과를 전송합니다.
+    // 백엔드로 결과 전송
     if (currentMatch.player1 === profileUsername) {
       try {
         const token = sessionStorage.getItem('fa_token');
