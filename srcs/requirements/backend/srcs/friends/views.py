@@ -10,11 +10,13 @@ from django.views.decorators.http import require_GET, require_POST
 
 from .models import Friend, OnlineList
 from authentication.views import jwt_required
+from .views import update_last_activate
 
 User = get_user_model()
 
 @require_GET
 @jwt_required
+@update_last_activate
 def friend_list(request: HttpRequest) -> JsonResponse:
     user = request.user
     list = Friend.objects.filter(follower=user)
@@ -29,6 +31,7 @@ def friend_list(request: HttpRequest) -> JsonResponse:
 
 @require_GET
 @jwt_required
+@update_last_activate
 def search_users(request: HttpRequest) -> JsonResponse:
     data = json.loads(request.body)
     query = data.get('search_query', '')
@@ -46,6 +49,7 @@ def search_users(request: HttpRequest) -> JsonResponse:
 @csrf_exempt
 @require_POST
 @jwt_required
+@update_last_activate
 def add_friend(request: HttpRequest) -> JsonResponse:
     user = request.user
     data = json.loads(request.body)
@@ -68,6 +72,7 @@ def add_friend(request: HttpRequest) -> JsonResponse:
 @csrf_exempt
 @require_POST
 @jwt_required
+@update_last_activate
 def delete_friend(request: HttpRequest) -> JsonResponse:
     user = request.user
     data = json.loads(request.body)
@@ -89,6 +94,7 @@ def delete_friend(request: HttpRequest) -> JsonResponse:
 
 @require_GET
 @jwt_required
+@update_last_activate
 def get_online(request: HttpRequest) -> JsonResponse:
     user = request.user
     following = Friend.objects.filter(follower=user)

@@ -13,6 +13,7 @@ from users.models import User
 from .models import UserOTP
 from django.core.mail import send_mail
 from django.utils import timezone
+from friends.views import update_last_activate
 
 def generate_jwt(user: User, factor_levela):
     payload = {
@@ -116,6 +117,7 @@ def send_signin_2fa(request: HttpRequest) -> JsonResponse:
 @csrf_exempt
 @require_POST
 @jwt_required(expected_factor_level=1)
+@update_last_activate
 def check_signup_2fa(request: HttpRequest) -> JsonResponse:
 	user: User = request.user
 	data = json.loads(request.body)
@@ -138,6 +140,7 @@ def check_signup_2fa(request: HttpRequest) -> JsonResponse:
 @csrf_exempt
 @require_POST
 @jwt_required(expected_factor_level=1)
+@update_last_activate
 def check_signin_2fa(request: HttpRequest) -> JsonResponse:
     user: User = request.user
     data = json.loads(request.body)

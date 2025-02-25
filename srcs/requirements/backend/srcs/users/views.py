@@ -11,6 +11,7 @@ from authentication.views import generate_jwt, jwt_required
 from .models import User
 from matchresult.models import MatchResult
 from .utils import check_existing_user
+from friends.views import update_last_activate
 
 @csrf_exempt
 @require_POST
@@ -70,6 +71,7 @@ def withdraw(request: HttpRequest) -> JsonResponse:
 @csrf_exempt
 @require_POST
 @jwt_required(expected_factor_level=2)
+@update_last_activate
 def upload_profile_image(request: HttpRequest) -> JsonResponse:
     user: User = request.user
     image = request.FILES.get('profile_image')
@@ -82,6 +84,7 @@ def upload_profile_image(request: HttpRequest) -> JsonResponse:
 
 @require_GET
 @jwt_required(expected_factor_level=2)
+@update_last_activate
 def get_profile(request: HttpRequest) -> JsonResponse:
     user: User = request.user
 
