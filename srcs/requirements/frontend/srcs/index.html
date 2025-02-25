@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="./scripts/style/navbar.css">
   <link rel="stylesheet" href="./scripts/style/profile.css">
   <link rel="stylesheet" href="./scripts/style/authorization.css">
+  <link rel="stylesheet" href="./scripts/style/play.css">
 
 </head>
 <body>
@@ -29,11 +30,13 @@
   <!-- 각 페이지 내용이 렌더링될 영역 -->
   <div id="app"></div>
 
-  <script src="./scripts/pages/game/option.js"></script>
-  <script src="./scripts/pages/game/tournament.js"></script>
-  <script src="./scripts/pages/game/play.js"></script>
+  <script src="./scripts/components/navbar.js"></script>
+  <script type="module" src="./scripts/pages/game/option.js"></script>
+  <script type="module" src="./scripts/pages/game/tournament.js"></script>
+  <script type="module" src="./scripts/pages/game/play.js"></script>
 
-  <script src="./scripts/pages/profile/profile.js"></script>
+
+  <script type="module" src="./scripts/pages/profile/profile.js"></script>
   <script src="./scripts/components/matchHistory.js"></script>
   <script src="./scripts/components/friends.js"></script>
 
@@ -41,7 +44,6 @@
   <script type="module" src="./scripts/components/deleteAccountModal.js"></script>
 
   <script type="module" src="./scripts/router.js"></script>
-  <script src="./scripts/components/navbar.js"></script>
   <!-- Bootstrap JS -->
   <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"

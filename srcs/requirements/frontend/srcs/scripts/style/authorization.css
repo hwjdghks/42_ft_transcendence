@@ -75,3 +75,24 @@
 .login-btn:hover {
     background-color: #5a23b5 !important;
 }
+
+.auth-btn {
+  background-color: black !important;
+  color: white !important;
+  border: none;
+  padding: 10px 20px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px; /* 아이콘과 텍스트 사이 간격 */
+}
+
+.auth-btn:hover {
+  background-color: #333 !important;
+}
+
+.auth-icon {
+  width: 80px;
+  height: 40px;
+}

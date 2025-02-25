@@ -58,6 +58,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',
     'authentication',
+    'oauth',
+    'matchresult' ,
 ]
 
 MIDDLEWARE = [
@@ -159,3 +161,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # default user model
 
 AUTH_USER_MODEL = "users.User"
+
+# SMTP 설정
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"  # Gmail SMTP 서버
+EMAIL_PORT = 587  # TLS 포트 (보통 587)
+EMAIL_USE_TLS = True  # TLS 사용 여부
+EMAIL_USE_SSL = False  # SSL 사용 여부
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER") # 이메일 계정 (발신자)
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD") # 앱 비밀번호 또는 SMTP 비밀번호
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # 기본 발신자 이메일
+
+# OAuth 2.0 setting : should be saved to a .env file
+OAUTH2_CLIENT_ID = os.getenv("OAUTH2_CLIENT_ID")
+OAUTH2_CLIENT_SECRET = os.getenv("OAUTH2_CLIENT_SECRET")
+OAUTH2_REDIRECT_URI = 'http://localhost:80/api/oauth/42intra/oauth-callback/'  # 콜백 URI
+OAUTH2_AUTHORIZATION_URL = 'https://api.intra.42.fr/oauth/authorize'
+OAUTH2_TOKEN_URL = 'https://api.intra.42.fr/oauth/token'
+OAUTH2_API_URL = 'https://api.intra.42.fr/v2/me'

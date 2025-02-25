@@ -1,4 +1,5 @@
 import json
+import datetime
 
 from django.http import JsonResponse
 from django.http import HttpRequest
@@ -8,6 +9,8 @@ from django.contrib.auth import authenticate
 
 from authentication.views import generate_jwt, jwt_required
 from .models import User
+from matchresult.models import MatchResult
+from .utils import check_existing_user
 
 @csrf_exempt
 @require_POST
@@ -20,12 +23,21 @@ def signup(request: HttpRequest) -> JsonResponse:
     if not email or not password:
         return JsonResponse({'error': 'Email and password are required'}, status=400)
 
-    if User.objects.filter(email=email).exists():
-        return JsonResponse({'error': 'Email already in use'}, status=400)
+    # 이메일 중복 검사 단 유저가 is_active가 false이고 otp를 발송한지 30분이 지난상태면 삭제
+    response = check_existing_user(User.objects.filter(email=email).first(), "Email")
+    if response:
+        return response
+
+    # 사용자명 중복 검사 단 유저가 is_active가 false이고 otp를 발송한지 30분이 지난상태면 삭제
+    response = check_existing_user(User.objects.filter(username=username).first(), "Username")
+    if response:
+        return response
 
     user = User.objects.create_user(username=username, email=email, password=password)
+    user.is_active = False
     user.save()
-    return JsonResponse({'message': 'User created successfully'}, status=201)
+    token = generate_jwt(user, 1)
+    return JsonResponse({'message': 'User created successfully', 'token': token}, status=201)
 
 @csrf_exempt
 @require_POST
@@ -36,19 +48,19 @@ def signin(request: HttpRequest) -> JsonResponse:
 
     user = authenticate(email=email, password=password)
     if user is not None:
-        token = generate_jwt(user)
+        token = generate_jwt(user, 1)
         return JsonResponse({'message': 'Signed in successfully', 'token': token}, status=200)
     return JsonResponse({'error': 'Invalid credentials'}, status=400)
 
 @csrf_exempt
 @require_POST
-@jwt_required
+@jwt_required(expected_factor_level=2) # jwt (2fa) 필요
 def signout(request: HttpRequest) -> JsonResponse:
     return JsonResponse({'message': 'Signed out successfully'}, status=200)
 
 @csrf_exempt
 @require_POST
-@jwt_required
+@jwt_required(expected_factor_level=2)
 def withdraw(request: HttpRequest) -> JsonResponse:
     if request.user.is_authenticated:
         request.user.delete()
@@ -57,23 +69,35 @@ def withdraw(request: HttpRequest) -> JsonResponse:
 
 @csrf_exempt
 @require_POST
-@jwt_required
+@jwt_required(expected_factor_level=2)
 def upload_profile_image(request: HttpRequest) -> JsonResponse:
     user: User = request.user
     image = request.FILES.get('profile_image')
     if image:
         user.profile_image = image
         user.save()
-        return JsonResponse({'message': 'Profile image uploaded successfully'}, status=200)
+        return JsonResponse({'message': 'Profile image uploaded successfully',
+                             'profile_image_url': user.profile_image.url}, status=200)
     return JsonResponse({'error': 'No profile image provided'}, status=400)
 
 @require_GET
-@jwt_required
+@jwt_required(expected_factor_level=2)
 def get_profile(request: HttpRequest) -> JsonResponse:
     user: User = request.user
+
+    user_matches = MatchResult.objects.filter(email=user)
+    total_games = user_matches.count()
+    win = user_matches.filter(game_result='win').count()
+    lose = user_matches.filter(game_result='lose').count()
+    draw = user_matches.filter(game_result='draw').count()
+
     profile = {
         'email': user.email,
         'username': user.username,
-        'profile_image': user.profile_image.url if user.profile_image else None
+        'profile_image': user.profile_image.url if user.profile_image else None,
+        'total': total_games,
+        'win': win,
+        'lose': lose,
+        'draw': draw
     }
     return JsonResponse(profile, status=200)
