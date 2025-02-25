@@ -10,9 +10,19 @@ from django.views.decorators.http import require_GET, require_POST
 
 from .models import Friend, OnlineList
 from authentication.views import jwt_required
-from .views import update_last_activate
 
 User = get_user_model()
+
+def update_last_activate(func):
+    @wraps(func)
+    def wrapper(request, *args, **kwargs):
+        response = func(request, *args, **kwargs)
+        if isinstance(response, JsonResponse) and 200 <= response.status_code < 300:
+            user_id = request.user.id
+            OnlineList.objects.update_or_create(user_id=user_id)
+
+        return response
+    return wrapper
 
 @require_GET
 @jwt_required(expected_factor_level=2)
@@ -114,14 +124,3 @@ def get_online(request: HttpRequest) -> JsonResponse:
         is_online = u.id in online_users
         result.append({"username": u.username, "is_online": is_online})
     return JsonResponse({'results': result}, status=200)
-
-def update_last_activate(func):
-    @wraps(func)
-    def wrapper(request, *args, **kwargs):
-        response = func(request, *args, **kwargs)
-        if isinstance(response, JsonResponse) and 200 <= response.status_code < 300:
-            user_id = request.user.id
-            OnlineList.objects.update_or_create(user_id=user_id)
-
-        return response
-    return wrapper
