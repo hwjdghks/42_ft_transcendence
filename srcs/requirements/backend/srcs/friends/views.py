@@ -15,7 +15,7 @@ from .views import update_last_activate
 User = get_user_model()
 
 @require_GET
-@jwt_required
+@jwt_required(expected_factor_level=2)
 @update_last_activate
 def friend_list(request: HttpRequest) -> JsonResponse:
     user = request.user
@@ -30,7 +30,7 @@ def friend_list(request: HttpRequest) -> JsonResponse:
     return JsonResponse({'results': result}, status=200)
 
 @require_GET
-@jwt_required
+@jwt_required(expected_factor_level=2)
 @update_last_activate
 def search_users(request: HttpRequest) -> JsonResponse:
     data = json.loads(request.body)
@@ -48,7 +48,7 @@ def search_users(request: HttpRequest) -> JsonResponse:
 
 @csrf_exempt
 @require_POST
-@jwt_required
+@jwt_required(expected_factor_level=2)
 @update_last_activate
 def add_friend(request: HttpRequest) -> JsonResponse:
     user = request.user
@@ -71,7 +71,7 @@ def add_friend(request: HttpRequest) -> JsonResponse:
 
 @csrf_exempt
 @require_POST
-@jwt_required
+@jwt_required(expected_factor_level=2)
 @update_last_activate
 def delete_friend(request: HttpRequest) -> JsonResponse:
     user = request.user
