@@ -55,7 +55,7 @@ def add_friend(request: HttpRequest) -> JsonResponse:
         return JsonResponse({'error': 'Friendname is required'}, status=400)
 
     try:
-        friend = User.objects.get(username=friend)
+        friend = User.objects.get(username=friendname)
     except User.DoesNotExist:
         return JsonResponse({'error': 'User not found'}, status=404)
 
