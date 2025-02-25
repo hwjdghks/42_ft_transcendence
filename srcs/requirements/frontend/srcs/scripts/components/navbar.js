@@ -1,7 +1,7 @@
 const navbar = document.getElementById('navbar');
 
 function isLoggedIn() {
-  const token = sessionStorage.getItem('username');
+  const token = sessionStorage.getItem('fa_token');
   console.log("🔹 [isLoggedIn] JWT Token 상태:", token);
   return token !== null && token !== "undefined"; 
 }
