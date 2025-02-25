@@ -8,11 +8,10 @@ from django.http import JsonResponse
 from django.http import HttpRequest
 from .models import MatchResult
 from users.models import User
-from django.utils import timezone
 
 
 @require_GET
-@jwt_required
+@jwt_required(expected_factor_level=2)
 def search(request: HttpRequest) -> JsonResponse:
     user: User = request.user
 
@@ -23,7 +22,7 @@ def search(request: HttpRequest) -> JsonResponse:
     return JsonResponse({'message': 'session is not finish'}, status=200)
 
 @require_GET
-@jwt_required
+@jwt_required(expected_factor_level=2)
 def results(request: HttpRequest) -> JsonResponse:
     user: User = request.user
     
@@ -45,7 +44,7 @@ def results(request: HttpRequest) -> JsonResponse:
 
 @csrf_exempt
 @require_POST
-@jwt_required
+@jwt_required(expected_factor_level=2)
 def add(request: HttpRequest) -> JsonResponse:
     user: User = request.user
 
@@ -58,7 +57,7 @@ def add(request: HttpRequest) -> JsonResponse:
         user_score = data.get('user_score')
         guest_score = data.get('guest_score')
         game_result = data.get('game_result')
-        session_id = data.get('seesion_id')
+        session_id = data.get('session_id')
 
 
         if not all([session_id, user_score, guest_score is not None, guestname is not None, game_result]):
