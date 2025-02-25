@@ -93,7 +93,7 @@ def delete_friend(request: HttpRequest) -> JsonResponse:
     return JsonResponse({'message': '친구 삭제 성공'}, status=200)
 
 @require_GET
-@jwt_required
+@jwt_required(expected_factor_level=2)
 @update_last_activate
 def get_online(request: HttpRequest) -> JsonResponse:
     user = request.user
