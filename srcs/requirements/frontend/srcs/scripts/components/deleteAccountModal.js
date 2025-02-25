@@ -1,5 +1,5 @@
 async function fetchAccountDeletion() {
-    const token = sessionStorage.getItem('jwtToken');
+    const token = sessionStorage.getItem('fa_token');
     
     const response = await fetch('https://localhost/api/users/withdraw/', {
         method: 'POST',

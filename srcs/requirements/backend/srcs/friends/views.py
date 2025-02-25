@@ -14,7 +14,7 @@ from authentication.views import jwt_required
 User = get_user_model()
 
 @require_GET
-@jwt_required
+@jwt_required(expected_factor_level=2)
 def friend_list(request: HttpRequest) -> JsonResponse:
     user = request.user
     list = Friend.objects.filter(follower=user)
@@ -28,13 +28,10 @@ def friend_list(request: HttpRequest) -> JsonResponse:
     return JsonResponse({'results': result}, status=200)
 
 @require_GET
-@jwt_required
+@jwt_required(expected_factor_level=2)
 def search_users(request: HttpRequest) -> JsonResponse:
-    data = json.loads(request.body)
-    query = data.get('search_query', '')
-
+    query = request.GET.get('search_query', '')
     users = User.objects.filter(username__icontains=query)
-
     result = []
     for user in users:
         result.append({
@@ -43,9 +40,10 @@ def search_users(request: HttpRequest) -> JsonResponse:
         })
     return JsonResponse({'results': result}, status=200)
 
+
 @csrf_exempt
 @require_POST
-@jwt_required
+@jwt_required(expected_factor_level=2)
 def add_friend(request: HttpRequest) -> JsonResponse:
     user = request.user
     data = json.loads(request.body)
@@ -67,7 +65,7 @@ def add_friend(request: HttpRequest) -> JsonResponse:
 
 @csrf_exempt
 @require_POST
-@jwt_required
+@jwt_required(expected_factor_level=2)
 def delete_friend(request: HttpRequest) -> JsonResponse:
     user = request.user
     data = json.loads(request.body)
@@ -88,7 +86,7 @@ def delete_friend(request: HttpRequest) -> JsonResponse:
     return JsonResponse({'message': '친구 삭제 성공'}, status=200)
 
 @require_GET
-@jwt_required
+@jwt_required(expected_factor_level=2)
 def get_online(request: HttpRequest) -> JsonResponse:
     user = request.user
     following = Friend.objects.filter(follower=user)

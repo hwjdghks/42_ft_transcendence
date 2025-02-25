@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'authentication',
     'oauth',
     'matchresult' ,
+    'friends',
 ]
 
 MIDDLEWARE = [
