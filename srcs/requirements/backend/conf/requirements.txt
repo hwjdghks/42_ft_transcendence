@@ -5,3 +5,4 @@ Pillow
 PyJWT>=2.0.0
 pyotp
 pytz
+requests>=2.25.0
