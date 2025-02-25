@@ -67,7 +67,7 @@ function showMessage(message, type) {
 }
 
 async function fetchLogout() {
-    const token = sessionStorage.getItem('jwtToken');
+    const token = sessionStorage.getItem('fa_token');
     const response = await fetch('https://localhost/api/users/signout/', {
         method: 'POST',
         headers: {
@@ -90,7 +90,7 @@ async function handleLogout() {
         showMessage(response.message, 'success');
         
         // 세션 스토리지 클리어
-        sessionStorage.removeItem('jwtToken');
+        sessionStorage.removeItem('fa_token');
         sessionStorage.removeItem('userId');
         
         setTimeout(() => {
