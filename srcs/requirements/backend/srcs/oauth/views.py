@@ -7,6 +7,7 @@ from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
 from authentication.views import generate_jwt, jwt_required
 from .utils import get_oauth_token, get_user_info, get_or_create_user
+from friends.views import update_last_activate
 
 #app -> 42intra login
 @csrf_exempt
@@ -27,6 +28,7 @@ def oauth_signin(request: HttpRequest) -> JsonResponse:
 
 # 42intra -> app
 @require_GET
+@update_last_activate
 def oauth_callback(request):
     code = request.GET.get('code')
 

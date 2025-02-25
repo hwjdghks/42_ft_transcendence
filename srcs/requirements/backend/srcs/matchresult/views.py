@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.http import HttpRequest
 from .models import MatchResult
 from users.models import User
-
+from friends.views import update_last_activate
 
 @require_GET
 @jwt_required(expected_factor_level=2)
@@ -23,6 +23,7 @@ def search(request: HttpRequest) -> JsonResponse:
 
 @require_GET
 @jwt_required(expected_factor_level=2)
+@update_last_activate
 def results(request: HttpRequest) -> JsonResponse:
     user: User = request.user
     
@@ -45,6 +46,7 @@ def results(request: HttpRequest) -> JsonResponse:
 @csrf_exempt
 @require_POST
 @jwt_required(expected_factor_level=2)
+@update_last_activate
 def add(request: HttpRequest) -> JsonResponse:
     user: User = request.user
 
