@@ -10,12 +10,22 @@ from django.views.decorators.http import require_GET, require_POST
 
 from .models import Friend, OnlineList
 from authentication.views import jwt_required
-from .views import update_last_activate
 
 User = get_user_model()
 
+def update_last_activate(func):
+    @wraps(func)
+    def wrapper(request, *args, **kwargs):
+        response = func(request, *args, **kwargs)
+        if isinstance(response, JsonResponse) and 200 <= response.status_code < 300:
+            user_id = request.user.id
+            OnlineList.objects.update_or_create(user_id=user_id)
+
+        return response
+    return wrapper
+
 @require_GET
-@jwt_required
+@jwt_required(expected_factor_level=2)
 @update_last_activate
 def friend_list(request: HttpRequest) -> JsonResponse:
     user = request.user
@@ -30,7 +40,7 @@ def friend_list(request: HttpRequest) -> JsonResponse:
     return JsonResponse({'results': result}, status=200)
 
 @require_GET
-@jwt_required
+@jwt_required(expected_factor_level=2)
 @update_last_activate
 def search_users(request: HttpRequest) -> JsonResponse:
     data = json.loads(request.body)
@@ -48,7 +58,7 @@ def search_users(request: HttpRequest) -> JsonResponse:
 
 @csrf_exempt
 @require_POST
-@jwt_required
+@jwt_required(expected_factor_level=2)
 @update_last_activate
 def add_friend(request: HttpRequest) -> JsonResponse:
     user = request.user
@@ -71,7 +81,7 @@ def add_friend(request: HttpRequest) -> JsonResponse:
 
 @csrf_exempt
 @require_POST
-@jwt_required
+@jwt_required(expected_factor_level=2)
 @update_last_activate
 def delete_friend(request: HttpRequest) -> JsonResponse:
     user = request.user
@@ -93,7 +103,7 @@ def delete_friend(request: HttpRequest) -> JsonResponse:
     return JsonResponse({'message': '친구 삭제 성공'}, status=200)
 
 @require_GET
-@jwt_required
+@jwt_required(expected_factor_level=2)
 @update_last_activate
 def get_online(request: HttpRequest) -> JsonResponse:
     user = request.user
@@ -114,14 +124,3 @@ def get_online(request: HttpRequest) -> JsonResponse:
         is_online = u.id in online_users
         result.append({"username": u.username, "is_online": is_online})
     return JsonResponse({'results': result}, status=200)
-
-def update_last_activate(func):
-    @wraps(func)
-    def wrapper(request, *args, **kwargs):
-        response = func(request, *args, **kwargs)
-        if isinstance(response, JsonResponse) and 200 <= response.status_code < 300:
-            user_id = request.user.id
-            OnlineList.objects.update_or_create(user_id=user_id)
-
-        return response
-    return wrapper
