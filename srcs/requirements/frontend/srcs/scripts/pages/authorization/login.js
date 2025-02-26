@@ -21,9 +21,23 @@ async function handleLoginSubmit(event) {
   }
 }
 
+async function handleOauthSubmit(event) {
+  event.preventDefault();
+  console.log("Oauth btn click!");
+
+  try {
+    window.location.href = "https://localhost/api/oauth/42intra/signin/";
+  
+  } catch (error) {
+    showMessage(error.message || "Redirection error", "error");
+  }
+}
+
 export function LoginPage() {
   setTimeout(() => {
     const loginForm = document.getElementById('login-form');
+    const oauthBtn = document.querySelector('.btn.oauth-btn');
+    oauthBtn.addEventListener('click', handleOauthSubmit);
     if (loginForm) {
       loginForm.addEventListener('submit', handleLoginSubmit);
     }
@@ -43,6 +57,7 @@ export function LoginPage() {
             <input type="password" class="form-control" id="password" placeholder="Enter your password">
           </div>
           <button type="submit" class="btn login-btn">Submit</button>
+          <button type="submit" class="btn oauth-btn">42 login</button>
         </form>
         <div id="login-message" class="mt-3"></div>
         <a href="/#signup" class="btn btn-link mt-3">Sign up</a>
