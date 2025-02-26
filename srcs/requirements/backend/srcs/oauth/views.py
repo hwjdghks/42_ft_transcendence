@@ -24,7 +24,10 @@ def oauth_signin(request: HttpRequest) -> JsonResponse:
     
 	# redirect to 42intra login page
     url = f"{auth_url}?{urllib.parse.urlencode(params)}"
-    return redirect(url)
+    return JsonResponse({
+        "redirect url" : url
+    })
+    # return redirect(url)
 
 # 42intra -> app
 @require_GET
