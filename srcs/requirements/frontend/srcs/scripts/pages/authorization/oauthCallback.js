@@ -42,7 +42,6 @@ async function handleOauthCallback() {
       return;
     }
 
-    console.error("에러2");
     // 백엔드가 반환한 JSON에서 JWT 토큰 추출
     const data = await response.json();
     const token = data.token;
@@ -50,12 +49,10 @@ async function handleOauthCallback() {
       throw new Error("토큰이 없습니다.");
     }
 
-    console.error("에러3");
     // JWT 토큰을 sessionStorage에 저장
     sessionStorage.setItem("fa_token", token);
 
     // 토큰 저장 후 원하는 페이지(예: 프로필 페이지)로 이동
-    console.error("에러4");
     window.location.hash = "#profile";
   } catch (error) {
     console.error("OAuth 코드 교환 에러:", error);
