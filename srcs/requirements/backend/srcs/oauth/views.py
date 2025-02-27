@@ -8,11 +8,12 @@ from django.contrib.auth import get_user_model
 from authentication.views import generate_jwt, jwt_required
 from .utils import get_oauth_token, get_user_info, get_or_create_user
 from friends.views import update_last_activate
+import pyotp
 
 #app -> 42intra login
 @csrf_exempt
 @require_GET
-def oauth_signin(request: HttpRequest) -> JsonResponse:
+def oauth_signin(request: HttpRequest):
     
     auth_url = settings.OAUTH2_AUTHORIZATION_URL
     params = {
@@ -24,13 +25,19 @@ def oauth_signin(request: HttpRequest) -> JsonResponse:
     
 	# redirect to 42intra login page
     url = f"{auth_url}?{urllib.parse.urlencode(params)}"
-    return redirect(url)
+    return JsonResponse({
+        "redirect_url" : url
+    })
+    # return redirect(url)
+
+import json
 
 # 42intra -> app
-@require_GET
+@require_POST
 @update_last_activate
 def oauth_callback(request):
-    code = request.GET.get('code')
+    data = json.loads(request.body)
+    code = data.get('code')
 
     if not code:
         return JsonResponse({'error': 'No code provided'}, status=400)
@@ -46,8 +53,9 @@ def oauth_callback(request):
 
     email = user_info.get('email')
     username = user_info.get('login')
+    password = pyotp.random_base32()
 
-    user = get_or_create_user(email, username)
+    user = get_or_create_user(email, username, password)
     token = generate_jwt(user, 2)
     
     return JsonResponse({'message': 'User created successfully', 'token': token}, status=201)

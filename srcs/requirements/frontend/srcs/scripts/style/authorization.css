@@ -72,8 +72,21 @@
     width: 100%;
 }
 
+.oauth-btn {
+  background-color: #777777 !important;
+  color: white !important;
+  margin-top: 10px;
+  border: none;
+  padding: 10px 20px;
+  width: 100%;
+}
+
 .login-btn:hover {
     background-color: #5a23b5 !important;
+}
+
+.oauth-btn:hover {
+  background-color: #414141 !important;
 }
 
 .auth-btn {

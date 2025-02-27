@@ -1,0 +1,366 @@
+[
+    {
+        "url": "https://localhost/api/auth/2fa/signup/request/",
+        "method": "POST",
+        "comment": "회원가입시 2fa otp 발송 요청",
+        "request": {
+            "comment": "프론트는 보내야 할 내용, 백엔드는 받아야 할 내용",
+            "data": {
+                "token": "jwt(1fa)"
+            }
+        },
+        "response": {
+            "comment": "프론트는 받아야 할 내용, 백엔드는 보내야 할 내용",
+            "data": {},
+            "return value": "기존 반환과 동일하게 status code를 포함한 message 또는 error"
+        }
+    },
+    {
+        "url": "https://localhost/api/auth/2fa/signup/verify/",
+        "method": "POST",
+        "comment": "회원가입시 2fa otp 검증",
+        "request": {
+            "comment": "프론트는 보내야 할 내용, 백엔드는 받아야 할 내용",
+            "data": {
+                "token": "jwt(1fa)",
+                "otp": "otp 코드"
+            }
+        },
+        "response": {
+            "comment": "프론트는 받아야 할 내용, 백엔드는 보내야 할 내용",
+            "data": {
+                "token": "jwt(2fa)로 변경"
+            },
+            "return value": "기존 반환과 동일하게 status code를 포함한 message 또는 error"
+        }
+    },
+    {
+        "url": "https://localhost/api/auth/2fa/signin/request/",
+        "method": "POST",
+        "comment": "로그인 시 2fa otp 발송 요청",
+        "request": {
+            "comment": "프론트는 보내야 할 내용, 백엔드는 받아야 할 내용",
+            "data": {
+                "token": "jwt(1fa)"
+            }
+        },
+        "response": {
+            "comment": "프론트는 받아야 할 내용, 백엔드는 보내야 할 내용",
+            "data": {},
+            "return value": "기존 반환과 동일하게 status code를 포함한 message 또는 error"
+        }
+    },
+    {
+        "url": "https://localhost/api/auth/2fa/signin/verify/",
+        "method": "POST",
+        "comment": "로그인 시 2fa otp 검증",
+        "request": {
+            "comment": "프론트는 보내야 할 내용, 백엔드는 받아야 할 내용",
+            "data": {
+                "token": "jwt(1fa)",
+                "otp": "otp 코드"
+            }
+        },
+        "response": {
+            "comment": "프론트는 받아야 할 내용, 백엔드는 보내야 할 내용",
+            "data": {
+                "token": "2fa 로 변경된 jwt"
+            },
+            "return value": "기존 반환과 동일하게 status code를 포함한 message 또는 error"
+        }
+    },
+    {
+        "url": "https://localhost/api/users/upload/",
+        "method": "POST",
+        "comment": "프로필 이미지 업로드",
+        "request": {
+            "comment": "프론트는 보내야 할 내용, 백엔드는 받아야 할 내용",
+            "data": {
+                "token": "jwt",
+                "profile_image": "이미지 원본 파일(%주의% formData로 전송. json시 base64로 변환해야 함)"
+            }
+        },
+        "response": {
+            "comment": "프론트는 받아야 할 내용, 백엔드는 보내야 할 내용",
+            "data": {},
+            "return value": "기존 반환과 동일하게 status code를 포함한 message 또는 error"
+        }
+    },
+    {
+        "url": "https://localhost/api/users/profile/",
+        "method": "GET",
+        "comment": "유저 정보 요청 ( 매치결과 요약 )",
+        "request": {
+            "comment": "프론트는 보내야 할 내용, 백엔드는 받아야 할 내용",
+            "data": {
+                "token": "jwt"
+            }
+        },
+        "response": {
+            "comment": "프론트는 받아야 할 내용, 백엔드는 보내야 할 내용",
+            "data": {
+                "email": "이메일 주소",
+                "username": "유저 네임",
+                "profile_image": "이미지 경로",
+                "total": "매치 결과 - 총 게임 수",
+                "win": "매치결과 - 이긴 게임 수",
+                "lose": "매치결과 - 진 게임 수",
+                "draw": "매치 결과 - 비긴 게임 수"
+            },
+            "return value": "기존 반환과 동일하게 status code를 포함한 message 또는 error"
+        }
+    },
+    {
+        "url": "https://localhost/api/match/results/",
+        "method": "GET",
+        "comment": "매치 상세 결과 조회",
+        "request": {
+            "comment": "프론트는 보내야 할 내용, 백엔드는 받아야 할 내용",
+            "data": {
+                "token": "jwt"
+            }
+        },
+        "response": {
+            "comment": "프론트는 받아야 할 내용, 백엔드는 보내야 할 내용",
+            "data": {
+                "username": "유저 네임",
+                "guestname": "상대 네임(키 값을 opponent로 대체 어떤지 의견 수집)",
+                "user_score": "유저 점수",
+                "guest_score": "상대 점수",
+                "game_result": "게임 결과",
+                "필요시 추가": ""
+            },
+            "return value": "기존 반환과 동일하게 status code를 포함한 message 또는 error"
+        }
+    },
+    {
+        "url": "https://localhost/api/match/search/",
+        "method": "GET",
+        "comment": "완료된 게임인지 세션 아이디를 사용해 조회",
+        "request": {
+            "comment": "프론트는 보내야 할 내용, 백엔드는 받아야 할 내용",
+            "data": {
+                "token": "jwt",
+                "session_id": "매치 고유 아이디(uuid)"
+            }
+        },
+        "response": {
+            "comment": "프론트는 받아야 할 내용, 백엔드는 보내야 할 내용",
+            "data": {},
+            "return value": "기존 반환과 동일하게 status code를 포함한 message 또는 error 성공시 200, 방 이름 중복시 409, 세션 아이디 형식 오류 400 등"
+        }
+    },
+    {
+        "url": "https://localhost/api/match/add/",
+        "method": "POST",
+        "comment": "매치 결과 등록",
+        "request": {
+            "comment": "프론트는 보내야 할 내용, 백엔드는 받아야 할 내용",
+            "data": {
+                "token": "jwt",
+                "session_id": "매치 세션 아이디",
+                "guestname": "상대 이름",
+                "user_score": "유저 점수",
+                "guest_score": "상대 점수",
+                "game_result": "게임 결과",
+                "필요시 추가": ""
+            }
+        },
+        "response": {
+            "comment": "프론트는 받아야 할 내용, 백엔드는 보내야 할 내용",
+            "data": {},
+            "return value": "기존 반환과 동일하게 status code를 포함한 message 또는 error"
+        }
+    },
+    {
+        "url": "https://localhost/api/friends/list/",
+        "method": "GET",
+        "comment": "친구 목록 조회",
+        "request": {
+            "comment": "프론트는 보내야 할 내용, 백엔드는 받아야 할 내용",
+            "data": {
+                "token": "jwt"
+            }
+        },
+        "response": {
+            "comment": "프론트는 받아야 할 내용, 백엔드는 보내야 할 내용",
+            "data": {
+                "results": [
+                    {
+                        "username": "친구 이름",
+                        "profile_image": "친구 프로필 이미지 경로"
+                    },
+                    {
+                        "username": "친구 이름",
+                        "profile_image": "친구 프로필 이미지 경로"
+                    },
+                    {
+                        "...": "친구 수에 따라 반복"
+                    }
+                ]
+            },
+            "return value": "기존 반환과 동일하게 status code를 포함한 message 또는 error"
+        }
+    },
+    {
+        "url": "https://localhost/api/friends/search/",
+        "method": "GET",
+        "comment": "유저 검색",
+        "request": {
+            "comment": "프론트는 보내야 할 내용, 백엔드는 받아야 할 내용",
+            "data": {
+                "token": "jwt",
+                "search_query": "사용자가 입력한 문자열"
+            }
+        },
+        "response": {
+            "comment": "프론트는 받아야 할 내용, 백엔드는 보내야 할 내용",
+            "data": {
+                "results": [
+                    {
+                        "username": "찾은 이름",
+                        "profile_image": "프로필 이미지 경로"
+                    },
+                    {
+                        "username": "찾은 이름",
+                        "profile_image": "프로필 이미지 경로"
+                    },
+                    {
+                        "...": "검색 결과에 따라 반복"
+                    }
+                ]
+            },
+            "return value": "기존 반환과 동일하게 status code를 포함한 message 또는 error"
+        }
+    },
+    {
+        "url": "https://localhost/api/friends/add/",
+        "method": "POST",
+        "comment": "친구 추가",
+        "request": {
+            "comment": "프론트는 보내야 할 내용, 백엔드는 받아야 할 내용",
+            "data": {
+                "token": "jwt",
+                "friendname": "추가할 친구 네임"
+            }
+        },
+        "response": {
+            "comment": "프론트는 받아야 할 내용, 백엔드는 보내야 할 내용",
+            "data": {},
+            "return value": "기존 반환과 동일하게 status code를 포함한 message 또는 error"
+        }
+    },
+    {
+        "url": "https://localhost/api/friends/delete/",
+        "method": "POST",
+        "comment": "친구 삭제",
+        "request": {
+            "comment": "프론트는 보내야 할 내용, 백엔드는 받아야 할 내용",
+            "data": {
+                "token": "jwt",
+                "friendname": "삭제할 친구 네임"
+            }
+        },
+        "response": {
+            "comment": "프론트는 받아야 할 내용, 백엔드는 보내야 할 내용",
+            "data": {},
+            "return value": "기존 반환과 동일하게 status code를 포함한 message 또는 error"
+        }
+    },
+    {
+        "url": "https://localhost/api/friends/online/",
+        "method": "GET",
+        "comment": "친구 온라인 여부 조회",
+        "request": {
+            "comment": "프론트는 보내야 할 내용, 백엔드는 받아야 할 내용",
+            "data": {
+                "token": "jwt"
+            }
+        },
+        "response": {
+            "comment": "프론트는 받아야 할 내용, 백엔드는 보내야 할 내용",
+            "data": {
+                "results": [
+                    {
+                        "username": "친구 네임",
+                        "is_online": true
+                    },
+                    {
+                        "username": "친구 네임",
+                        "is_online": false
+                    },
+                    {
+                        "...": "친구마다 반복. 각 친구마다 true 또는 false 중 하나 반환"
+                    }
+                ]
+            },
+            "return value": "기존 반환과 동일하게 status code를 포함한 message 또는 error"
+        }
+    },
+    {
+        "url": "https://localhost/api/users/update/username/",
+        "method": "POST",
+        "comment": "유저네임 변경",
+        "request": {
+            "comment": "프론트는 보내야 할 내용, 백엔드는 받아야 할 내용",
+            "data": {
+                "token": "jwt",
+                "new_username": "변경할 유저네임"
+            }
+        },
+        "response": {
+            "comment": "프론트는 받아야 할 내용, 백엔드는 보내야 할 내용",
+            "data": {},
+            "return value": "기존 반환과 동일하게 status code를 포함한 message 또는 error"
+        }
+    },
+    {
+        "url": "https://localhost/api/users/update/password/",
+        "method": "POST",
+        "comment": "비밀번호 변경",
+        "request": {
+            "comment": "프론트는 보내야 할 내용, 백엔드는 받아야 할 내용",
+            "data": {
+                "token": "jwt",
+                "new_password": "변경할 비밀번호"
+            }
+        },
+        "response": {
+            "comment": "프론트는 받아야 할 내용, 백엔드는 보내야 할 내용",
+            "data": {},
+            "return value": "기존 반환과 동일하게 status code를 포함한 message 또는 error"
+        }
+    },
+    {
+        "url": "https://localhost/api/oauth/42intra/signin/",
+        "method": "GET",
+        "comment": "42 intra login 하기 위해 필요한 42 intra api url",
+        "request": {
+            "comment" : "프론트는 보내야 할 내용, 백엔드는 받아야 할 내용",
+            "data": {}
+        },
+        "response": {
+            "comment" : "프론트는 받아야 할 내용, 백엔드는 보내야 할 내용",
+            "data": {
+                "redirect url" : "url"
+            }
+        }
+    },
+    {
+        "url": "https://localhost/api/oauth/42intra/oauth-callback/",
+        "method": "GET",
+        "comment": "42 intra login 한 뒤 받은 auth code를 백엔드에 전달",
+        "request": {
+            "comment" : "프론트는 보내야 할 내용, 백엔드는 받아야 할 내용",
+            "data": {
+                "code" : "auth code"
+            }
+        },
+        "response": {
+            "comment" : "프론트는 받아야 할 내용, 백엔드는 보내야 할 내용",
+            "data": {
+                "token" : "jwt"
+            }
+        }
+    }
+]
