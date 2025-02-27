@@ -34,7 +34,7 @@ import json
 
 # 42intra -> app
 @require_POST
-@update_last_activate
+@csrf_exempt
 def oauth_callback(request):
     data = json.loads(request.body)
     code = data.get('code')
