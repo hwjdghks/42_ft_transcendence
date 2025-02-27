@@ -27,7 +27,7 @@ async function handleOauthSubmit(event) {
 
   try {
     window.location.href = "https://localhost/api/oauth/42intra/signin/";
-  
+
   } catch (error) {
     showMessage(error.message || "Redirection error", "error");
   }
