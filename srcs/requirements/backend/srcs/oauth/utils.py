@@ -31,11 +31,11 @@ def get_user_info(access_token):
 
 from django.contrib.auth import get_user_model
 
-def get_or_create_user(email, username):
+def get_or_create_user(email, username, password):
     user = get_user_model().objects.filter(email=email).first()
 
     if user is None:
-        user = get_user_model().objects.create(username=username, email=email, password='temporary_password')
+        user = get_user_model().objects.create(username=username, email=email, password=password)
         user.is_active = True
         user.save()
 
