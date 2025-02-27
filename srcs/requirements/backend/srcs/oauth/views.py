@@ -13,7 +13,7 @@ import pyotp
 #app -> 42intra login
 @csrf_exempt
 @require_GET
-def oauth_signin(request: HttpRequest) -> JsonResponse:
+def oauth_signin(request: HttpRequest):
     
     auth_url = settings.OAUTH2_AUTHORIZATION_URL
     params = {
@@ -26,15 +26,18 @@ def oauth_signin(request: HttpRequest) -> JsonResponse:
 	# redirect to 42intra login page
     url = f"{auth_url}?{urllib.parse.urlencode(params)}"
     return JsonResponse({
-        "redirect url" : url
+        "redirect_url" : url
     })
     # return redirect(url)
 
+import json
+
 # 42intra -> app
-@require_GET
+@require_POST
 @update_last_activate
 def oauth_callback(request):
-    code = request.GET.get('code')
+    data = json.loads(request.body)
+    code = data.get('code')
 
     if not code:
         return JsonResponse({'error': 'No code provided'}, status=400)

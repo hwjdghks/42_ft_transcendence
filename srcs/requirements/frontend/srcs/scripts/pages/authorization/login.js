@@ -26,12 +26,30 @@ async function handleOauthSubmit(event) {
   console.log("Oauth btn click!");
 
   try {
-    window.location.href = "https://localhost/api/oauth/42intra/signin/";
+    const response = await fetch("https://localhost/api/oauth/42intra/signin/", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch redirect URL");
+    }
+
+    const data = await response.json();
+    if (data.redirect_url) {
+      window.location.href = data.redirect_url;
+    } else {
+      throw new Error("redirect_url not found in response");
+    }
 
   } catch (error) {
+    console.error("Redirection error:", error);
     showMessage(error.message || "Redirection error", "error");
   }
 }
+
 
 export function LoginPage() {
   setTimeout(() => {
