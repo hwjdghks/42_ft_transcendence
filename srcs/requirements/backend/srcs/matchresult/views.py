@@ -35,11 +35,14 @@ def results(request: HttpRequest) -> JsonResponse:
 
     seoul_tz = pytz.timezone('Asia/Seoul')
 
+    profile_image_url = user.profile_image.url if user.profile_image else None
+
     # match_date를 한국 시간으로 변환하여 문자열로 포맷팅
     for result in match_results:
         if result['match_date']:
             local_dt = result['match_date'].astimezone(seoul_tz)
             result['match_date'] = local_dt.strftime("%Y-%m-%d %H:%M:%S")
+        result['profile_image_url'] = profile_image_url
 
     return JsonResponse({'match_results': match_results}, status=200)
 
