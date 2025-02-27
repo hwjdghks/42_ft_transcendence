@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 from authentication.views import generate_jwt, jwt_required
 from .utils import get_oauth_token, get_user_info, get_or_create_user
 from friends.views import update_last_activate
+import pyotp
 
 #app -> 42intra login
 @csrf_exempt
@@ -24,7 +25,10 @@ def oauth_signin(request: HttpRequest) -> JsonResponse:
     
 	# redirect to 42intra login page
     url = f"{auth_url}?{urllib.parse.urlencode(params)}"
-    return redirect(url)
+    return JsonResponse({
+        "redirect url" : url
+    })
+    # return redirect(url)
 
 # 42intra -> app
 @require_GET
@@ -46,8 +50,9 @@ def oauth_callback(request):
 
     email = user_info.get('email')
     username = user_info.get('login')
+    password = pyotp.random_base32()
 
-    user = get_or_create_user(email, username)
+    user = get_or_create_user(email, username, password)
     token = generate_jwt(user, 2)
     
     return JsonResponse({'message': 'User created successfully', 'token': token}, status=201)
