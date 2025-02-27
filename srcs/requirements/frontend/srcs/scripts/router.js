@@ -79,7 +79,7 @@ function router() {
     window.location.hash = '#gameplay/option';
     return;
   }
-  
+
   // 토너먼트 진행 중일 때, 허용되지 않은 페이지로 이동 시 확인
   if (sessionStorage.getItem('tournament_in_progress') === 'true') {
     const allowedDuringTournament = ['gameplay/tournament'];

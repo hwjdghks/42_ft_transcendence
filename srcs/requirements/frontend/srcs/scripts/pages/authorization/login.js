@@ -50,7 +50,6 @@ async function handleOauthSubmit(event) {
   }
 }
 
-
 export function LoginPage() {
   setTimeout(() => {
     const loginForm = document.getElementById('login-form');
