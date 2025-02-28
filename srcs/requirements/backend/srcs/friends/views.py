@@ -13,8 +13,20 @@ from authentication.views import jwt_required
 
 User = get_user_model()
 
+def update_last_activate(func):
+    @wraps(func)
+    def wrapper(request, *args, **kwargs):
+        response = func(request, *args, **kwargs)
+        if isinstance(response, JsonResponse) and 200 <= response.status_code < 300:
+            user_id = request.user.id
+            OnlineList.objects.update_or_create(user_id=user_id)
+
+        return response
+    return wrapper
+
 @require_GET
 @jwt_required(expected_factor_level=2)
+@update_last_activate
 def friend_list(request: HttpRequest) -> JsonResponse:
     user = request.user
     list = Friend.objects.filter(follower=user)
@@ -29,6 +41,7 @@ def friend_list(request: HttpRequest) -> JsonResponse:
 
 @require_GET
 @jwt_required(expected_factor_level=2)
+@update_last_activate
 def search_users(request: HttpRequest) -> JsonResponse:
     query = request.GET.get('search_query', '')
     users = User.objects.filter(username__icontains=query)
@@ -44,6 +57,7 @@ def search_users(request: HttpRequest) -> JsonResponse:
 @csrf_exempt
 @require_POST
 @jwt_required(expected_factor_level=2)
+@update_last_activate
 def add_friend(request: HttpRequest) -> JsonResponse:
     user = request.user
     data = json.loads(request.body)
@@ -66,6 +80,7 @@ def add_friend(request: HttpRequest) -> JsonResponse:
 @csrf_exempt
 @require_POST
 @jwt_required(expected_factor_level=2)
+@update_last_activate
 def delete_friend(request: HttpRequest) -> JsonResponse:
     user = request.user
     data = json.loads(request.body)
@@ -87,6 +102,7 @@ def delete_friend(request: HttpRequest) -> JsonResponse:
 
 @require_GET
 @jwt_required(expected_factor_level=2)
+@update_last_activate
 def get_online(request: HttpRequest) -> JsonResponse:
     user = request.user
     following = Friend.objects.filter(follower=user)
@@ -106,14 +122,3 @@ def get_online(request: HttpRequest) -> JsonResponse:
         is_online = u.id in online_users
         result.append({"username": u.username, "is_online": is_online})
     return JsonResponse({'results': result}, status=200)
-
-def update_last_activate(func):
-    @wraps(func)
-    def wrapper(request, *args, **kwargs):
-        response = func(request, *args, **kwargs)
-        if isinstance(response, JsonResponse) and 200 <= response.status_code < 300:
-            user_id = request.user.id
-            OnlineList.objects.update_or_create(user_id=user_id)
-
-        return response
-    return wrapper

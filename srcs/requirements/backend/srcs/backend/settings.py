@@ -41,8 +41,8 @@ JWT_EXPIRATION_DELTA = datetime.timedelta(hours=1)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-# DEBUG = True
-DEBUG = False
+DEBUG = True
+# DEBUG = False
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'backend']
 
@@ -176,7 +176,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # 기본 발신자 이메일
 # OAuth 2.0 setting : should be saved to a .env file
 OAUTH2_CLIENT_ID = os.getenv("OAUTH2_CLIENT_ID")
 OAUTH2_CLIENT_SECRET = os.getenv("OAUTH2_CLIENT_SECRET")
-OAUTH2_REDIRECT_URI = 'http://localhost:80/api/oauth/42intra/oauth-callback/'  # 콜백 URI
+OAUTH2_REDIRECT_URI = 'http://localhost:80/oauth-callback/'  # 콜백 URI
 OAUTH2_AUTHORIZATION_URL = 'https://api.intra.42.fr/oauth/authorize'
 OAUTH2_TOKEN_URL = 'https://api.intra.42.fr/oauth/token'
 OAUTH2_API_URL = 'https://api.intra.42.fr/v2/me'

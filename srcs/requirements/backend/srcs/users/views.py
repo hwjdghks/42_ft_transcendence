@@ -11,6 +11,7 @@ from authentication.views import generate_jwt, jwt_required
 from .models import User
 from matchresult.models import MatchResult
 from .utils import check_existing_user
+from friends.views import update_last_activate
 
 @csrf_exempt
 @require_POST
@@ -70,6 +71,7 @@ def withdraw(request: HttpRequest) -> JsonResponse:
 @csrf_exempt
 @require_POST
 @jwt_required(expected_factor_level=2)
+@update_last_activate
 def upload_profile_image(request: HttpRequest) -> JsonResponse:
     user: User = request.user
     image = request.FILES.get('profile_image')
@@ -82,6 +84,7 @@ def upload_profile_image(request: HttpRequest) -> JsonResponse:
 
 @require_GET
 @jwt_required(expected_factor_level=2)
+@update_last_activate
 def get_profile(request: HttpRequest) -> JsonResponse:
     user: User = request.user
 
@@ -102,6 +105,7 @@ def get_profile(request: HttpRequest) -> JsonResponse:
     }
     return JsonResponse(profile, status=200)
 
+
 @require_GET
 @jwt_required(expected_factor_level=2)
 def get_name(request: HttpRequest) -> JsonResponse:
@@ -111,3 +115,64 @@ def get_name(request: HttpRequest) -> JsonResponse:
         'username': user.username,
     }
     return JsonResponse(username, status=200)
+
+@require_POST
+@jwt_required(expected_factor_level=2)
+def update_username(request: HttpRequest) -> JsonResponse:
+    user: User = request.user
+    new_username = json.loads(request.body).get('new_username')
+
+    if not new_username or not new_username.strip():
+        return JsonResponse({
+            'error': '유저 이름은 공백일 수 없습니다.'
+        }, status=400)
+    
+    old_username = user.get_username()
+    if old_username == new_username:
+        return JsonResponse({
+            'error': '기존 이름과 같은 이름으로 변경할 수 없습니다.'
+        }, status=400)
+    
+    if User.objects.filter(username=new_username).exists():
+        return JsonResponse({
+            'error': '이미 존재하는 이름 입니다.'
+        }, status=400)
+    
+    user.username = new_username
+    user.save()
+
+    return JsonResponse({'message': 'Usrename updated successfully'}, status=200)
+
+@require_POST
+@jwt_required(expected_factor_level=2)
+def update_password(request: HttpRequest) -> JsonResponse:
+    user: User = request.user
+    new_password = json.loads(request.body).get('new_password')
+
+    if not new_password or not new_password.strip():
+        return JsonResponse({
+            'error': '비밀번호는 공백일 수 없습니다.'
+        }, status=400)
+    
+    old_password = user.get_password()
+    if old_password == new_password:
+        return JsonResponse({
+            'error': '기존 비밀번호와 같은 비밀번호로 변경할 수 없습니다.'
+        }, status=400)
+    
+    user.password = new_password
+    user.save()
+
+    return JsonResponse({'message': 'password updated successfully'}, status=200)
+
+import logging
+logger = logging.getLogger('django')
+
+def test_api(request: HttpRequest) -> JsonResponse:
+    user: User = request.user
+    logger.info("username={}", user.get_username())
+    logger.info("password={}", user.password)
+    return JsonResponse({
+        'username': user.username,
+        'password': user.password
+    }, status=200)
