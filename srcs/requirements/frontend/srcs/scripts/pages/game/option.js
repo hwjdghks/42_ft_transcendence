@@ -52,10 +52,8 @@ function GameOptionPage() {
           <h5 class="card-title">Paddle Size</h5>
           <div class="btn-group w-100" role="group">
             <button type="button" class="btn btn-primary active">x1</button>
-            <button type="button" class="btn btn-outline-primary">x1.25</button>
+            <button type="button" class="btn btn-outline-primary">x1.2</button>
             <button type="button" class="btn btn-outline-primary">x1.5</button>
-            <button type="button" class="btn btn-outline-primary">x1.75</button>
-            <button type="button" class="btn btn-outline-primary">x2.0</button>
           </div>
         </div>
       </div>
@@ -66,9 +64,7 @@ function GameOptionPage() {
           <h5 class="card-title">Ball Speed</h5>
           <div class="btn-group w-100" role="group">
             <button type="button" class="btn btn-primary active">x1</button>
-            <button type="button" class="btn btn-outline-primary">x1.25</button>
             <button type="button" class="btn btn-outline-primary">x1.5</button>
-            <button type="button" class="btn btn-outline-primary">x1.75</button>
             <button type="button" class="btn btn-outline-primary">x2.0</button>
           </div>
         </div>
@@ -79,11 +75,9 @@ function GameOptionPage() {
         <div class="card-body">
           <h5 class="card-title">Obstacles Number</h5>
           <div class="btn-group w-100" role="group">
-            <button type="button" class="btn btn-primary active">1</button>
+            <button type="button" class="btn btn-primary active">0</button>
+            <button type="button" class="btn btn-outline-primary">1</button>
             <button type="button" class="btn btn-outline-primary">2</button>
-            <button type="button" class="btn btn-outline-primary">3</button>
-            <button type="button" class="btn btn-outline-primary">4</button>
-            <button type="button" class="btn btn-outline-primary">5</button>
           </div>
         </div>
       </div>
@@ -145,7 +139,7 @@ function renderPlayerInputs(container, players) {
   const playerInputs = container.querySelector('#playerInputs');
   playerInputs.innerHTML = '';
 
-  // 첫 번째 입력 필드 생성 (기본값은 "Me")
+  // 첫 번째 입력 필드 (수정 불가)
   const firstDiv = document.createElement('div');
   firstDiv.className = 'mb-3';
   const firstLabel = document.createElement('label');
@@ -155,14 +149,14 @@ function renderPlayerInputs(container, players) {
   firstInput.type = 'text';
   firstInput.className = 'form-control';
   firstInput.placeholder = 'username';
-  firstInput.disabled = true;
-  firstInput.value = 'Me'; // 초기 기본값
+  firstInput.disabled = true; // 변경 불가 처리
+  firstInput.value = 'Me';
 
   firstDiv.appendChild(firstLabel);
   firstDiv.appendChild(firstInput);
   playerInputs.appendChild(firstDiv);
 
-  // 비동기로 프로필 API를 호출하여 username 업데이트
+  // 비동기로 프로필 API 호출하여 첫 번째 플레이어 이름 업데이트
   fetchProfileUsername().then(username => {
     firstInput.value = username;
   });
@@ -181,15 +175,34 @@ function renderPlayerInputs(container, players) {
     div.appendChild(label);
     div.appendChild(input);
     playerInputs.appendChild(div);
+
+    // 영어만 입력 가능 및 중복 체크
+    input.addEventListener('input', () => {
+      // 1. 영어 알파벳만 허용: 영어 외 문자는 제거합니다.
+      const cleanedValue = input.value.replace(/[^A-Za-z]/g, '');
+      if (input.value !== cleanedValue) {
+        input.value = cleanedValue;
+        alert("영어 문자만 입력 가능합니다.");
+      }
+      
+      // 2. 중복 이름 체크 (비교는 대소문자 구분 없이)
+      const otherInputs = playerInputs.querySelectorAll('input:not([disabled])');
+      let isDuplicate = false;
+      otherInputs.forEach(other => {
+        if (other !== input && other.value.trim().toLowerCase() === input.value.trim().toLowerCase() && input.value.trim() !== "") {
+          isDuplicate = true;
+        }
+      });
+      if (isDuplicate) {
+        alert("중복된 이름은 사용할 수 없습니다.");
+        input.value = ""; // 중복일 경우 입력값 초기화
+      }
+      
+      // 옵션 저장 (실시간 반영)
+      saveOptionsToSessionStorage(container);
+    });
   }
-
-  // 플레이어 이름 입력 시 옵션 저장 이벤트 설정
-  const inputs = playerInputs.querySelectorAll('input:not([disabled])');
-  inputs.forEach((input) => {
-    input.addEventListener('input', () => saveOptionsToSessionStorage(container));
-  });
 }
-
 
 function saveOptionsToSessionStorage(container) {
   // 1. 플레이어 수 (data-players 속성이 있는 버튼에서 가져옴)
@@ -238,7 +251,20 @@ function saveOptionsToSessionStorage(container) {
 // 입력값 검증 함수
 function validateInputs(container) {
   const inputs = container.querySelectorAll('#playerInputs input:not([disabled])');
-  return [...inputs].every(input => input.value.trim() !== '');
+  let names = [];
+  for (const input of inputs) {
+    const trimmed = input.value.trim();
+    // 빈 값 또는 영어 알파벳이 아닌 경우 false
+    if (trimmed === "" || !/^[A-Za-z]+$/.test(trimmed)) {
+      return false;
+    }
+    // 중복 검사 (대소문자 구분 없이)
+    if (names.includes(trimmed.toLowerCase())) {
+      return false;
+    }
+    names.push(trimmed.toLowerCase());
+  }
+  return true;
 }
 
 // 외부에서 사용할 수 있도록 GameOptionPage 함수 export
