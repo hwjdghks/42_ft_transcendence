@@ -31,6 +31,7 @@ export function LoginVerificationPage() {
       
       // OTP 검증 성공 시 최종 토큰으로 업데이트하고 임시 토큰 제거
       sessionStorage.setItem('fa_token', verifyResponse.token);
+      sessionStorage.setItem('username', verifyResponse)
       sessionStorage.removeItem('fa_temp_token');
       
       showMessage(verifyResponse.message || 'Login successful!', 'success');
