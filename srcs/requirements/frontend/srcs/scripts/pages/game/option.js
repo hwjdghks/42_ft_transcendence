@@ -1,3 +1,4 @@
+// 프로필 username을 API에서 가져오는 함수
 async function fetchProfileUsername() {
   const token = sessionStorage.getItem('fa_token');
   try {
@@ -19,6 +20,161 @@ async function fetchProfileUsername() {
   return "Me"; // 기본값
 }
 
+// 모든 플레이어 입력에 대해 유효성 검증 후 시각적 피드백 및 Next 버튼 상태 업데이트
+function updateValidationState(container) {
+  const playerInputs = container.querySelectorAll('#playerInputs input');
+  let names = [];
+  let isAllValid = true;
+  
+  // 각 입력 필드 개별 유효성 검사 (빈 값, 영어 알파벳만, 최대 8자)
+  playerInputs.forEach(input => {
+    const trimmed = input.value.trim();
+    let valid = true;
+    if (trimmed === "" || !/^[A-Za-z]+$/.test(trimmed) || trimmed.length > 8) {
+      valid = false;
+    }
+    
+    // 사용자가 이미 필드를 벗어난 경우(data-touched가 true) 오류일 때만 빨간색 처리
+    if (input.dataset.touched === "true" && !valid) {
+      input.classList.add("is-invalid");
+    } else {
+      input.classList.remove("is-invalid");
+    }
+    
+    names.push(trimmed.toLowerCase());
+  });
+  
+  // 중복 검사: 같은 이름이 두 개 이상이면 모두 invalid 처리
+  const nameCounts = names.reduce((acc, name) => {
+    if (name !== "") {
+      acc[name] = (acc[name] || 0) + 1;
+    }
+    return acc;
+  }, {});
+  
+  playerInputs.forEach(input => {
+    const trimmed = input.value.trim().toLowerCase();
+    if (trimmed !== "" && nameCounts[trimmed] > 1 && input.dataset.touched === "true") {
+      input.classList.add("is-invalid");
+      isAllValid = false;
+    }
+  });
+  
+  // Next 버튼 활성화 여부 업데이트
+  const nextButton = container.querySelector('#game-option-next');
+  nextButton.disabled = !isAllValid;
+}
+
+// 플레이어 입력 필드를 렌더링하는 함수
+function renderPlayerInputs(container, players) {
+  const playerInputs = container.querySelector('#playerInputs');
+  playerInputs.innerHTML = '';
+
+  // 첫 번째 입력 필드 (수정 불가)
+  const firstDiv = document.createElement('div');
+  firstDiv.className = 'mb-3';
+  const firstLabel = document.createElement('label');
+  firstLabel.className = 'form-label';
+  firstLabel.textContent = 'User 1';
+  const firstInput = document.createElement('input');
+  firstInput.type = 'text';
+  firstInput.className = 'form-control';
+  firstInput.placeholder = 'username';
+  firstInput.disabled = true;
+  firstInput.value = 'Me';
+  
+  firstDiv.appendChild(firstLabel);
+  firstDiv.appendChild(firstInput);
+  playerInputs.appendChild(firstDiv);
+
+  // API 호출 후 첫 번째 플레이어 이름 업데이트 및 유효성 검사 갱신
+  fetchProfileUsername().then(username => {
+    firstInput.value = username;
+    updateValidationState(container);
+    saveOptionsToSessionStorage(container);
+  });
+
+  // 나머지 플레이어 입력 필드 생성
+  for (let i = 1; i < players; i++) {
+    const div = document.createElement('div');
+    div.className = 'mb-3';
+    const label = document.createElement('label');
+    label.className = 'form-label';
+    label.textContent = `User ${i + 1}`;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'form-control';
+    input.placeholder = 'Enter username';
+    
+    // blur 이벤트: 사용자가 입력 후 필드를 벗어나면 data-touched 플래그 설정
+    input.addEventListener('blur', () => {
+      input.dataset.touched = "true";
+      updateValidationState(container);
+    });
+    
+    // 입력 시 실시간 검증 및 옵션 저장 (영어 알파벳만 허용)
+    input.addEventListener('input', () => {
+      const cleanedValue = input.value.replace(/[^A-Za-z]/g, '');
+      if (input.value !== cleanedValue) {
+        input.value = cleanedValue;
+      }
+      updateValidationState(container);
+      saveOptionsToSessionStorage(container);
+    });
+    
+    div.appendChild(label);
+    div.appendChild(input);
+    playerInputs.appendChild(div);
+  }
+  
+  // 새 플레이어 인풋 생성 후에도 Next 버튼 상태 업데이트
+  updateValidationState(container);
+}
+
+// 옵션 저장 함수
+function saveOptionsToSessionStorage(container) {
+  // 1. 플레이어 수 (data-players 속성이 있는 버튼에서 가져옴)
+  const playersElement = container.querySelector('.btn-group .active[data-players]');
+  const players = playersElement ? parseInt(playersElement.getAttribute('data-players'), 10) : 2;
+  
+  // 2. 패들 사이즈: "x1", "x1.2" 등으로 되어 있을 수 있으므로 "x" 제거 후 숫자형 변환
+  const rawPaddleSize = container
+    .querySelectorAll('.btn-group')[1]
+    .querySelector('.active')?.textContent.trim() || "1";
+  const paddleMultiplier = rawPaddleSize.startsWith('x')
+    ? parseFloat(rawPaddleSize.substring(1))
+    : parseFloat(rawPaddleSize);
+  
+  // 3. 공 속도: "x1", "x1.5" 등으로 되어 있을 수 있으므로 "x" 제거 후 숫자형 변환
+  const rawBallSpeed = container
+    .querySelectorAll('.btn-group')[2]
+    .querySelector('.active')?.textContent.trim() || "1";
+  const ballSpeed = rawBallSpeed.startsWith('x')
+    ? parseFloat(rawBallSpeed.substring(1))
+    : parseFloat(rawBallSpeed);
+  
+  // 4. 장애물 수: 정수형으로 변환
+  const obstaclesElement = container
+    .querySelectorAll('.btn-group')[3]
+    .querySelector('.active');
+  const obstacles = obstaclesElement ? parseInt(obstaclesElement.textContent.trim(), 10) : 0;
+  
+  // 5. 플레이어 이름 배열: 모든 인풋에서 값 추출 (첫 번째 플레이어 포함)
+  const playerInputs = container.querySelectorAll('#playerInputs input');
+  const usernameArr = Array.from(playerInputs).map(input => input.value.trim());
+  
+  // 옵션 객체 구성 (paddleSize와 ballSpeed는 숫자형 multiplier로 저장)
+  const options = {
+    players,
+    paddleSize: paddleMultiplier,
+    ballSpeed,
+    obstacles,
+  };
+  
+  sessionStorage.setItem('game_option', JSON.stringify(options));
+  sessionStorage.setItem('username', JSON.stringify(usernameArr));
+}
+
 // 게임 옵션 페이지 생성 함수
 function GameOptionPage() {
   const container = document.createElement('div');
@@ -32,7 +188,10 @@ function GameOptionPage() {
       <!-- Players Section -->
       <div class="card mb-4">
         <div class="card-body">
-          <h5 class="card-title">Players</h5>
+          <h5 class="card-title">
+            Players 
+            <small class="text-muted ms-2" style="font-size: 0.5em;">알파벳, 최대 8자, 중복불가</small>
+          </h5>
           <div class="btn-group w-100" role="group">
             <!-- data-players로 인원수 표시 -->
             <button type="button" class="btn btn-primary active" data-players="2">2</button>
@@ -41,8 +200,7 @@ function GameOptionPage() {
           </div>
 
           <!-- Player Input Section (inside the card) -->
-          <div id="playerInputs" class="mt-3">
-          </div>
+          <div id="playerInputs" class="mt-3"></div>
         </div>
       </div>
 
@@ -84,11 +242,11 @@ function GameOptionPage() {
 
       <!-- Next Button -->
       <div class="text-center">
-        <button class="btn btn-primary w-50" id="game-option-next">Next</button>
+        <button class="btn btn-primary w-50" id="game-option-next" disabled>Next</button>
       </div>
   `;
 
-  // .btn-group에 이벤트 리스너 설정
+  // 옵션 버튼 선택 시 이벤트 리스너 설정
   const btnGroups = container.querySelectorAll('.btn-group');
   btnGroups.forEach((btnGroup) => {
     btnGroup.addEventListener('click', (event) => {
@@ -99,11 +257,11 @@ function GameOptionPage() {
           btn.classList.add('btn-outline-primary');
         });
     
-        // 클릭된 버튼만 active 적용
+        // 클릭된 버튼에 active 적용
         event.target.classList.add('active', 'btn-primary');
         event.target.classList.remove('btn-outline-primary');
     
-        // data-players 속성이 있는 버튼인 경우에만 플레이어 인풋을 렌더링합니다.
+        // data-players 속성이 있으면 플레이어 인풋 렌더링
         if (event.target.hasAttribute('data-players')) {
           const players = parseInt(event.target.getAttribute('data-players'));
           renderPlayerInputs(container, players);
@@ -121,150 +279,15 @@ function GameOptionPage() {
   // Next 버튼 이벤트 설정
   const nextButton = container.querySelector('#game-option-next');
   nextButton.addEventListener('click', () => {
-    if (validateInputs(container)) {
+    if (!nextButton.disabled) {
       saveOptionsToSessionStorage(container);
       sessionStorage.setItem('tournament_in_progress', 'true');
       // 토너먼트 페이지로 이동
       window.location.hash = '#gameplay/tournament';
-    } else {
-      alert('모든 플레이어의 이름을 입력하세요.');
     }
   });
 
   return container;
-}
-
-// 플레이어 입력 필드를 렌더링하는 함수
-function renderPlayerInputs(container, players) {
-  const playerInputs = container.querySelector('#playerInputs');
-  playerInputs.innerHTML = '';
-
-  // 첫 번째 입력 필드 (수정 불가)
-  const firstDiv = document.createElement('div');
-  firstDiv.className = 'mb-3';
-  const firstLabel = document.createElement('label');
-  firstLabel.className = 'form-label';
-  firstLabel.textContent = 'User 1';
-  const firstInput = document.createElement('input');
-  firstInput.type = 'text';
-  firstInput.className = 'form-control';
-  firstInput.placeholder = 'username';
-  firstInput.disabled = true; // 변경 불가 처리
-  firstInput.value = 'Me';
-
-  firstDiv.appendChild(firstLabel);
-  firstDiv.appendChild(firstInput);
-  playerInputs.appendChild(firstDiv);
-
-  // 비동기로 프로필 API 호출하여 첫 번째 플레이어 이름 업데이트
-  fetchProfileUsername().then(username => {
-    firstInput.value = username;
-  });
-
-  // 나머지 플레이어 입력 필드 생성
-  for (let i = 1; i < players; i++) {
-    const div = document.createElement('div');
-    div.className = 'mb-3';
-    const label = document.createElement('label');
-    label.className = 'form-label';
-    label.textContent = `User ${i + 1}`;
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'form-control';
-    input.placeholder = 'Enter username';
-    div.appendChild(label);
-    div.appendChild(input);
-    playerInputs.appendChild(div);
-
-    // 영어만 입력 가능 및 중복 체크
-    input.addEventListener('input', () => {
-      // 1. 영어 알파벳만 허용: 영어 외 문자는 제거합니다.
-      const cleanedValue = input.value.replace(/[^A-Za-z]/g, '');
-      if (input.value !== cleanedValue) {
-        input.value = cleanedValue;
-        alert("영어 문자만 입력 가능합니다.");
-      }
-      
-      // 2. 중복 이름 체크 (비교는 대소문자 구분 없이)
-      const otherInputs = playerInputs.querySelectorAll('input:not([disabled])');
-      let isDuplicate = false;
-      otherInputs.forEach(other => {
-        if (other !== input && other.value.trim().toLowerCase() === input.value.trim().toLowerCase() && input.value.trim() !== "") {
-          isDuplicate = true;
-        }
-      });
-      if (isDuplicate) {
-        alert("중복된 이름은 사용할 수 없습니다.");
-        input.value = ""; // 중복일 경우 입력값 초기화
-      }
-      
-      // 옵션 저장 (실시간 반영)
-      saveOptionsToSessionStorage(container);
-    });
-  }
-}
-
-function saveOptionsToSessionStorage(container) {
-  // 1. 플레이어 수 (data-players 속성이 있는 버튼에서 가져옴)
-  const playersElement = container.querySelector('.btn-group .active[data-players]');
-  const players = playersElement ? parseInt(playersElement.getAttribute('data-players'), 10) : 2;
-  
-  // 2. 패들 사이즈: 텍스트가 "x1", "x1.25" 등으로 되어 있을 수 있으므로 "x" 제거 후 숫자형으로 변환
-  const rawPaddleSize = container
-    .querySelectorAll('.btn-group')[1]
-    .querySelector('.active')?.textContent.trim() || "1";
-  const paddleMultiplier = rawPaddleSize.startsWith('x')
-    ? parseFloat(rawPaddleSize.substring(1))
-    : parseFloat(rawPaddleSize);
-  
-  // 3. 공 속도: 텍스트가 "x1", "x1.25" 등으로 되어 있을 수 있으므로 "x" 제거 후 숫자형으로 변환
-  const rawBallSpeed = container
-    .querySelectorAll('.btn-group')[2]
-    .querySelector('.active')?.textContent.trim() || "1";
-  const ballSpeed = rawBallSpeed.startsWith('x')
-    ? parseFloat(rawBallSpeed.substring(1))
-    : parseFloat(rawBallSpeed);
-  
-  // 4. 장애물 수: 정수형으로 변환
-  const obstaclesElement = container
-    .querySelectorAll('.btn-group')[3]
-    .querySelector('.active');
-  const obstacles = obstaclesElement ? parseInt(obstaclesElement.textContent.trim(), 10) : 1;
-  
-  // 5. 플레이어 이름 배열: 첫 번째 입력은 고정값("Me")일 수 있으므로 모든 인풋에서 값 추출
-  const playerInputs = container.querySelectorAll('#playerInputs input');
-  const usernameArr = Array.from(playerInputs).map(input => input.value.trim());
-  
-  // 옵션 객체 구성 (paddleSize와 ballSpeed는 숫자형 multiplier로 저장)
-  const options = {
-    players,
-    paddleSize: paddleMultiplier,
-    ballSpeed,
-    obstacles,
-  };
-  
-  // sessionStorage에 JSON 문자열로 저장
-  sessionStorage.setItem('game_option', JSON.stringify(options));
-  sessionStorage.setItem('username', JSON.stringify(usernameArr));
-}
-
-// 입력값 검증 함수
-function validateInputs(container) {
-  const inputs = container.querySelectorAll('#playerInputs input:not([disabled])');
-  let names = [];
-  for (const input of inputs) {
-    const trimmed = input.value.trim();
-    // 빈 값 또는 영어 알파벳이 아닌 경우 false
-    if (trimmed === "" || !/^[A-Za-z]+$/.test(trimmed)) {
-      return false;
-    }
-    // 중복 검사 (대소문자 구분 없이)
-    if (names.includes(trimmed.toLowerCase())) {
-      return false;
-    }
-    names.push(trimmed.toLowerCase());
-  }
-  return true;
 }
 
 // 외부에서 사용할 수 있도록 GameOptionPage 함수 export
