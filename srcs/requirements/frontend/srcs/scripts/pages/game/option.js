@@ -26,19 +26,35 @@ function updateValidationState(container) {
   let names = [];
   let isAllValid = true;
   
-  // 각 입력 필드 개별 유효성 검사 (빈 값, 영어 알파벳만, 최대 8자)
+  // 각 입력 필드 개별 유효성 검사 (빈 값, 영어 알파벳만, 최대 10자)
   playerInputs.forEach(input => {
     const trimmed = input.value.trim();
     let valid = true;
-    if (trimmed === "" || !/^[A-Za-z]+$/.test(trimmed) || trimmed.length > 8) {
+    let errorMsg = "";
+    
+    if (trimmed === "") {
       valid = false;
+      errorMsg = "이름을 입력해주세요.";
+    } else if (!/^[A-Za-z]+$/.test(trimmed)) {
+      valid = false;
+      errorMsg = "영어 알파벳만 입력 가능합니다.";
+    } else if (trimmed.length > 10) {
+      valid = false;
+      errorMsg = "최대 10자까지 입력 가능합니다.";
     }
     
-    // 사용자가 이미 필드를 벗어난 경우(data-touched가 true) 오류일 때만 빨간색 처리
+    // 인풋의 부모 요소에 있는 invalid-feedback 엘리먼트를 찾음
+    const feedback = input.parentNode.querySelector('.invalid-feedback');
     if (input.dataset.touched === "true" && !valid) {
       input.classList.add("is-invalid");
+      if (feedback) {
+        feedback.textContent = errorMsg;
+      }
     } else {
       input.classList.remove("is-invalid");
+      if (feedback) {
+        feedback.textContent = "";
+      }
     }
     
     names.push(trimmed.toLowerCase());
@@ -54,8 +70,15 @@ function updateValidationState(container) {
   
   playerInputs.forEach(input => {
     const trimmed = input.value.trim().toLowerCase();
+    const feedback = input.parentNode.querySelector('.invalid-feedback');
     if (trimmed !== "" && nameCounts[trimmed] > 1 && input.dataset.touched === "true") {
       input.classList.add("is-invalid");
+      if (feedback) {
+        feedback.textContent = "중복된 이름입니다.";
+      }
+      isAllValid = false;
+    }
+    if (input.classList.contains("is-invalid")) {
       isAllValid = false;
     }
   });
@@ -82,9 +105,13 @@ function renderPlayerInputs(container, players) {
   firstInput.placeholder = 'username';
   firstInput.disabled = true;
   firstInput.value = 'Me';
+  // 에러 메시지 엘리먼트 추가
+  const firstFeedback = document.createElement('div');
+  firstFeedback.className = 'invalid-feedback';
   
   firstDiv.appendChild(firstLabel);
   firstDiv.appendChild(firstInput);
+  firstDiv.appendChild(firstFeedback);
   playerInputs.appendChild(firstDiv);
 
   // API 호출 후 첫 번째 플레이어 이름 업데이트 및 유효성 검사 갱신
@@ -106,6 +133,10 @@ function renderPlayerInputs(container, players) {
     input.className = 'form-control';
     input.placeholder = 'Enter username';
     
+    // 에러 메시지 엘리먼트 추가
+    const feedback = document.createElement('div');
+    feedback.className = 'invalid-feedback';
+    
     // blur 이벤트: 사용자가 입력 후 필드를 벗어나면 data-touched 플래그 설정
     input.addEventListener('blur', () => {
       input.dataset.touched = "true";
@@ -124,6 +155,7 @@ function renderPlayerInputs(container, players) {
     
     div.appendChild(label);
     div.appendChild(input);
+    div.appendChild(feedback);
     playerInputs.appendChild(div);
   }
   
@@ -189,8 +221,7 @@ function GameOptionPage() {
       <div class="card mb-4">
         <div class="card-body">
           <h5 class="card-title">
-            Players 
-            <small class="text-muted ms-2" style="font-size: 0.5em;">알파벳, 최대 8자, 중복불가</small>
+            Players
           </h5>
           <div class="btn-group w-100" role="group">
             <!-- data-players로 인원수 표시 -->
