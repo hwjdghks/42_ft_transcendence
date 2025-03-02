@@ -20,22 +20,23 @@ async function fetchMatchResults() {
     async function loadMatchHistory() {
         try {
           const allMatches = await fetchMatchResults();
-          console.log("전체 경기 결과:", allMatches); // 응답 결과 확인
-      
+          
+          // 결과가 없을 경우 메시지 출력
+          if (!allMatches || allMatches.length === 0) {
+            document.getElementById('matchHistory').innerHTML = `<div class="alert alert-info">경기 결과가 없습니다.</div>`;
+            return;
+          }
+
           const sortedMatches = allMatches.sort((a, b) => new Date(b.match_date) - new Date(a.match_date));
           const topMatches = sortedMatches.slice(0, 5);
-          console.log("최신 5개 경기 결과:", topMatches); // 상위 5개 결과 확인
-      
+          
           const matchHistoryHTML = topMatches.map(match => createMatchHistoryItem(match)).join('');
-          // "match-history-container" 대신 "matchHistory" 사용
           document.getElementById('matchHistory').innerHTML = matchHistoryHTML;
         } catch (error) {
           console.error('매치 기록 불러오기 실패:', error);
         }
     }
-    
-      
-    
+
     // 단일 경기 결과 항목을 HTML로 생성하는 함수
     function createMatchHistoryItem(match) {
         // 상태에 따른 클래스 지정
@@ -53,7 +54,7 @@ async function fetchMatchResults() {
     
                 <div class="d-flex flex-column align-items-center">
                     <div class="rounded-circle bg-light" style="width: 48px; height: 48px;">
-                        <img src="/static/profile.jpg" alt="Player 1" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                        <img src="${match.profile_image_url}" alt="Player 1" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                     </div>
                     <span class="fw-bold mt-1">${match.username}</span>
                 </div>
