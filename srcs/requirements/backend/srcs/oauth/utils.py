@@ -1,5 +1,6 @@
 import requests
 from django.conf import settings
+from django.contrib.auth import get_user_model
 
 def get_oauth_token(code):
     token_data = {
@@ -29,13 +30,12 @@ def get_user_info(access_token):
 
     return user_info_response.json()
 
-from django.contrib.auth import get_user_model
-
-def get_or_create_user(email, username, password):
+def get_or_create_user(email, username):
     user = get_user_model().objects.filter(email=email).first()
 
     if user is None:
-        user = get_user_model().objects.create(username=username, email=email, password=password)
+        user = get_user_model().objects.create(username=username, email=email)
+        user.set_unusable_password()
         user.is_active = True
         user.save()
 
