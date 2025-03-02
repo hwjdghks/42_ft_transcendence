@@ -3,25 +3,25 @@
 import { createDeleteAccountModal } from './deleteAccountModal.js';
 
 async function fetchProfileUsername() {
-    const token = sessionStorage.getItem('fa_token');
-    try {
-      const response = await fetch('https://localhost/api/users/profile/', {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        return data.username || "Me";
-      } else {
-        console.error("프로필 username을 가져오지 못했습니다.");
+  const token = sessionStorage.getItem('fa_token');
+  try {
+    const response = await fetch('https://localhost/api/users/profile/', {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
       }
-    } catch (error) {
-      console.error("프로필 username 호출 에러:", error);
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return data.username || "Me";
+    } else {
+      console.error("프로필 username을 가져오지 못했습니다.");
     }
-    return "Me"; // 기본값
+  } catch (error) {
+    console.error("프로필 username 호출 에러:", error);
   }
+  return "Me"; // 기본값
+}
 
 // Username 변경 모달 생성 함수
 function createUsernameModal() {
@@ -56,6 +56,19 @@ function createUsernameModal() {
   `;
   document.body.appendChild(modalDiv);
 
+  // 모달이 완전히 닫힐 때마다 폼/메시지/클래스 초기화
+  modalDiv.addEventListener('hidden.bs.modal', () => {
+    const messageDiv = document.getElementById('usernameModalMessage');
+    if (messageDiv) {
+      messageDiv.textContent = '';
+      messageDiv.className = 'mb-3'; // alert 클래스 제거
+    }
+    const newUsernameInput = document.getElementById('newUsername');
+    if (newUsernameInput) {
+      newUsernameInput.value = '';
+    }
+  });
+
   const usernameForm = modalDiv.querySelector('#usernameForm');
   usernameForm.addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -87,21 +100,22 @@ function createUsernameModal() {
         throw new Error(errorData.message || 'Failed to update username');
       }
 
-      
       const result = await response.json();
       messageDiv.textContent = result.message || 'Username updated successfully';
       messageDiv.className = 'alert alert-success';
       
+      // 화면 상단 username도 즉시 변경
       const usernameElement = document.querySelector('.fs-2.fw-bold');
       if (usernameElement && newUsername) {
-          usernameElement.textContent = newUsername;
+        usernameElement.textContent = newUsername;
       }
 
+      // 1초 후 모달 닫기
       setTimeout(() => {
         const modalInstance = bootstrap.Modal.getInstance(modalDiv);
         modalInstance.hide();
-        messageDiv.textContent = '';
       }, 1000);
+
     } catch (error) {
       messageDiv.textContent = error.message || 'Error updating username';
       messageDiv.className = 'alert alert-danger';
@@ -110,7 +124,7 @@ function createUsernameModal() {
   });
 }
 
-// Password 변경 모달 생성 함수 (실시간으로 두 인풋 일치 여부 검증)
+// Password 변경 모달 생성 함수
 function createPasswordModal() {
   if (document.getElementById('passwordModal')) return;
 
@@ -154,6 +168,17 @@ function createPasswordModal() {
   const newPasswordInput = modalDiv.querySelector('#newPassword');
   const confirmPasswordInput = modalDiv.querySelector('#confirmPassword');
   const savePasswordBtn = modalDiv.querySelector('#savePasswordBtn');
+  const messageDiv = modalDiv.querySelector('#passwordModalMessage');
+
+  // 모달이 완전히 닫힐 때마다 폼/메시지/클래스 초기화
+  modalDiv.addEventListener('hidden.bs.modal', () => {
+    messageDiv.textContent = '';
+    messageDiv.className = 'mb-3'; // alert 제거
+    newPasswordInput.value = '';
+    confirmPasswordInput.value = '';
+    confirmPasswordInput.classList.remove('is-invalid');
+    savePasswordBtn.disabled = true;
+  });
 
   // 실시간 검증 함수
   function validatePasswordMatch() {
@@ -181,7 +206,6 @@ function createPasswordModal() {
     e.preventDefault();
     const newPassword = newPasswordInput.value;
     const confirmPassword = confirmPasswordInput.value;
-    const messageDiv = document.getElementById('passwordModalMessage');
 
     // 추가 검증: 혹시 실시간 검증을 우회한 경우
     if (newPassword !== confirmPassword) {
@@ -200,13 +224,13 @@ function createPasswordModal() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          token: token,
           new_password: newPassword
         })
       });
 
       if (!response.ok) {
         const errorData = await response.json();
+        // 백엔드에서 전달한 에러 메시지를 그대로 사용
         throw new Error(errorData.message || 'Failed to update password');
       }
 
@@ -214,14 +238,12 @@ function createPasswordModal() {
       messageDiv.textContent = result.message || 'Password updated successfully';
       messageDiv.className = 'alert alert-success';
 
+      // 1초 뒤 모달 닫기
       setTimeout(() => {
         const modalInstance = bootstrap.Modal.getInstance(modalDiv);
         modalInstance.hide();
-        messageDiv.textContent = '';
-        newPasswordInput.value = '';
-        confirmPasswordInput.value = '';
-        savePasswordBtn.disabled = true;
       }, 1000);
+
     } catch (error) {
       messageDiv.textContent = error.message || 'Error updating password';
       messageDiv.className = 'alert alert-danger';
@@ -235,8 +257,6 @@ function renderSettings() {
   container.className = 'container py-5';
 
   container.innerHTML = `
-    <div class="card">
-      <div class="card-body">
         <!-- Username Field -->
         <div class="mb-3">
           <label for="username" class="form-label text-start w-100">Username</label>
@@ -260,8 +280,6 @@ function renderSettings() {
         <button class="btn btn-outline-primary w-100 mb-2" id="logoutBtn">Log out</button>
         <button class="btn btn-danger w-100" id="deleteAccountBtn">Delete account</button>
         <div id="setting-message" class="mt-3"></div>
-      </div>
-    </div>
   `;
 
   // 로그아웃 처리
@@ -347,4 +365,5 @@ async function handleLogout() {
   }
 }
 
+// 전역에서 사용하기 위해 window에 할당
 window.renderSettings = renderSettings;
