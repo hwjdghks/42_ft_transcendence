@@ -44,7 +44,7 @@ def friend_list(request: HttpRequest) -> JsonResponse:
 @update_last_activate
 def search_users(request: HttpRequest) -> JsonResponse:
     query = request.GET.get('search_query', '')
-    users = User.objects.filter(username__icontains=query)
+    users = User.objects.filter(username__icontains=query).exclude(id=request.user.id)
     result = []
     for user in users:
         result.append({

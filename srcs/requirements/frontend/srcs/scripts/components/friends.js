@@ -8,6 +8,7 @@ function fetchFriends() {
   const friendListPromise = fetch("https://localhost/api/friends/list/", {
     method: "GET",
     headers: {
+      "Content-Type": "application/json",
       "Authorization": `Bearer ${getToken()}`
     }
   }).then(response => {
@@ -20,6 +21,7 @@ function fetchFriends() {
   const onlineListPromise = fetch("https://localhost/api/friends/online/", {
     method: "GET",
     headers: {
+      "Content-Type": "application/json",
       "Authorization": `Bearer ${getToken()}`
     }
   }).then(response => {
