@@ -1,32 +1,61 @@
 function getToken() {
-  return sessionStorage.getItem("fa_token");
+  return sessionStorage.getItem('fa_token');
 }
+
 let friends = [];
 
-function fetchFriends() {
-  fetch("https://localhost/api/friends/list/", {
+export function fetchFriends() {
+  const friendListPromise = fetch("https://localhost/api/friends/list/", {
     method: "GET",
     headers: {
+      "Content-Type": "application/json",
       "Authorization": `Bearer ${getToken()}`
     }
-  })
-    .then(response => response.json())
-    .then(data => {
-      // 백엔드 API가 { results: [...] } 형태로 응답한다고 가정
-      friends = data.results.map(friend => ({
+  }).then(response => {
+    if (!response.ok) {
+      throw new Error("Friend list fetch error: " + response.status);
+    }
+    return response.json();
+  });
+
+  const onlineListPromise = fetch("https://localhost/api/friends/online/", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getToken()}`
+    }
+  }).then(response => {
+    if (!response.ok) {
+      console.error("Online status fetch error, using fallback. Status:", response.status);
+      return { results: [] };
+    }
+    return response.json();
+  });
+
+  Promise.all([friendListPromise, onlineListPromise])
+    .then(([friendData, onlineData]) => {
+      const onlineStatusMap = {};
+      if (onlineData.results) {
+        onlineData.results.forEach(status => {
+          onlineStatusMap[status.username] = status.is_online;
+        });
+      }
+
+      friends = friendData.results.map(friend => ({
         username: friend.username,
-        avatar: friend.profile_image
+        avatar: friend.profile_image || '/static/profile.jpg',
+        is_online: onlineStatusMap[friend.username] || false
       }));
+      console.log("[fetchFriends] merged friends data:", friends);
       renderFriends();
     })
     .catch(error => console.error('Error fetching friends:', error));
 }
 
-function renderFriends() {
+export function renderFriends() {
   const friendsContainer = document.getElementById('friends');
   friendsContainer.innerHTML = '';
 
-  // 컨테이너 스타일: grid 레이아웃
   friendsContainer.style.display = 'grid';
   friendsContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(150px, 1fr))';
   friendsContainer.style.gap = '16px';
@@ -48,8 +77,15 @@ function renderFriends() {
     friendElement.innerHTML = `
       <div class="d-flex flex-column align-items-center">
         <img src="${friend.avatar}" alt="${friend.username}" class="rounded-circle me-2" style="width: 40px; height: 40px;">
-        <div class="d-flex align-items-center">
+        <div class="d-flex align-items-center" style="margin-top: 8px;">
           <span>${friend.username}</span>
+          <span class="status-indicator" style="
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: ${friend.is_online ? 'green' : 'red'};
+            margin-left: 5px;
+          "></span>
           <button class="btn btn-danger btn-sm ms-2" onclick="removeFriend('${friend.username}')" style="font-size: 12px; padding: 2px 5px;">X</button>
         </div>
       </div>
@@ -65,7 +101,7 @@ function renderFriends() {
   friendsContainer.appendChild(addButton);
 }
 
-function openAddFriendPopup() {
+export function openAddFriendPopup() {
   const popup = document.createElement('div');
   popup.classList.add('popup');
   popup.style.position = 'fixed';
@@ -85,13 +121,11 @@ function openAddFriendPopup() {
   popupContent.style.borderRadius = '8px';
   popupContent.style.width = '400px';
 
-  // 제목
   const title = document.createElement('h3');
   title.textContent = 'Add Friend';
   title.classList.add('add-friend-title');
   popupContent.appendChild(title);
 
-  // 검색 입력란
   const searchInput = document.createElement('input');
   searchInput.type = 'text';
   searchInput.placeholder = 'Search for friends...';
@@ -103,12 +137,10 @@ function openAddFriendPopup() {
   });
   popupContent.appendChild(searchInput);
 
-  // 검색 결과 영역
   const searchResults = document.createElement('div');
   searchResults.id = 'searchResults';
   popupContent.appendChild(searchResults);
 
-  // 팝업 닫기 버튼
   const closeButton = document.createElement('button');
   closeButton.classList.add('btn', 'btn-secondary');
   closeButton.textContent = 'Close';
@@ -119,26 +151,25 @@ function openAddFriendPopup() {
   document.body.appendChild(popup);
 }
 
-function performFriendSearch(query) {
+export function performFriendSearch(query) {
   const searchResults = document.getElementById('searchResults');
   searchResults.innerHTML = '';
 
-  // GET 방식으로 검색어를 쿼리 파라미터로 전달
   fetch(`https://localhost/api/friends/search/?search_query=${encodeURIComponent(query)}`, {
     method: "GET",
     headers: {
+      "Content-Type": "application/json",
       "Authorization": `Bearer ${getToken()}`
     }
   })
     .then(response => response.json())
     .then(data => {
-      const results = data.results;
-      results.forEach(user => {
+      data.results.forEach(user => {
         const userElement = document.createElement('div');
         userElement.classList.add('d-flex', 'align-items-center', 'mb-2', 'justify-content-between');
         userElement.innerHTML = `
           <div class="d-flex align-items-center">
-            <img src="${user.profile_image}" alt="${user.username}" class="rounded-circle me-2" style="width: 40px; height: 40px;">
+            <img src="${user.profile_image || '/static/profile.jpg'}" alt="${user.username}" class="rounded-circle me-2" style="width: 40px; height: 40px;">
             <span>${user.username}</span>
           </div>
           <button class="btn btn-success btn-sm ms-2" onclick="addFriendFromSearch('${user.username}')">+</button>
@@ -149,7 +180,9 @@ function performFriendSearch(query) {
     .catch(error => console.error("Error searching friends:", error));
 }
 
-function addFriendFromSearch(friendname) {
+export function addFriendFromSearch(friendname) {
+  console.log("Attempting to add friend:", friendname);
+
   fetch("https://localhost/api/friends/add/", {
     method: "POST",
     headers: {
@@ -158,17 +191,27 @@ function addFriendFromSearch(friendname) {
     },
     body: JSON.stringify({ friendname: friendname })
   })
-    .then(response => response.json())
-    .then(data => {
+  .then(response => {
+    console.log(`HTTP Status Code: ${response.status}`);
+    return response.json().then(data => ({ status: response.status, data }));
+  })
+  .then(result => {
+    console.log("Response data:", result.data);
+    if (result.status >= 400) {
+      console.error("Error occurred while adding friend:", JSON.stringify(result.data, null, 2));
+    } else {
       fetchFriends();
-    })
-    .catch(error => console.error("Error adding friend:", error));
+    }
+  })
+  .catch(error => console.error("Error adding friend:", error));
 
   const popup = document.querySelector('.popup');
   if (popup) popup.remove();
 }
 
-function removeFriend(friendname) {
+
+
+export function removeFriend(friendname) {
   fetch("https://localhost/api/friends/delete/", {
     method: "POST",
     headers: {
@@ -184,4 +227,8 @@ function removeFriend(friendname) {
     .catch(error => console.error("Error deleting friend:", error));
 }
 
-document.addEventListener('DOMContentLoaded', fetchFriends);
+document.addEventListener('DOMContentLoaded', () => {
+  fetchFriends();
+});
+
+window.addFriendFromSearch = addFriendFromSearch;

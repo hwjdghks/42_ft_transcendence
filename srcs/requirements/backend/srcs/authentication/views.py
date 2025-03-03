@@ -65,7 +65,7 @@ def generate_otp(user_otp, interval=180):
 
 def verify_otp(user_otp, otp_code, interval=180):
 	totp = pyotp.TOTP(user_otp.secret, interval=interval)
-	if totp.verify(otp_code):
+	if totp.verify(otp_code, valid_window=1) and timezone.now() < user_otp.expires_at:
 		refresh_otp(user_otp)
 		return True
 	else:

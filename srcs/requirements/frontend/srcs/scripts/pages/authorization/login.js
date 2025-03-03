@@ -1,4 +1,5 @@
 import { fetchLogin, fetchLoginOTPRequest, showMessage } from './loginApi.js';
+import { fetchFriends } from '../../components/friends.js'
 
 async function handleLoginSubmit(event) {
   event.preventDefault();
@@ -8,13 +9,16 @@ async function handleLoginSubmit(event) {
 
   try {
     const response = await fetchLogin({ email, password });
-    // 임시 토큰으로 저장
     sessionStorage.setItem('fa_temp_token', response.token);
 
     const otpResponse = await fetchLoginOTPRequest(response.token);
     showMessage(otpResponse.message || 'OTP has been sent. Check your email.', 'success');
 
-    window.location.hash = '#login-verification';
+    setTimeout(async () => {
+      fetchFriends();
+      window.location.hash = "#login-verification"; 
+    }, 1000);
+
   } catch (error) {
     showMessage(error.message || 'An error occurred. Please try again later.', 'error');
     console.error('Login error:', error);
@@ -40,6 +44,7 @@ async function handleOauthSubmit(event) {
     const data = await response.json();
     if (data.redirect_url) {
       window.location.href = data.redirect_url;
+
     } else {
       throw new Error("redirect_url not found in response");
     }
