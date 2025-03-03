@@ -1,3 +1,4 @@
+// ./pages/game/play.js
 async function getProfileUsername() {
   try {
     const token = sessionStorage.getItem('fa_token');
@@ -27,25 +28,30 @@ function GamePlayPage(configJson) {
       <div id="scoreBoard">Player1: 0 | Player2: 0</div>
       <div id="gameContainer"></div>
       <div id="winnerMessage"></div>
+      <!-- 점수 후 카운트다운 UI -->
+      <div id="countdownOverlay" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size:2em; color:#fff;"></div>
   `;
   
-  // DOM이 완전히 준비된 후에 게임 초기화
+  // 임시 cleanup 함수 할당 (추후 초기화 후 교체)
+  container.cleanup = function() {};
+
+  // DOM이 준비된 후 게임 초기화 및 cleanup 함수 획득
   setTimeout(() => {
-    initializePingPongGame(container, configJson);
+    const cleanupFn = initializePingPongGame(container, configJson);
+    container.cleanup = cleanupFn;
   }, 100);
 
   return container;
 }
 
 function initializePingPongGame(parentContainer, configJson) {
-  // 게임 컨테이너를 parentContainer 내부에서 찾습니다.
   const gameContainer = parentContainer.querySelector('#gameContainer');
   if (!gameContainer) {
     console.error('게임 컨테이너를 찾을 수 없습니다.');
-    return;
+    return function(){};
   }
   
-  // 현재 경기 정보 불러오기 (예: gameId 포함)
+  // 현재 경기 정보 불러오기
   const currentMatch = JSON.parse(sessionStorage.getItem('currentMatch') || '{}');
   const roundIndex = currentMatch.roundIndex ?? 0;
   const matchIndex = currentMatch.matchIndex ?? 0;
@@ -53,38 +59,29 @@ function initializePingPongGame(parentContainer, configJson) {
   // 기본 옵션 설정
   const defaultConfig = {
     winningScore: 7,
-    ballSpeed: 0.6,
-    paddleSpeed: 0.5,
-    paddleSize: { width: 0.5, height: 4, depth: 1 },
+    ballSpeed: 0.2,
+    paddleSpeed: 0.6,
+    paddleSize: { width: 0.3, height: 4, depth: 1 },
     boundaryY: 10,
     mapSkin: 0x001133,
-    obstacleCount: 2
+    obstacleCount: 0
   };
   let config = { ...defaultConfig };
   if (configJson) {
     try {
       const parsed = typeof configJson === 'string' ? JSON.parse(configJson) : configJson;
-
-      // 1) 공 속도
-      //    예) session 값(1.75)을 기본 값(0.6)에 곱하는 식 등
       if (parsed.ballSpeed) {
         config.ballSpeed = defaultConfig.ballSpeed * parsed.ballSpeed;
       }
-
-      // 2) 패들 크기
-      //    sessionStorage에는 단일 숫자(멀티플라이어)만 있으므로, 기본 높이에 곱해서 최종 height를 만든다.
       if (parsed.paddleSize) {
         config.paddleSize = {
           ...defaultConfig.paddleSize,
           height: defaultConfig.paddleSize.height * parsed.paddleSize,
         };
       }
-
-      // 3) 장애물 수
       if (parsed.obstacles) {
         config.obstacleCount = parsed.obstacles;
       }
-      
     } catch (e) {
       console.error("Invalid config JSON, using default config:", e);
     }
@@ -101,7 +98,6 @@ function initializePingPongGame(parentContainer, configJson) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(600, 600, false);
   gameContainer.appendChild(renderer.domElement);
-
   renderer.domElement.tabIndex = 0;
   renderer.domElement.focus();
 
@@ -139,35 +135,85 @@ function initializePingPongGame(parentContainer, configJson) {
   scene.add(ball);
   const ballVelocity = new THREE.Vector3(config.ballSpeed, config.ballSpeed, 0);
 
-  // 장애물 생성
+  // 장애물 생성 (안전 영역 및 충돌 체크)
   const obstacles = [];
+  const safeZoneRadius = 3;
   for (let i = 0; i < config.obstacleCount; i++) {
-    const obstacle = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), obstacleMaterial);
-    obstacle.position.set(
-      (Math.random() * 20) - 10,
-      (Math.random() * (config.boundaryY * 2 - 2)) - (config.boundaryY - 1),
-      0
-    );
-    scene.add(obstacle);
-    obstacles.push(obstacle);
+    let validPositionFound = false;
+    let attempt = 0;
+    let obstacle;
+    while (!validPositionFound && attempt < 10) {
+      const posX = (Math.random() * 20) - 10;
+      const posY = (Math.random() * (config.boundaryY * 2 - 2)) - (config.boundaryY - 1);
+      obstacle = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), obstacleMaterial);
+      obstacle.position.set(posX, posY, 0);
+
+      if (obstacle.position.distanceTo(new THREE.Vector3(0, 0, 0)) < safeZoneRadius) {
+        attempt++;
+        continue;
+      }
+      
+      let collision = false;
+      for (const existing of obstacles) {
+        if (obstacle.position.distanceTo(existing.position) < 1.5) {
+          collision = true;
+          break;
+        }
+      }
+      if (collision) {
+        attempt++;
+        continue;
+      }
+      validPositionFound = true;
+    }
+    if (validPositionFound) {
+      scene.add(obstacle);
+      obstacles.push(obstacle);
+    } else {
+      console.warn("유효한 장애물 위치를 찾지 못했습니다.");
+    }
   }
 
   // 키 입력 이벤트 처리
   const keysPressed = {};
-  window.addEventListener('keydown', (e) => {
-    // console.log('Pressed:', e.code);
+  function onKeyDown(e) {
     keysPressed[e.code] = true;
-  });
-  
-  window.addEventListener('keyup', (e) => { keysPressed[e.code] = false; });
+  }
+  function onKeyUp(e) {
+    keysPressed[e.code] = false;
+  }
+  window.addEventListener('keydown', onKeyDown);
+  window.addEventListener('keyup', onKeyUp);
 
   let gameScore = { player1: 0, player2: 0 };
   let gameOver = false;
+  let scoringInProgress = false;
+  let isCountdownActive = false;
+  let countdownTime = 0;
+  const countdownOverlay = document.getElementById('countdownOverlay');
 
-  // 게임 로직 업데이트 함수
+  // 충돌 후 공의 진행 각도에 변화 주기 (예: -0.1 ~ 0.1 라디안)
+  function adjustBallAngle(ballVelocity, invertX = false) {
+    // 속도의 크기를 계산
+    const speed = ballVelocity.length();
+    // 현재 각도 계산
+    let currentAngle = Math.atan2(ballVelocity.y, ballVelocity.x);
+    // x 반전이 필요한 경우 각도를 보정
+    if (invertX) {
+      currentAngle = Math.PI - currentAngle;
+    }
+    // 작은 각도 변화 추가 (예: -0.1 ~ 0.1 라디안)
+    const angleVariation = Math.random() * 0.2 - 0.1;
+    const newAngle = currentAngle + angleVariation;
+    // 새로운 속도 벡터 설정 (속도는 유지)
+    ballVelocity.x = speed * Math.cos(newAngle);
+    ballVelocity.y = speed * Math.sin(newAngle);
+  }
+
   function update() {
-    if (gameOver) return;
+    if (gameOver || isCountdownActive) return;
 
+    // 패들 이동 처리
     if (keysPressed['KeyW'] && leftPaddle.position.y < config.boundaryY - config.paddleSize.height / 2) {
       leftPaddle.position.y += config.paddleSpeed;
     }
@@ -181,43 +227,34 @@ function initializePingPongGame(parentContainer, configJson) {
       rightPaddle.position.y -= config.paddleSpeed;
     }
 
+    // 공 이동
     ball.position.add(ballVelocity);
 
     // 위/아래 경계 반사
     if (ball.position.y + 0.5 > config.boundaryY || ball.position.y - 0.5 < -config.boundaryY) {
       ballVelocity.y = -ballVelocity.y;
     }
-
-    // 점수 처리
-    if (ball.position.x - 0.5 < -13) {
-      gameScore.player2++;
-      if (gameScore.player2 >= config.winningScore) {
-        endGame("Player 2 Wins!");
-        return;
-      }
-      resetBall(1);
-    } else if (ball.position.x + 0.5 > 13) {
-      gameScore.player1++;
-      if (gameScore.player1 >= config.winningScore) {
-        endGame("Player 1 Wins!");
-        return;
-      }
-      resetBall(-1);
-    }
-
-    // 패들과 충돌 처리
+  
     if (
       ball.position.x - 0.5 < leftPaddle.position.x + config.paddleSize.width / 2 &&
       Math.abs(ball.position.y - leftPaddle.position.y) < config.paddleSize.height / 2 + 0.5
     ) {
+      // 왼쪽 패들과 충돌 시, x는 양수 방향으로 반전 후 각도 조정
       ballVelocity.x = Math.abs(ballVelocity.x);
+      adjustBallAngle(ballVelocity, false);
+      ballVelocity.multiplyScalar(1.05);
     }
+    
     if (
       ball.position.x + 0.5 > rightPaddle.position.x - config.paddleSize.width / 2 &&
       Math.abs(ball.position.y - rightPaddle.position.y) < config.paddleSize.height / 2 + 0.5
     ) {
-      ballVelocity.x = -Math.abs(ballVelocity.x);
+      // 오른쪽 패들과 충돌 시, x를 양수로 설정 후, adjustBallAngle에서 invertX=true로 전달하여 좌측(음수) 방향으로 반전
+      ballVelocity.x = Math.abs(ballVelocity.x);
+      adjustBallAngle(ballVelocity, true);
+      ballVelocity.multiplyScalar(1.05);
     }
+    
 
     // 장애물과 충돌 처리
     obstacles.forEach(obstacle => {
@@ -226,29 +263,72 @@ function initializePingPongGame(parentContainer, configJson) {
       if (ballBox.intersectsBox(obstacleBox)) {
         ballVelocity.x = -ballVelocity.x;
         ballVelocity.y = -ballVelocity.y;
+        ballVelocity.x *= (1 + Math.random() * 0.1 - 0.05);
+        ballVelocity.y *= (1 + Math.random() * 0.1 - 0.05);
       }
     });
 
-    document.getElementById('scoreBoard').innerText = `Player1: ${gameScore.player1} | Player2: ${gameScore.player2}`;
+    // 득점 처리
+    if (!scoringInProgress) {
+      if (ball.position.x - 0.1 < -13) {
+        scoringInProgress = true;
+        gameScore.player2++;
+        if (gameScore.player2 >= config.winningScore) {
+          endGame("Player 2 Wins!");
+          return;
+        }
+        startCountdown(3, 1);
+      } else if (ball.position.x + 0.1 > 13) {
+        scoringInProgress = true;
+        gameScore.player1++;
+        if (gameScore.player1 >= config.winningScore) {
+          endGame("Player 1 Wins!");
+          return;
+        }
+        startCountdown(3, -1);
+      }
+    }
+
+
+    const scoreBoard = document.getElementById('scoreBoard');
+    if (scoreBoard) {
+      scoreBoard.innerText = `${currentMatch.player1}: ${gameScore.player1} | ${currentMatch.player2}: ${gameScore.player2}`;
+    }
   }
 
-  // 득점 후 공 초기화 함수
+  function startCountdown(time, direction) {
+    isCountdownActive = true;
+    countdownTime = time;
+    countdownOverlay.style.display = 'block';
+    countdownOverlay.innerText = `${countdownTime}`;
+    const intervalId = setInterval(() => {
+      countdownTime--;
+      if (countdownTime > 0) {
+        countdownOverlay.innerText = `${countdownTime}`;
+      } else {
+        clearInterval(intervalId);
+        countdownOverlay.style.display = 'none';
+        resetBall(direction);
+        isCountdownActive = false;
+      }
+    }, 1000);
+  }
+
   function resetBall(direction) {
     ball.position.set(0, 0, 0);
     ballVelocity.set(
       config.ballSpeed * direction,
-      config.ballSpeed * (Math.random() * 0.5 - 0.25),
+      config.ballSpeed * (Math.random() * 0.8 - 0.25),
       0
     );
+    scoringInProgress = false;
   }
 
   async function endGame(message) {
     gameOver = true;
     const winnerMessage = document.getElementById('winnerMessage');
-  
     const currentMatch = JSON.parse(sessionStorage.getItem('currentMatch'));
     const matches = JSON.parse(sessionStorage.getItem('matches')) || [];
-  
     const profileUsername = await getProfileUsername();
 
     let userScore, opponentScore, opponentName, winnerName;
@@ -262,7 +342,6 @@ function initializePingPongGame(parentContainer, configJson) {
       opponentName = currentMatch.player1;
     }
   
-    // 실제 점수를 비교하여 승리자 결정 (동점이면 'draw')
     if (userScore > opponentScore) {
       winnerName = profileUsername;
     } else if (userScore < opponentScore) {
@@ -271,17 +350,15 @@ function initializePingPongGame(parentContainer, configJson) {
       winnerName = "Draw";
     }
   
-    // 승리 메시지 및 최종 스코어 출력
     winnerMessage.innerHTML = `
       <div style="text-align: center;">
-        <div style="font-size: 24px; margin-bottom: 10px;">${winnerName} 승리!</div>
-        <div>최종 스코어: ${gameScore.player1} - ${gameScore.player2}</div>
+        <div style="font-size: 24px; margin-bottom: 10px;">${winnerName} 승리</div>
+        <div>${gameScore.player1} - ${gameScore.player2}</div>
         <button id="exitButton" class="btn btn-primary" style="margin-top: 20px;">토너먼트로 돌아가기</button>
       </div>
     `;
     winnerMessage.style.display = 'block';
   
-    // 매치 목록에서 현재 매치 업데이트
     const matchIndex = matches.findIndex(m =>
       m.player1 === currentMatch.player1 &&
       m.player2 === currentMatch.player2
@@ -294,7 +371,6 @@ function initializePingPongGame(parentContainer, configJson) {
       };
     }
   
-    // 이미 종료된 매치 ID 목록 업데이트 (중복 플레이 방지 등)
     let finishedGames = JSON.parse(sessionStorage.getItem('finishedGames')) || [];
     if (currentMatch.id) {
       finishedGames.push(currentMatch.id);
@@ -302,7 +378,6 @@ function initializePingPongGame(parentContainer, configJson) {
     }
     sessionStorage.setItem('matches', JSON.stringify(matches));
   
-    // 실제 게임 결과 결정: "win", "lose", 또는 "draw"
     let gameResult;
     if (userScore > opponentScore) {
       gameResult = "win";
@@ -312,7 +387,6 @@ function initializePingPongGame(parentContainer, configJson) {
       gameResult = "draw";
     }
   
-    // 백엔드에 전송할 데이터 구성
     const matchResultData = {
       session_id: currentMatch.id,
       guestname: opponentName,
@@ -321,7 +395,6 @@ function initializePingPongGame(parentContainer, configJson) {
       game_result: gameResult,
     };
   
-    // 백엔드로 결과 전송
     if (currentMatch.player1 === profileUsername) {
       try {
         const token = sessionStorage.getItem('fa_token');
@@ -347,23 +420,29 @@ function initializePingPongGame(parentContainer, configJson) {
       console.log("플레이어1이 프로필 username과 일치하지 않아 백엔드로 결과를 전송하지 않습니다.");
     }
   
-    // '토너먼트로 돌아가기' 버튼 클릭 시 토너먼트 페이지로 이동
     document.getElementById('exitButton').addEventListener('click', () => {
       window.location.hash = '#gameplay/tournament';
     });
   }
-  
-  
 
-  // 애니메이션 루프
+  let requestId;
   function animate() {
-    if (!gameOver) {
-      requestAnimationFrame(animate);
-    }
+    requestId = requestAnimationFrame(animate);
     update();
     renderer.render(scene, camera);
   }
+  scoringInProgress = true;
+  startCountdown(3, 1);
   animate();
+
+  // cleanup 함수: 애니메이션 중단 및 이벤트 리스너 제거
+  function cleanup() {
+    cancelAnimationFrame(requestId);
+    window.removeEventListener('keydown', onKeyDown);
+    window.removeEventListener('keyup', onKeyUp);
+  }
+
+  return cleanup;
 }
 
 export { GamePlayPage };

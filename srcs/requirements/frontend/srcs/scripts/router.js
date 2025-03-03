@@ -30,11 +30,15 @@ const pages = {
   "profile": () => ProfilePage()
 };
 
+// 현재 렌더링된 페이지의 DOM 요소를 저장 (cleanup() 함수가 있으면 호출)
+let currentPageElement = null;
+
 function router() {
   // 해시가 없으면 로그인 페이지로 이동
   if (window.location.pathname === '/' && !window.location.hash) {
     const app = document.getElementById('app');
     app.innerHTML = LoginPage();
+    currentPageElement = null;
     return;
   }
 
@@ -42,10 +46,23 @@ function router() {
   const hash = window.location.hash.replace('#', '');
   const app = document.getElementById('app');
 
+  // 페이지 전환 전, 이전 페이지가 cleanup()을 가지고 있다면 호출
+  if (currentPageElement && typeof currentPageElement.cleanup === 'function') {
+    currentPageElement.cleanup();
+    currentPageElement = null;
+  }
+
   // oauth callback 라우팅
-  // 동적 경로 체크: URL이 "gameplay/play-<id>" 형태인 경우
   if (hash.startsWith('oauth-callback')) {
-    OauthCallbackPage();
+    const pageContent = OauthCallbackPage();
+    if (typeof pageContent === 'string') {
+      app.innerHTML = pageContent;
+      currentPageElement = null;
+    } else {
+      app.replaceChildren(pageContent);
+      currentPageElement = pageContent;
+    }
+    return;
   } else if (hash.startsWith('gameplay/play-')) {
     const gameIdFromURL = hash.substring('gameplay/play-'.length);
 
@@ -83,7 +100,6 @@ function router() {
   // 토너먼트 진행 중일 때, 허용되지 않은 페이지로 이동 시 확인
   if (sessionStorage.getItem('tournament_in_progress') === 'true') {
     const allowedDuringTournament = ['gameplay/tournament'];
-    // 동적 경로 "gameplay/play-<id>"는 허용됨
     if (hash && !allowedDuringTournament.includes(hash) && !hash.startsWith('gameplay/play-')) {
       const leave = confirm('현재 토너먼트가 진행 중입니다. 정말 나가시겠습니까?');
       if (!leave) {
@@ -102,9 +118,11 @@ function router() {
   // 등록된 페이지가 없으면 404 처리 (예: "gameplay/play"는 등록되어 있지 않음)
   if (hash && !pages[hash] && !hash.startsWith('gameplay/play-')) {
     app.innerHTML = NotFoundPage();
+    currentPageElement = null;
     return;
   }
 
+  // 렌더링할 페이지 선택 (동적 경로의 경우 GamePlayPage 호출)
   let renderPage;
   if (hash.startsWith('gameplay/play-')) {
     renderPage = () => GamePlayPage();
@@ -115,8 +133,10 @@ function router() {
   const pageContent = renderPage();
   if (typeof pageContent === 'string') {
     app.innerHTML = pageContent;
+    currentPageElement = null;
   } else {
     app.replaceChildren(pageContent);
+    currentPageElement = pageContent;
   }
 }
 
@@ -126,9 +146,9 @@ window.addEventListener('hashchange', router);
 window.addEventListener('beforeunload', (event) => {
   if (sessionStorage.getItem("tournament_in_progress") === "true") {
     sessionStorage.removeItem("tournament_in_progress");
-    sessionStorage.removeItem('game_option');
-    sessionStorage.removeItem('username');
-    sessionStorage.removeItem('matches');
-    sessionStorage.removeItem('currentMatch');
+    sessionStorage.removeItem("game_option");
+    sessionStorage.removeItem("username");
+    sessionStorage.removeItem("matches");
+    sessionStorage.removeItem("currentMatch");
   }
 });
