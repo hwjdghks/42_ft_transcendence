@@ -1,3 +1,5 @@
+import {renderFriends} from '../../components/friends.js'
+
 // [1] 프로필 페이지 생성 함수 (라우터에서 import하여 사용)
 export function ProfilePage() {
     const container = document.createElement('div');

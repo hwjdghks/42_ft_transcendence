@@ -1,4 +1,3 @@
-// loginApi.js
 
 export async function fetchLogin(data) {
   const response = await fetch('https://localhost/api/users/signin/', {

@@ -4,7 +4,7 @@ function getToken() {
 
 let friends = [];
 
-function fetchFriends() {
+export function fetchFriends() {
   const friendListPromise = fetch("https://localhost/api/friends/list/", {
     method: "GET",
     headers: {
@@ -46,13 +46,13 @@ function fetchFriends() {
         avatar: friend.profile_image || '/static/profile.jpg',
         is_online: onlineStatusMap[friend.username] || false
       }));
-
+      console.log("[fetchFriends] merged friends data:", friends);
       renderFriends();
     })
     .catch(error => console.error('Error fetching friends:', error));
 }
 
-function renderFriends() {
+export function renderFriends() {
   const friendsContainer = document.getElementById('friends');
   friendsContainer.innerHTML = '';
 
@@ -101,7 +101,7 @@ function renderFriends() {
   friendsContainer.appendChild(addButton);
 }
 
-function openAddFriendPopup() {
+export function openAddFriendPopup() {
   const popup = document.createElement('div');
   popup.classList.add('popup');
   popup.style.position = 'fixed';
@@ -151,13 +151,14 @@ function openAddFriendPopup() {
   document.body.appendChild(popup);
 }
 
-function performFriendSearch(query) {
+export function performFriendSearch(query) {
   const searchResults = document.getElementById('searchResults');
   searchResults.innerHTML = '';
 
   fetch(`https://localhost/api/friends/search/?search_query=${encodeURIComponent(query)}`, {
     method: "GET",
     headers: {
+      "Content-Type": "application/json",
       "Authorization": `Bearer ${getToken()}`
     }
   })
@@ -179,7 +180,7 @@ function performFriendSearch(query) {
     .catch(error => console.error("Error searching friends:", error));
 }
 
-function addFriendFromSearch(friendname) {
+export function addFriendFromSearch(friendname) {
   console.log("Attempting to add friend:", friendname);
 
   fetch("https://localhost/api/friends/add/", {
@@ -210,7 +211,7 @@ function addFriendFromSearch(friendname) {
 
 
 
-function removeFriend(friendname) {
+export function removeFriend(friendname) {
   fetch("https://localhost/api/friends/delete/", {
     method: "POST",
     headers: {
@@ -226,4 +227,8 @@ function removeFriend(friendname) {
     .catch(error => console.error("Error deleting friend:", error));
 }
 
-document.addEventListener('DOMContentLoaded', fetchFriends);
+document.addEventListener('DOMContentLoaded', () => {
+  fetchFriends();
+});
+
+window.addFriendFromSearch = addFriendFromSearch;

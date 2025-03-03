@@ -1,4 +1,5 @@
 import { fetchLoginOTPVerify, showMessage } from './loginApi.js';
+import { fetchFriends } from '../../components/friends.js'
 
 export function LoginVerificationPage() {
   async function verifyTokenOnLoad() {
@@ -11,37 +12,36 @@ export function LoginVerificationPage() {
 
   async function handleVerificationSubmit(event) {
     event.preventDefault();
-  
+    
     const existingToken = sessionStorage.getItem("fa_temp_token");
     if (!existingToken) {
       showMessage('No token found. Please go back to login page.', 'error');
       return;
     }
-
+  
     const otp = document.getElementById('otp').value.trim();
     if (!otp) {
       showMessage('Please enter your OTP code.', 'error');
       return;
     }
-
+  
     try {
-      // 중복 제출 방지: 버튼 비활성화
       document.getElementById('verify-btn').disabled = true;
       const verifyResponse = await fetchLoginOTPVerify(existingToken, otp);
-      
-      // OTP 검증 성공 시 최종 토큰으로 업데이트하고 임시 토큰 제거
+  
       sessionStorage.setItem('fa_token', verifyResponse.token);
-      sessionStorage.setItem('username', verifyResponse)
+      sessionStorage.setItem('username', verifyResponse.username);
       sessionStorage.removeItem('fa_temp_token');
-      
-      showMessage(verifyResponse.message || 'Login successful!', 'success');
-      setTimeout(() => {
-        window.location.hash = '#profile';
-      }, 500);
+
+  
+      setTimeout(async () => {
+        fetchFriends();
+        window.location.hash = "#profile"; 
+      }, 1000);
+  
     } catch (error) {
       console.error(error);
       showMessage(error.message || 'OTP verification failed. Please try again.', 'error');
-      // 에러 발생 시 버튼 다시 활성화
       document.getElementById('verify-btn').disabled = false;
     }
   }
