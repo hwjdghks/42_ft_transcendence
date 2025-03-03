@@ -47,10 +47,17 @@ def signin(request: HttpRequest) -> JsonResponse:
     email = data.get('email')
     password = data.get('password')
 
+    is_old_user = User.objects.filter(email=email).first()
+    if is_old_user and is_old_user.has_usable_password() == False:
+        return JsonResponse({
+            'error': '42 계정 이메일로 회원 가입된 사용자 입니다. 42 intra 계정으로 로그인 하세요.'
+        }, status=400)
+    
     user = authenticate(email=email, password=password)
     if user is not None:
         token = generate_jwt(user, 1)
         return JsonResponse({'message': 'Signed in successfully', 'token': token}, status=200)
+
     return JsonResponse({'error': 'Invalid credentials'}, status=400)
 
 @csrf_exempt
@@ -105,8 +112,7 @@ def get_profile(request: HttpRequest) -> JsonResponse:
     }
     return JsonResponse(profile, status=200)
 
-
-@require_GET
+@csrf_exempt
 @jwt_required(expected_factor_level=2)
 def get_name(request: HttpRequest) -> JsonResponse:
     user: User = request.user
@@ -116,6 +122,7 @@ def get_name(request: HttpRequest) -> JsonResponse:
     }
     return JsonResponse(username, status=200)
 
+@csrf_exempt
 @require_POST
 @jwt_required(expected_factor_level=2)
 def update_username(request: HttpRequest) -> JsonResponse:
@@ -143,36 +150,29 @@ def update_username(request: HttpRequest) -> JsonResponse:
 
     return JsonResponse({'message': 'Usrename updated successfully'}, status=200)
 
+@csrf_exempt
 @require_POST
 @jwt_required(expected_factor_level=2)
 def update_password(request: HttpRequest) -> JsonResponse:
     user: User = request.user
     new_password = json.loads(request.body).get('new_password')
 
+    if user.has_usable_password() == False:
+        return JsonResponse({
+            'error': '42계정의 비밀번호를 변경할 수 없습니다.'
+        }, status=400)
+
     if not new_password or not new_password.strip():
         return JsonResponse({
             'error': '비밀번호는 공백일 수 없습니다.'
         }, status=400)
     
-    old_password = user.get_password()
-    if old_password == new_password:
+    if user.check_password(new_password):
         return JsonResponse({
             'error': '기존 비밀번호와 같은 비밀번호로 변경할 수 없습니다.'
         }, status=400)
     
-    user.password = new_password
+    user.set_password(new_password)
     user.save()
 
     return JsonResponse({'message': 'password updated successfully'}, status=200)
-
-import logging
-logger = logging.getLogger('django')
-
-def test_api(request: HttpRequest) -> JsonResponse:
-    user: User = request.user
-    logger.info("username={}", user.get_username())
-    logger.info("password={}", user.password)
-    return JsonResponse({
-        'username': user.username,
-        'password': user.password
-    }, status=200)
