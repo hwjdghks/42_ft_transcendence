@@ -33,9 +33,16 @@ def signup(request: HttpRequest) -> JsonResponse:
     response = check_existing_user(User.objects.filter(username=username).first(), "Username")
     if response:
         return response
+    
+    show_in_search = data.get('show_in_search', True)
+    share_profile_image = data.get('share_profile_image', True)
+    share_online_status = data.get('share_online_status', True)
 
     user = User.objects.create_user(username=username, email=email, password=password)
     user.is_active = False
+    user.show_in_search = show_in_search
+    user.share_profile_image = share_profile_image
+    user.share_online_status = share_online_status
     user.save()
     token = generate_jwt(user, 1)
     return JsonResponse({'message': 'User created successfully', 'token': token}, status=201)
@@ -176,3 +183,24 @@ def update_password(request: HttpRequest) -> JsonResponse:
     user.save()
 
     return JsonResponse({'message': 'password updated successfully'}, status=200)
+
+
+@csrf_exempt
+@require_POST
+@jwt_required(expected_factor_level=2)
+@update_last_activate
+def update_user_settings(request: HttpRequest) -> JsonResponse:
+    user = request.user
+    data = json.loads(request.body)
+    show_in_search = data.get('show_in_search')
+    share_profile_image = data.get('share_profile_image')
+    share_online_status = data.get('share_online_status')
+
+    if show_in_search is not None:
+        user.show_in_search = bool(show_in_search)
+    if share_profile_image is not None:
+        user.share_profile_image = bool(share_profile_image)
+    if share_online_status is not None:
+        user.share_online_status = bool(share_online_status)
+    user.save()
+    return JsonResponse({'message': 'Settings updated successfully'}, status=200)

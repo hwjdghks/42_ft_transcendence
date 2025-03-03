@@ -33,9 +33,14 @@ def friend_list(request: HttpRequest) -> JsonResponse:
     result = []
     for friend in list:
         now = friend.following
+        profile_image = (
+            now.profile_image.url
+            if now.profile_image and now.share_profile_image
+            else None
+        )
         result.append({
             'username': now.username,
-            'profile_image': now.profile_image.url if now.profile_image else None
+            'profile_image': profile_image
         })
     return JsonResponse({'results': result}, status=200)
 
@@ -47,10 +52,16 @@ def search_users(request: HttpRequest) -> JsonResponse:
     users = User.objects.filter(username__icontains=query).exclude(id=request.user.id)
     result = []
     for user in users:
-        result.append({
-            'username': user.username,
-            'profile_image': user.profile_image.url if user.profile_image else None
-        })
+        if user.show_in_search:
+            profile_image = (
+                user.profile_image.url
+                if user.profile_image and user.share_profile_image
+                else None
+            )
+            result.append({
+                'username': user.username,
+                'profile_image': profile_image
+            })
     return JsonResponse({'results': result}, status=200)
 
 
@@ -119,6 +130,6 @@ def get_online(request: HttpRequest) -> JsonResponse:
 
     result = []
     for u in following_users:
-        is_online = u.id in online_users
+        is_online = u.id in online_users if u.share_online_status else False
         result.append({"username": u.username, "is_online": is_online})
     return JsonResponse({'results': result}, status=200)
