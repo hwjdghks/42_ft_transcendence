@@ -1,32 +1,45 @@
 function getToken() {
   return sessionStorage.getItem("fa_token");
 }
+
 let friends = [];
 
 function fetchFriends() {
-  fetch("https://localhost/api/friends/list/", {
-    method: "GET",
-    headers: {
-      "Authorization": `Bearer ${getToken()}`
-    }
+  Promise.all([
+    fetch("https://localhost/api/friends/list/", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${getToken()}`
+      }
+    }).then(response => response.json()),
+    fetch("https://localhost/api/friends/online/", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${getToken()}`
+      }
+    }).then(response => response.json())
+  ])
+  .then(([friendData, onlineData]) => {
+    const onlineStatusMap = {};
+    onlineData.results.forEach(status => {
+      onlineStatusMap[status.username] = status.is_online;
+    });
+
+    friends = friendData.results.map(friend => ({
+      username: friend.username,
+      avatar: friend.profile_image || '/static/profile.jpg',
+      is_online: onlineStatusMap[friend.username] || false
+    }));
+
+    renderFriends();
   })
-    .then(response => response.json())
-    .then(data => {
-      // 백엔드 API가 { results: [...] } 형태로 응답한다고 가정
-      friends = data.results.map(friend => ({
-        username: friend.username,
-        avatar: friend.profile_image
-      }));
-      renderFriends();
-    })
-    .catch(error => console.error('Error fetching friends:', error));
+  .catch(error => console.error('Error fetching friends:', error));
 }
 
 function renderFriends() {
   const friendsContainer = document.getElementById('friends');
   friendsContainer.innerHTML = '';
 
-  // 컨테이너 스타일: grid 레이아웃
   friendsContainer.style.display = 'grid';
   friendsContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(150px, 1fr))';
   friendsContainer.style.gap = '16px';
@@ -48,8 +61,15 @@ function renderFriends() {
     friendElement.innerHTML = `
       <div class="d-flex flex-column align-items-center">
         <img src="${friend.avatar}" alt="${friend.username}" class="rounded-circle me-2" style="width: 40px; height: 40px;">
-        <div class="d-flex align-items-center">
+        <div class="d-flex align-items-center" style="margin-top: 8px;">
           <span>${friend.username}</span>
+          <span class="status-indicator" style="
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: ${friend.is_online ? 'green' : 'red'};
+            margin-left: 5px;
+          "></span>
           <button class="btn btn-danger btn-sm ms-2" onclick="removeFriend('${friend.username}')" style="font-size: 12px; padding: 2px 5px;">X</button>
         </div>
       </div>
@@ -85,13 +105,11 @@ function openAddFriendPopup() {
   popupContent.style.borderRadius = '8px';
   popupContent.style.width = '400px';
 
-  // 제목
   const title = document.createElement('h3');
   title.textContent = 'Add Friend';
   title.classList.add('add-friend-title');
   popupContent.appendChild(title);
 
-  // 검색 입력란
   const searchInput = document.createElement('input');
   searchInput.type = 'text';
   searchInput.placeholder = 'Search for friends...';
@@ -103,12 +121,10 @@ function openAddFriendPopup() {
   });
   popupContent.appendChild(searchInput);
 
-  // 검색 결과 영역
   const searchResults = document.createElement('div');
   searchResults.id = 'searchResults';
   popupContent.appendChild(searchResults);
 
-  // 팝업 닫기 버튼
   const closeButton = document.createElement('button');
   closeButton.classList.add('btn', 'btn-secondary');
   closeButton.textContent = 'Close';
@@ -123,7 +139,6 @@ function performFriendSearch(query) {
   const searchResults = document.getElementById('searchResults');
   searchResults.innerHTML = '';
 
-  // GET 방식으로 검색어를 쿼리 파라미터로 전달
   fetch(`https://localhost/api/friends/search/?search_query=${encodeURIComponent(query)}`, {
     method: "GET",
     headers: {
@@ -132,13 +147,12 @@ function performFriendSearch(query) {
   })
     .then(response => response.json())
     .then(data => {
-      const results = data.results;
-      results.forEach(user => {
+      data.results.forEach(user => {
         const userElement = document.createElement('div');
         userElement.classList.add('d-flex', 'align-items-center', 'mb-2', 'justify-content-between');
         userElement.innerHTML = `
           <div class="d-flex align-items-center">
-            <img src="${user.profile_image}" alt="${user.username}" class="rounded-circle me-2" style="width: 40px; height: 40px;">
+            <img src="${user.profile_image || '/static/profile.jpg'}" alt="${user.username}" class="rounded-circle me-2" style="width: 40px; height: 40px;">
             <span>${user.username}</span>
           </div>
           <button class="btn btn-success btn-sm ms-2" onclick="addFriendFromSearch('${user.username}')">+</button>
