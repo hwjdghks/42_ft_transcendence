@@ -1,39 +1,53 @@
 function getToken() {
-  return sessionStorage.getItem("fa_token");
+  return sessionStorage.getItem('fa_token');
 }
 
 let friends = [];
 
 function fetchFriends() {
-  Promise.all([
-    fetch("https://localhost/api/friends/list/", {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${getToken()}`
-      }
-    }).then(response => response.json()),
-    fetch("https://localhost/api/friends/online/", {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${getToken()}`
-      }
-    }).then(response => response.json())
-  ])
-  .then(([friendData, onlineData]) => {
-    const onlineStatusMap = {};
-    onlineData.results.forEach(status => {
-      onlineStatusMap[status.username] = status.is_online;
-    });
+  const friendListPromise = fetch("https://localhost/api/friends/list/", {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${getToken()}`
+    }
+  }).then(response => {
+    if (!response.ok) {
+      throw new Error("Friend list fetch error: " + response.status);
+    }
+    return response.json();
+  });
 
-    friends = friendData.results.map(friend => ({
-      username: friend.username,
-      avatar: friend.profile_image || '/static/profile.jpg',
-      is_online: onlineStatusMap[friend.username] || false
-    }));
+  const onlineListPromise = fetch("https://localhost/api/friends/online/", {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${getToken()}`
+    }
+  }).then(response => {
+    if (!response.ok) {
+      console.error("Online status fetch error, using fallback. Status:", response.status);
+      return { results: [] };
+    }
+    return response.json();
+  });
 
-    renderFriends();
-  })
-  .catch(error => console.error('Error fetching friends:', error));
+  Promise.all([friendListPromise, onlineListPromise])
+    .then(([friendData, onlineData]) => {
+      const onlineStatusMap = {};
+      if (onlineData.results) {
+        onlineData.results.forEach(status => {
+          onlineStatusMap[status.username] = status.is_online;
+        });
+      }
+
+      friends = friendData.results.map(friend => ({
+        username: friend.username,
+        avatar: friend.profile_image || '/static/profile.jpg',
+        is_online: onlineStatusMap[friend.username] || false
+      }));
+
+      renderFriends();
+    })
+    .catch(error => console.error('Error fetching friends:', error));
 }
 
 function renderFriends() {
@@ -164,6 +178,8 @@ function performFriendSearch(query) {
 }
 
 function addFriendFromSearch(friendname) {
+  console.log("Attempting to add friend:", friendname);
+
   fetch("https://localhost/api/friends/add/", {
     method: "POST",
     headers: {
@@ -172,15 +188,25 @@ function addFriendFromSearch(friendname) {
     },
     body: JSON.stringify({ friendname: friendname })
   })
-    .then(response => response.json())
-    .then(data => {
+  .then(response => {
+    console.log(`HTTP Status Code: ${response.status}`);
+    return response.json().then(data => ({ status: response.status, data }));
+  })
+  .then(result => {
+    console.log("Response data:", result.data);
+    if (result.status >= 400) {
+      console.error("Error occurred while adding friend:", JSON.stringify(result.data, null, 2));
+    } else {
       fetchFriends();
-    })
-    .catch(error => console.error("Error adding friend:", error));
+    }
+  })
+  .catch(error => console.error("Error adding friend:", error));
 
   const popup = document.querySelector('.popup');
   if (popup) popup.remove();
 }
+
+
 
 function removeFriend(friendname) {
   fetch("https://localhost/api/friends/delete/", {
