@@ -43,11 +43,8 @@ def friend_list(request: HttpRequest) -> JsonResponse:
 @jwt_required(expected_factor_level=2)
 @update_last_activate
 def search_users(request: HttpRequest) -> JsonResponse:
-    data = json.loads(request.body)
-    query = data.get('search_query', '')
-
+    query = request.GET.get('search_query', '')
     users = User.objects.filter(username__icontains=query)
-
     result = []
     for user in users:
         result.append({
@@ -55,6 +52,7 @@ def search_users(request: HttpRequest) -> JsonResponse:
             'profile_image': user.profile_image.url if user.profile_image else None
         })
     return JsonResponse({'results': result}, status=200)
+
 
 @csrf_exempt
 @require_POST

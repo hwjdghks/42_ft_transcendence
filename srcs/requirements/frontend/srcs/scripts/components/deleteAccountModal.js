@@ -46,29 +46,52 @@ export function createDeleteAccountModal() {
 
     document.body.appendChild(modal);
 
-    // ✅ Bootstrap 모달 객체 생성
     const bootstrapModal = new bootstrap.Modal(document.getElementById('deleteAccountModal'));
 
-    // 이벤트 리스너 설정
     const confirmUsernameInput = modal.querySelector('#confirmUsername');
     const confirmDeleteBtn = modal.querySelector('#confirmDelete');
     const confirmErrorText = modal.querySelector('#confirmError');
 
-    confirmUsernameInput.addEventListener('input', () => {
-        const username = sessionStorage.getItem('username');
-        console.log(username);
-        if (confirmUsernameInput.value === username) {
-            confirmUsernameInput.classList.remove('is-invalid');
-            confirmUsernameInput.classList.add('is-valid');
-            confirmErrorText.style.display = 'none';
-            confirmDeleteBtn.disabled = false;
-        } else {
-            confirmUsernameInput.classList.remove('is-valid');
-            confirmUsernameInput.classList.add('is-invalid');
-            confirmErrorText.style.display = 'block';
-            confirmDeleteBtn.disabled = true;
+    let storedUsername = null;
+
+    const token = sessionStorage.getItem('fa_token');
+
+    fetch('https://localhost/api/users/name/', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
         }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to fetch username');
+        }
+        return response.json();
+    })
+    .then(data => {
+        storedUsername = data.username;
+        console.log('Fetched username:', storedUsername);
+    })
+    .catch(error => {
+        console.error('Error fetching username:', error);
     });
+    
+    confirmUsernameInput.addEventListener('input', () => {
+      if (storedUsername === null) return;
+    
+      if (confirmUsernameInput.value === storedUsername) {
+        confirmUsernameInput.classList.remove('is-invalid');
+        confirmUsernameInput.classList.add('is-valid');
+        confirmErrorText.style.display = 'none';
+        confirmDeleteBtn.disabled = false;
+      } else {
+        confirmUsernameInput.classList.remove('is-valid');
+        confirmUsernameInput.classList.add('is-invalid');
+        confirmErrorText.style.display = 'block';
+        confirmDeleteBtn.disabled = true;
+      }
+    })
+    
 
     confirmDeleteBtn.addEventListener('click', async () => {
         try {

@@ -6,7 +6,6 @@ User = get_user_model()
 class Friend(models.Model):
     follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followers')
     following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followings')
-
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['follower', 'following'], name='unique_follow')

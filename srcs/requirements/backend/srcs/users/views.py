@@ -105,6 +105,17 @@ def get_profile(request: HttpRequest) -> JsonResponse:
     }
     return JsonResponse(profile, status=200)
 
+
+@require_GET
+@jwt_required(expected_factor_level=2)
+def get_name(request: HttpRequest) -> JsonResponse:
+    user: User = request.user
+
+    username = {
+        'username': user.username,
+    }
+    return JsonResponse(username, status=200)
+
 @require_POST
 @jwt_required(expected_factor_level=2)
 def update_username(request: HttpRequest) -> JsonResponse:
