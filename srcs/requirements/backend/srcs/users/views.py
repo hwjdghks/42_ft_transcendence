@@ -1,17 +1,15 @@
 import json
-import datetime
 
-from django.http import JsonResponse
-from django.http import HttpRequest
+from django.contrib.auth import authenticate
+from django.http import HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
-from django.contrib.auth import authenticate
 
 from authentication.views import generate_jwt, jwt_required
-from .models import User
-from matchresult.models import MatchResult
-from .utils import check_existing_user
 from friends.views import update_last_activate
+from matchresult.models import MatchResult
+from .models import User
+from .utils import check_existing_user
 
 @csrf_exempt
 @require_POST
@@ -52,7 +50,7 @@ def signin(request: HttpRequest) -> JsonResponse:
         return JsonResponse({
             'error': '42 계정 이메일로 회원 가입된 사용자 입니다. 42 intra 계정으로 로그인 하세요.'
         }, status=400)
-    
+
     user = authenticate(email=email, password=password)
     if user is not None:
         token = generate_jwt(user, 1)
@@ -133,18 +131,18 @@ def update_username(request: HttpRequest) -> JsonResponse:
         return JsonResponse({
             'error': '유저 이름은 공백일 수 없습니다.'
         }, status=400)
-    
+
     old_username = user.get_username()
     if old_username == new_username:
         return JsonResponse({
             'error': '기존 이름과 같은 이름으로 변경할 수 없습니다.'
         }, status=400)
-    
+
     if User.objects.filter(username=new_username).exists():
         return JsonResponse({
             'error': '이미 존재하는 이름 입니다.'
         }, status=400)
-    
+
     user.username = new_username
     user.save()
 
@@ -166,12 +164,12 @@ def update_password(request: HttpRequest) -> JsonResponse:
         return JsonResponse({
             'error': '비밀번호는 공백일 수 없습니다.'
         }, status=400)
-    
+
     if user.check_password(new_password):
         return JsonResponse({
             'error': '기존 비밀번호와 같은 비밀번호로 변경할 수 없습니다.'
         }, status=400)
-    
+
     user.set_password(new_password)
     user.save()
 

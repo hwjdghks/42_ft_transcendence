@@ -1,6 +1,6 @@
-from django.db import models
-from django.core.validators import MinValueValidator
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
+from django.db import models
 
 User = get_user_model()
 
@@ -13,7 +13,7 @@ class MatchResult(models.Model):
     match_date = models.DateTimeField(auto_now_add=True)
     game_result = models.CharField(max_length=5, choices=[('win', 'Win'), ('lose', 'Lose'), ('draw', 'Draw')])
     session_id = models.UUIDField(primary_key=True, unique=True)  # 자동 생성하지 않고 외부에서 값을 지정합니다.
-    
+
     class Meta:
         db_table = 'matchresult'  # 실제 테이블 이름을 'matchresult'로 명시적 지정
         ordering = ['-match_date']  # 기본 내림차순 정렬 (최신 데이터 우선)

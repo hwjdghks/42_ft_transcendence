@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import send_signup_2fa, send_signin_2fa, check_signup_2fa, check_signin_2fa
+
+from .views import check_signin_2fa, check_signup_2fa, send_signin_2fa, send_signup_2fa
 
 urlpatterns = [
     path('2fa/signup/request/', send_signup_2fa, name='send_signup_2fa'),

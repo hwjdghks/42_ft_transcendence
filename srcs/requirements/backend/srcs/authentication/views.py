@@ -1,18 +1,19 @@
 import datetime
+import json
 import jwt
 import pyotp
-import json
 import pytz
-
 from functools import wraps
+
 from django.conf import settings
-from django.http import JsonResponse, HttpRequest
+from django.core.mail import send_mail
+from django.http import HttpRequest, JsonResponse
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+
 from users.models import User
 from .models import UserOTP
-from django.core.mail import send_mail
-from django.utils import timezone
 
 def generate_jwt(user: User, factor_levela):
     payload = {
@@ -92,19 +93,19 @@ def send_signup_2fa(request: HttpRequest) -> JsonResponse:
     user: User = request.user
     if User.objects.filter(email=user.email, is_active=True).exists():
         return JsonResponse({'error': 'Email already in signup'}, status=400)
-    
+
     try:
         send_otp_email(user)
     except Exception as e:
         return JsonResponse({'error': 'Failed to send OTP email'}, status=500)
     return JsonResponse({'message': 'OTP email sent successfully'}, status=200)
-      
+
 @csrf_exempt
 @require_POST
 @jwt_required(expected_factor_level=1)
 def send_signin_2fa(request: HttpRequest) -> JsonResponse:
 	user: User = request.user
-    
+
 	if User.objects.filter(email=user.email, is_active=False).exists():
 		return JsonResponse({'error': 'Users who are not two-factor authentication'}, status=400)
 	try:

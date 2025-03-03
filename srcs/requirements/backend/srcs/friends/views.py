@@ -1,15 +1,15 @@
 import json
-from functools import wraps
 from datetime import timedelta
+from functools import wraps
 
+from django.contrib.auth import get_user_model
 from django.http import HttpRequest, JsonResponse
 from django.utils import timezone
-from django.contrib.auth import get_user_model
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
-from .models import Friend, OnlineList
 from authentication.views import jwt_required
+from .models import Friend, OnlineList
 
 User = get_user_model()
 
