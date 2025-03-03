@@ -59,7 +59,7 @@ INSTALLED_APPS = [
     'users',
     'authentication',
     'oauth',
-    'matchresult',
+    'matchresult' ,
     'friends',
 ]
 
