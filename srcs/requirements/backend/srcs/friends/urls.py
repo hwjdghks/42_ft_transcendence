@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import friend_list, search_users, add_friend, delete_friend, get_online
+
+from .views import add_friend, delete_friend, friend_list, get_online, search_users
 
 urlpatterns = [
     path('list/', friend_list, name='list'),
