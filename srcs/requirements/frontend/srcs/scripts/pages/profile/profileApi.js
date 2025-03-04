@@ -1,3 +1,5 @@
+import { updateProfilePage } from "./profile.js";
+
 /**
  * 프로필 데이터(이미지, 매치 결과, 친구 목록 등)를 가져오는 함수
  * 
@@ -48,7 +50,7 @@ async function uploadProfileImage(file) {
 			},
 			body: formData
 		});
-		if (response.ok) {
+		if (!response.ok) {
 			const error = await response.json();
 			throw new Error(error.error || 'Failed uploadProfileImage');
 		}
