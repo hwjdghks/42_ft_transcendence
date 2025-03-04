@@ -1,8 +1,8 @@
 import datetime
 import pyotp
 
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.db import models
 
 User = get_user_model()
 
@@ -13,7 +13,7 @@ class UserOTP(models.Model):
 
     def __str__(self):
         return f"OTP for {self.user}"
-    
+
     @property
     def expires_at(self):
         return self.updated_at + datetime.timedelta(minutes=3)

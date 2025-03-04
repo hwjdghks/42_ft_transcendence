@@ -1,14 +1,14 @@
 import json
 import pytz
 
-from django.views.decorators.http import require_GET, require_POST
+from django.http import HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_POST
+
 from authentication.views import jwt_required
-from django.http import JsonResponse
-from django.http import HttpRequest
-from .models import MatchResult
-from users.models import User
 from friends.views import update_last_activate
+from users.models import User
+from .models import MatchResult
 
 @require_GET
 @jwt_required(expected_factor_level=2)
@@ -26,7 +26,7 @@ def search(request: HttpRequest) -> JsonResponse:
 @update_last_activate
 def results(request: HttpRequest) -> JsonResponse:
     user: User = request.user
-    
+
     match_results = list(
         MatchResult.objects.filter(email=user).values(
             'username', 'guestname', 'user_score', 'guest_score', 'game_result', 'match_date'
