@@ -365,5 +365,4 @@ async function handleLogout() {
   }
 }
 
-// 전역에서 사용하기 위해 window에 할당
-window.renderSettings = renderSettings;
+export { renderSettings };
