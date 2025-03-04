@@ -2,27 +2,6 @@
 
 import { createDeleteAccountModal } from './deleteAccountModal.js';
 
-async function fetchProfileUsername() {
-  const token = sessionStorage.getItem('fa_token');
-  try {
-    const response = await fetch('https://localhost/api/users/profile/', {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (response.ok) {
-      const data = await response.json();
-      return data.username || "Me";
-    } else {
-      console.error("프로필 username을 가져오지 못했습니다.");
-    }
-  } catch (error) {
-    console.error("프로필 username 호출 에러:", error);
-  }
-  return "Me"; // 기본값
-}
-
 // Username 변경 모달 생성 함수
 function createUsernameModal() {
   if (document.getElementById('usernameModal')) return;
@@ -253,7 +232,6 @@ function createPasswordModal() {
 }
 
 function renderSettings() {
-  // 기존에 있는 "setting" 영역을 선택합니다.
   const settingsContainer = document.getElementById('setting');
   if (!settingsContainer) return;
 
