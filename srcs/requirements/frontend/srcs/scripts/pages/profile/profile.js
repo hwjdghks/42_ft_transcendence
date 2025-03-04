@@ -1,11 +1,10 @@
-import { fetchProfileData, uploadProfileImage } from "./profileApi.js";
+import { fetchProfileData, fetchLogout, uploadProfileImage } from "./profileApi.js";
 import { renderMatchHistory } from "../../components/matchHistory.js";
 import { renderFriends } from "../../components/friends.js";
 import { renderSettings } from "../../components/setting.js";
 
 /**
  * 프로필 페이지를 생성하여 반환하는 함수
- * 프로필 데이터 로딩, 드롭다운 초기화, 프로필 업로드 기능을 초기화 함
  *
  * @returns {HTMLElement} 생성된 프로필 페이지 컨테이너 요소
  */
@@ -93,6 +92,7 @@ function ProfilePage() {
               <!-- Setting content -->
             </div>
           </div>
+          <button class="btn btn-outline-primary w-100 mb-2" id="logoutBtn">Log out</button>
         </div>
       </div>
     </div>
@@ -143,6 +143,12 @@ function ProfilePage() {
       toggleContent(id);
     });
   });
+
+    // 로그아웃 버튼 이벤트 등록
+    const logoutBtn = container.querySelector('#logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', handleLogout);
+    }
 
   // 프로필 데이터, 드롭다운, 프로필 업로드 초기화
   fetchProfileData();
@@ -231,6 +237,34 @@ function initProfileUpload(container) {
       uploadProfileImage(file);
     }
   });
+}
+
+/**
+ * 로그아웃 기능을 담당하는 함수
+ *
+ * @returns {void}
+ */
+async function handleLogout() {
+  try {
+    const logoutLog = await fetchLogout();
+    alert(logoutLog);
+
+    // 세션 스토리지 클리어
+    sessionStorage.removeItem('fa_token');
+    sessionStorage.removeItem('userId');
+    sessionStorage.removeItem("tournament_in_progress");
+    sessionStorage.removeItem("game_option");
+    sessionStorage.removeItem("username");
+    sessionStorage.removeItem("matches");
+    sessionStorage.removeItem("currentMatch");
+
+    setTimeout(() => {
+      window.location.href = '#login';
+    }, 1000);
+
+  } catch (error) {
+    alert(error);
+  }
 }
 
 export { ProfilePage, updateProfilePage };

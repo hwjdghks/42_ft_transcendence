@@ -68,4 +68,22 @@ async function uploadProfileImage(file) {
 	}
 }
 
-export { fetchProfileData, uploadProfileImage };
+async function fetchLogout() {
+	const token = sessionStorage.getItem('fa_token');
+	const response = await fetch('https://localhost/api/users/signout/', {
+	  method: 'POST',
+	  headers: {
+		'Content-Type': 'application/json',
+		'Authorization': `Bearer ${token}`
+	  }
+	});
+  
+	if (!response.ok) {
+		const error = await response.json();
+	  throw new Error(error.error);
+	}
+	const result = await response.json();
+	return result.message;
+}
+
+export { fetchProfileData, uploadProfileImage, fetchLogout};

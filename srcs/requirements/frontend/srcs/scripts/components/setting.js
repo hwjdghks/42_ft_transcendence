@@ -256,16 +256,9 @@ function renderSettings() {
         </button>
       </div>
     </div>
-    <button class="btn btn-outline-primary w-100 mb-2" id="logoutBtn">Log out</button>
     <button class="btn btn-danger w-100" id="deleteAccountBtn">Delete account</button>
     <div id="setting-message" class="mt-3"></div>
   `;
-
-  // 로그아웃 버튼 이벤트 등록
-  const logoutBtn = settingsContainer.querySelector('#logoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', handleLogout);
-  }
 
   // Delete Account 모달 생성 및 이벤트 등록
   if (!document.getElementById('deleteAccountModal')) {
@@ -304,50 +297,6 @@ function renderSettings() {
       const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
       modal.show();
     });
-  }
-}
-
-function showMessage(message, type) {
-  const messageDiv = document.getElementById('setting-message');
-  if (!messageDiv) return;
-
-  messageDiv.textContent = message;
-  messageDiv.className = `alert ${type === 'success' ? 'alert-success' : 'alert-danger'}`;
-}
-
-async function fetchLogout() {
-  const token = sessionStorage.getItem('fa_token');
-  const response = await fetch('https://localhost/api/users/signout/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    }
-  });
-
-  if (!response.ok) {
-    throw new Error('Logout failed');
-  }
-
-  return await response.json();
-}
-
-async function handleLogout() {
-  try {
-    const response = await fetchLogout();
-    showMessage(response.message, 'success');
-    
-    // 세션 스토리지 클리어
-    sessionStorage.removeItem('fa_token');
-    sessionStorage.removeItem('userId');
-    
-    setTimeout(() => {
-      window.location.href = '#login';
-    }, 1000);
-
-  } catch (error) {
-    showMessage('Failed to logout. Please try again.', 'error');
-    console.error('Logout error:', error);
   }
 }
 
