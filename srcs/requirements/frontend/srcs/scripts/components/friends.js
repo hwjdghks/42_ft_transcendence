@@ -231,4 +231,6 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchFriends();
 });
 
+window.removeFriend = removeFriend;
+window.fetchFriends= fetchFriends;
 window.addFriendFromSearch = addFriendFromSearch;
