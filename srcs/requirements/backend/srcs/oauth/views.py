@@ -1,34 +1,29 @@
-from django.conf import settings
-from django.http import JsonResponse, HttpRequest
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST, require_GET
+import json
 import urllib.parse
-from django.shortcuts import redirect
-from django.contrib.auth import get_user_model
-from authentication.views import generate_jwt, jwt_required
+
+from django.conf import settings
+from django.http import HttpRequest, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_POST
+
+from authentication.views import generate_jwt
 from .utils import get_oauth_token, get_user_info, get_or_create_user
-from friends.views import update_last_activate
 
 #app -> 42intra login
 @csrf_exempt
 @require_GET
 def oauth_signin(request: HttpRequest):
-    
     auth_url = settings.OAUTH2_AUTHORIZATION_URL
     params = {
         'client_id': settings.OAUTH2_CLIENT_ID,
         'redirect_uri': settings.OAUTH2_REDIRECT_URI,
         'response_type': 'code',
-        'scope': 'public',  
+        'scope': 'public',
     }
-    
+
 	# redirect to 42intra login page
     url = f"{auth_url}?{urllib.parse.urlencode(params)}"
-    return JsonResponse({
-        "redirect_url" : url
-    })
-
-import json
+    return JsonResponse({"redirect_url" : url})
 
 # 42intra -> app
 @require_POST
@@ -54,5 +49,5 @@ def oauth_callback(request):
 
     user = get_or_create_user(email, username)
     token = generate_jwt(user, 2)
-    
+
     return JsonResponse({'message': 'User created successfully', 'token': token}, status=201)
