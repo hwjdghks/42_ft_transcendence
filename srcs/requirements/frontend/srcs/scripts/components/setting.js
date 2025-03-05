@@ -2,27 +2,6 @@
 
 import { createDeleteAccountModal } from './deleteAccountModal.js';
 
-async function fetchProfileUsername() {
-  const token = sessionStorage.getItem('fa_token');
-  try {
-    const response = await fetch('https://localhost/api/users/profile/', {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (response.ok) {
-      const data = await response.json();
-      return data.username || "Me";
-    } else {
-      console.error("프로필 username을 가져오지 못했습니다.");
-    }
-  } catch (error) {
-    console.error("프로필 username 호출 에러:", error);
-  }
-  return "Me"; // 기본값
-}
-
 // Username 변경 모달 생성 함수
 function createUsernameModal() {
   if (document.getElementById('usernameModal')) return;
@@ -253,32 +232,32 @@ function createPasswordModal() {
 }
 
 function renderSettings() {
-  const container = document.createElement('div');
-  container.className = 'container py-5';
+  const settingsContainer = document.getElementById('setting');
+  if (!settingsContainer) return;
 
-  container.innerHTML = `
-        <!-- Username Field -->
-        <div class="mb-3">
-          <label for="username" class="form-label text-start w-100">Username</label>
-          <div class="input-group">
-            <input type="text" class="form-control" id="username" placeholder="Enter your username" disabled>
-            <button class="btn btn-outline-secondary" type="button" id="editUsernameBtn">
-              <i class="bi bi-gear"></i>
-            </button>
-          </div>
-        </div>
-        <!-- Password Field -->
-        <div class="mb-3">
-          <label for="password" class="form-label text-start w-100">Password</label>
-          <div class="input-group">
-            <input type="password" class="form-control" id="password" placeholder="Enter your password" disabled>
-            <button class="btn btn-outline-secondary" type="button" id="editPasswordBtn">
-              <i class="bi bi-gear"></i>
-            </button>
-          </div>
-        </div>
-        <button class="btn btn-outline-primary w-100 mb-2" id="logoutBtn">Log out</button>
-        <button class="btn btn-danger w-100" id="deleteAccountBtn">Delete account</button>
+  settingsContainer.innerHTML = `
+    <!-- Username Field -->
+    <div class="mb-3">
+      <label for="username" class="form-label text-start w-100">Username</label>
+      <div class="input-group">
+        <input type="text" class="form-control" id="username" placeholder="Enter your username" disabled>
+        <button class="btn btn-outline-secondary" type="button" id="editUsernameBtn">
+          <i class="bi bi-gear"></i>
+        </button>
+      </div>
+    </div>
+    <!-- Password Field -->
+    <div class="mb-3">
+      <label for="password" class="form-label text-start w-100">Password</label>
+      <div class="input-group">
+        <input type="password" class="form-control" id="password" placeholder="Enter your password" disabled>
+        <button class="btn btn-outline-secondary" type="button" id="editPasswordBtn">
+          <i class="bi bi-gear"></i>
+        </button>
+      </div>
+    </div>
+    <button class="btn btn-danger w-100" id="deleteAccountBtn">Delete account</button>
+    <div id="setting-message" class="mt-3"></div>
         <!-- Privacy Settings Section -->
         <div class="card mt-4">
           <div class="card-header">
@@ -304,36 +283,45 @@ function renderSettings() {
         <div id="setting-message" class="mt-3"></div>
   `;
 
-  // 로그아웃 처리
-  const logoutBtn = container.querySelector('#logoutBtn');
-  logoutBtn.addEventListener('click', handleLogout);
-
-  // Delete Account 모달 생성 및 처리
+  // Delete Account 모달 생성 및 이벤트 등록
   if (!document.getElementById('deleteAccountModal')) {
     createDeleteAccountModal();
   }
-  const deleteAccountBtn = container.querySelector('#deleteAccountBtn');
-  deleteAccountBtn.addEventListener('click', () => {
-    const modal = new bootstrap.Modal(document.getElementById('deleteAccountModal'));
-    modal.show();
-  });
+  const deleteAccountBtn = settingsContainer.querySelector('#deleteAccountBtn');
+  if (deleteAccountBtn) {
+    deleteAccountBtn.addEventListener('click', () => {
+      const modal = new bootstrap.Modal(document.getElementById('deleteAccountModal'));
+      modal.show();
+    });
+  }
 
-  // Username 모달 생성 및 처리
+  // Username 모달 생성 및 이벤트 등록
   if (!document.getElementById('usernameModal')) {
     createUsernameModal();
   }
-  const editUsernameBtn = container.querySelector('#editUsernameBtn');
-  editUsernameBtn.addEventListener('click', () => {
-    // 현재 username 값을 모달에 미리 채워넣음
-    document.getElementById('newUsername').value = document.getElementById('username').value;
-    const modal = new bootstrap.Modal(document.getElementById('usernameModal'));
-    modal.show();
-  });
+  const editUsernameBtn = settingsContainer.querySelector('#editUsernameBtn');
+  if (editUsernameBtn) {
+    editUsernameBtn.addEventListener('click', () => {
+      // 현재 username 값을 모달에 미리 채워넣음
+      const currentUsername = settingsContainer.querySelector('#username').value;
+      document.getElementById('newUsername').value = currentUsername;
+      const modal = new bootstrap.Modal(document.getElementById('usernameModal'));
+      modal.show();
+    });
+  }
 
-  // Password 모달 생성 및 처리
+  // Password 모달 생성 및 이벤트 등록
   if (!document.getElementById('passwordModal')) {
     createPasswordModal();
   }
+
+  const editPasswordBtn = settingsContainer.querySelector('#editPasswordBtn');
+  if (editPasswordBtn) {
+    editPasswordBtn.addEventListener('click', () => {
+      const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+      modal.show();
+    });
+
   const editPasswordBtn = container.querySelector('#editPasswordBtn');
   editPasswordBtn.addEventListener('click', () => {
     const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
@@ -423,5 +411,4 @@ async function handleLogout() {
   }
 }
 
-// 전역에서 사용하기 위해 window에 할당
-window.renderSettings = renderSettings;
+export { renderSettings };
