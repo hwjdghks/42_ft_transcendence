@@ -1,8 +1,108 @@
-// setting.js
-
 import { createDeleteAccountModal } from './deleteAccountModal.js';
+import { fetchUpdateUsername, fetchUpdatePrivacySettings, fetchUpdatePassword } from './settingApi.js';
 
-// Username 변경 모달 생성 함수
+/**
+ * 세팅 컴포넌트 렌더 함수
+ */
+function renderSettings() {
+  const settingsContainer = document.getElementById('setting');
+  if (!settingsContainer) return;
+
+  settingsContainer.innerHTML = `
+    <!-- Username Field -->
+    <div class="mb-3">
+      <label for="username" class="form-label text-start w-100">Username</label>
+      <div class="input-group">
+        <input type="text" class="form-control" id="username" placeholder="change username" disabled>
+        <button class="btn btn-outline-secondary" type="button" id="editUsernameBtn">
+          <i class="bi bi-gear"></i>
+        </button>
+      </div>
+    </div>
+    <!-- Password Field -->
+    <div class="mb-3">
+      <label for="password" class="form-label text-start w-100">Password</label>
+      <div class="input-group">
+        <input type="password" class="form-control" id="password" placeholder="change password" disabled>
+        <button class="btn btn-outline-secondary" type="button" id="editPasswordBtn">
+          <i class="bi bi-gear"></i>
+        </button>
+      </div>
+    </div>
+    <!-- Privacy Field -->
+    <div class="mb-3">
+      <label for="privacy" class="form-label text-start w-100">Privacy</label>
+      <div class="input-group">
+        <input type="privacy" class="form-control" id="privacy" placeholder="set privacy options" disabled>
+        <button class="btn btn-outline-secondary" type="button" id="editPrivacyBtn">
+          <i class="bi bi-gear"></i>
+        </button>
+      </div>
+    </div>
+    <button class="btn btn-danger w-100" id="deleteAccountBtn">Delete account</button>
+    <div id="setting-message" class="mt-3"></div>
+  `;
+
+  // 각 모달 초기화
+  if (!document.getElementById('usernameModal')) {
+    createUsernameModal();
+  }
+  if (!document.getElementById('passwordModal')) {
+    createPasswordModal();
+  }
+  if (!document.getElementById('privacySettingsModal')) {
+    createPrivacySettingsModal();
+  }
+  if (!document.getElementById('deleteAccountModal')) {
+    createDeleteAccountModal();
+  }
+  
+  // Edit Username 버튼 이벤트
+  const editUsernameBtn = settingsContainer.querySelector('#editUsernameBtn');
+  if (editUsernameBtn) {
+    editUsernameBtn.addEventListener('click', () => {
+      const currentUsername = settingsContainer.querySelector('#username').value;
+      document.getElementById('newUsername').value = currentUsername;
+      const modal = new bootstrap.Modal(document.getElementById('usernameModal'));
+      modal.show();
+    });
+  }
+  
+  // Edit Password 버튼 이벤트
+  const editPasswordBtn = settingsContainer.querySelector('#editPasswordBtn');
+  if (editPasswordBtn) {
+    editPasswordBtn.addEventListener('click', () => {
+      const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+      modal.show();
+    });
+  }
+  
+  // Privacy Settings 버튼 이벤트
+  const editPrivacyBtn = settingsContainer.querySelector('#editPrivacyBtn');
+  if (editPrivacyBtn) {
+    editPrivacyBtn.addEventListener('click', () => {
+      const modal = new bootstrap.Modal(document.getElementById('privacySettingsModal'));
+      modal.show();
+    });
+  }
+  
+  // Delete Account 버튼 이벤트
+  const deleteAccountBtn = settingsContainer.querySelector('#deleteAccountBtn');
+  if (deleteAccountBtn) {
+    deleteAccountBtn.addEventListener('click', () => {
+      const modal = new bootstrap.Modal(document.getElementById('deleteAccountModal'));
+      modal.show();
+    });
+  }
+
+  return settingsContainer;
+}
+
+/**
+ * 유저 이름 변경 모달 생성 함수
+ * - 오직 영어 알파벳만 허용 (정규식: /^[A-Za-z]+$/)
+ * - 입력 필드가 비었거나 정규식에 맞지 않으면 저장 버튼 비활성화
+ */
 function createUsernameModal() {
   if (document.getElementById('usernameModal')) return;
 
@@ -22,11 +122,12 @@ function createUsernameModal() {
              <div class="mb-3">
                <label for="newUsername" class="form-label">New Username</label>
                <input type="text" class="form-control" id="newUsername" placeholder="Enter new username">
+               <small class="form-text text-muted">영어, 숫자만 입력 가능합니다. (최대 10자)</small>
              </div>
              <div id="usernameModalMessage" class="mb-3"></div>
              <div class="modal-footer">
                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-               <button type="submit" class="btn btn-primary">Save</button>
+               <button type="submit" class="btn btn-primary" id="usernameSaveBtn" disabled>Save</button>
              </div>
            </form>
          </div>
@@ -35,75 +136,121 @@ function createUsernameModal() {
   `;
   document.body.appendChild(modalDiv);
 
-  // 모달이 완전히 닫힐 때마다 폼/메시지/클래스 초기화
-  modalDiv.addEventListener('hidden.bs.modal', () => {
-    const messageDiv = document.getElementById('usernameModalMessage');
-    if (messageDiv) {
-      messageDiv.textContent = '';
-      messageDiv.className = 'mb-3'; // alert 클래스 제거
-    }
-    const newUsernameInput = document.getElementById('newUsername');
-    if (newUsernameInput) {
-      newUsernameInput.value = '';
-    }
+  const newUsernameInput = modalDiv.querySelector('#newUsername');
+  const usernameSaveBtn = modalDiv.querySelector('#usernameSaveBtn');
+
+  // 실시간 유효성 검사: 입력값이 비어있지 않고 오직 영어,숫자만 있는지 확인(최대 10자 까지)
+  newUsernameInput.addEventListener('input', () => {
+    const value = newUsernameInput.value.trim();
+    const valid = /^[A-Za-z0-9]{0,10}$/.test(value);
+    usernameSaveBtn.disabled = !value || !valid;
   });
 
+  // 모달 닫힐 때 초기화
+  modalDiv.addEventListener('hidden.bs.modal', () => {
+    const usernameForm = modalDiv.querySelector('#usernameForm');
+    if (usernameForm) usernameForm.reset();
+    usernameSaveBtn.disabled = true;
+  });
+
+  // Username 변경 요청 처리
   const usernameForm = modalDiv.querySelector('#usernameForm');
-  usernameForm.addEventListener('submit', async function(e) {
+  usernameForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const newUsername = document.getElementById('newUsername').value.trim();
-    const messageDiv = document.getElementById('usernameModalMessage');
-
-    if (!newUsername) {
-      messageDiv.textContent = 'Username cannot be empty';
-      messageDiv.className = 'alert alert-danger';
-      return;
-    }
-
+    const newUsername = newUsernameInput.value.trim();
     try {
-      const token = sessionStorage.getItem('fa_token');
-      const response = await fetch('https://localhost/api/users/update/username/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          token: token,
-          new_username: newUsername
-        })
-      });
+      const updateMessage = await fetchUpdateUsername(newUsername);
+      alert(updateMessage || "Success to change");
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update username');
-      }
-
-      const result = await response.json();
-      messageDiv.textContent = result.message || 'Username updated successfully';
-      messageDiv.className = 'alert alert-success';
-      
-      // 화면 상단 username도 즉시 변경
+      // 화면 상단 username 업데이트
       const usernameElement = document.querySelector('.fs-2.fw-bold');
-      if (usernameElement && newUsername) {
+      if (usernameElement) {
         usernameElement.textContent = newUsername;
       }
-
-      // 1초 후 모달 닫기
-      setTimeout(() => {
-        const modalInstance = bootstrap.Modal.getInstance(modalDiv);
-        modalInstance.hide();
-      }, 1000);
-
+      const modalInstance = bootstrap.Modal.getInstance(modalDiv);
+      modalInstance.hide();
     } catch (error) {
-      messageDiv.textContent = error.message || 'Error updating username';
-      messageDiv.className = 'alert alert-danger';
-      console.error('Username update error:', error);
+      alert(error.message);
+      newUsernameInput.value = "";
+      usernameSaveBtn.disabled = true;
     }
   });
 }
 
-// Password 변경 모달 생성 함수
+/**
+ * 개인정보(Privacy Settings) 변경 모달 생성 함수
+ */
+function createPrivacySettingsModal() {
+  if (document.getElementById('privacySettingsModal')) return;
+
+  const modalDiv = document.createElement('div');
+  modalDiv.id = 'privacySettingsModal';
+  modalDiv.className = 'modal fade';
+  modalDiv.tabIndex = -1;
+  modalDiv.innerHTML = `
+    <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+           <h5 class="modal-title">Privacy Settings</h5>
+           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+           <form id="privacySettingsForm">
+             <div class="form-check mb-2">
+               <input type="checkbox" class="form-check-input" id="modalShowInSearchCheckbox" checked>
+               <label class="form-check-label" for="modalShowInSearchCheckbox">Show in friend search</label>
+             </div>
+             <div class="form-check mb-2">
+               <input type="checkbox" class="form-check-input" id="modalShareProfileImageCheckbox" checked>
+               <label class="form-check-label" for="modalShareProfileImageCheckbox">Share profile image</label>
+             </div>
+             <div class="form-check mb-2">
+               <input type="checkbox" class="form-check-input" id="modalShareOnlineStatusCheckbox" checked>
+               <label class="form-check-label" for="modalShareOnlineStatusCheckbox">Share online status</label>
+             </div>
+             <div id="privacySettingsModalMessage" class="mb-3"></div>
+           </form>
+         </div>
+         <div class="modal-footer">
+           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+           <button type="button" class="btn btn-primary" id="privacySettingsSaveBtn">Save Changes</button>
+         </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modalDiv);
+
+  modalDiv.addEventListener('hidden.bs.modal', () => {
+    const privacyForm = modalDiv.querySelector('#privacySettingsForm');
+    if (privacyForm) privacyForm.reset();
+    document.getElementById('modalShowInSearchCheckbox').checked = true;
+    document.getElementById('modalShareProfileImageCheckbox').checked = true;
+    document.getElementById('modalShareOnlineStatusCheckbox').checked = true;
+  });
+  
+  // 개인정보 업데이트 요청 처리
+  const saveBtn = modalDiv.querySelector('#privacySettingsSaveBtn');
+  saveBtn.addEventListener('click', async () => {
+    const showInSearch = document.getElementById('modalShowInSearchCheckbox').checked;
+    const shareProfileImage = document.getElementById('modalShareProfileImageCheckbox').checked;
+    const shareOnlineStatus = document.getElementById('modalShareOnlineStatusCheckbox').checked;
+
+    const result = await fetchUpdatePrivacySettings(showInSearch, shareProfileImage, shareOnlineStatus);
+    if (result.success) {
+      alert('success to change');
+    } else {
+      alert('failed to change');
+    }
+    const modalInstance = bootstrap.Modal.getInstance(modalDiv);
+    modalInstance.hide();
+  });
+}
+
+/**
+ * 패스워드 변경 모달 생성 함수
+ * - 현재 패스워드, 새 패스워드, 확인용 패스워드를 모두 빈칸 없이 입력해야 저장 버튼이 활성화
+ * - 새 패스워드는 숫자와 영어만 포함 가능하며, 길이는 8자 이상 50자 이하
+ */
 function createPasswordModal() {
   if (document.getElementById('passwordModal')) return;
 
@@ -111,6 +258,7 @@ function createPasswordModal() {
   modalDiv.id = 'passwordModal';
   modalDiv.className = 'modal fade';
   modalDiv.tabIndex = -1;
+  // currentPassword: 현재 패스워드, newPassword: 새 패스워드, confirmPassword: 새 패스워드 확인
   modalDiv.innerHTML = `
     <div class="modal-dialog">
       <div class="modal-content">
@@ -121,15 +269,17 @@ function createPasswordModal() {
          <div class="modal-body">
            <form id="passwordForm">
              <div class="mb-3">
+               <label for="currentPassword" class="form-label">Current Password</label>
+               <input type="password" class="form-control" id="currentPassword" placeholder="Enter current password">
+             </div>
+             <div class="mb-3">
                <label for="newPassword" class="form-label">New Password</label>
                <input type="password" class="form-control" id="newPassword" placeholder="Enter new password">
+               <small class="form-text text-muted">영어, 숫자만 입력 가능합니다. (최소 8자, 최대 50자)</small>
              </div>
              <div class="mb-3">
                <label for="confirmPassword" class="form-label">Confirm New Password</label>
                <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm new password">
-               <div id="confirmPasswordFeedback" class="invalid-feedback">
-                 입력한 패스워드가 다릅니다.
-               </div>
              </div>
              <div id="passwordModalMessage" class="mb-3"></div>
              <div class="modal-footer">
@@ -144,271 +294,71 @@ function createPasswordModal() {
   document.body.appendChild(modalDiv);
 
   const passwordForm = modalDiv.querySelector('#passwordForm');
+  const currentPasswordInput = modalDiv.querySelector('#currentPassword');
   const newPasswordInput = modalDiv.querySelector('#newPassword');
   const confirmPasswordInput = modalDiv.querySelector('#confirmPassword');
   const savePasswordBtn = modalDiv.querySelector('#savePasswordBtn');
-  const messageDiv = modalDiv.querySelector('#passwordModalMessage');
 
-  // 모달이 완전히 닫힐 때마다 폼/메시지/클래스 초기화
+  // 실시간 유효성 검사 함수
+  function validatePasswordFields() {
+    const currentPassword = currentPasswordInput.value.trim();
+    const newPassword = newPasswordInput.value.trim();
+    const confirmPassword = confirmPasswordInput.value.trim();
+    // 새 패스워드는 숫자와 영어만 포함, 8자 이상 50자 이하
+    const newPasswordValid = /^[A-Za-z0-9]{8,50}$/.test(newPassword);
+    const passwordsMatch = newPassword === confirmPassword;
+    
+    if (currentPassword && newPassword && confirmPassword && newPasswordValid && passwordsMatch) {
+      savePasswordBtn.disabled = false;
+      confirmPasswordInput.classList.remove('is-invalid');
+    } else {
+      savePasswordBtn.disabled = true;
+      if (confirmPassword && !passwordsMatch) {
+        confirmPasswordInput.classList.add('is-invalid');
+      } else {
+        confirmPasswordInput.classList.remove('is-invalid');
+      }
+    }
+  }
+
+  // 입력 이벤트로 실시간 검사 실행
+  currentPasswordInput.addEventListener('input', validatePasswordFields);
+  newPasswordInput.addEventListener('input', validatePasswordFields);
+  confirmPasswordInput.addEventListener('input', validatePasswordFields);
+
   modalDiv.addEventListener('hidden.bs.modal', () => {
-    messageDiv.textContent = '';
-    messageDiv.className = 'mb-3'; // alert 제거
-    newPasswordInput.value = '';
-    confirmPasswordInput.value = '';
+    passwordForm.reset();
     confirmPasswordInput.classList.remove('is-invalid');
     savePasswordBtn.disabled = true;
   });
 
-  // 실시간 검증 함수
-  function validatePasswordMatch() {
-    const newPassword = newPasswordInput.value;
-    const confirmPassword = confirmPasswordInput.value;
-    
-    if (confirmPassword && newPassword !== confirmPassword) {
-      confirmPasswordInput.classList.add('is-invalid');
-      savePasswordBtn.disabled = true;
-    } else {
-      confirmPasswordInput.classList.remove('is-invalid');
-      // 두 인풋 모두 값이 있을 때만 저장 버튼 활성화
-      if (newPassword && confirmPassword) {
-        savePasswordBtn.disabled = false;
-      } else {
-        savePasswordBtn.disabled = true;
-      }
-    }
-  }
-
-  newPasswordInput.addEventListener('input', validatePasswordMatch);
-  confirmPasswordInput.addEventListener('input', validatePasswordMatch);
-
-  passwordForm.addEventListener('submit', async function(e) {
+  // Password 변경 요청 처리
+  passwordForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const newPassword = newPasswordInput.value;
-    const confirmPassword = confirmPasswordInput.value;
+    const currentPassword = currentPasswordInput.value.trim();
+    const newPassword = newPasswordInput.value.trim();
+    const confirmPassword = confirmPasswordInput.value.trim();
 
-    // 추가 검증: 혹시 실시간 검증을 우회한 경우
     if (newPassword !== confirmPassword) {
       confirmPasswordInput.classList.add('is-invalid');
-      messageDiv.textContent = '입력한 패스워드가 다릅니다.';
-      messageDiv.className = 'alert alert-danger';
+      alert('입력한 패스워드가 다릅니다.');
       return;
     }
 
     try {
-      const token = sessionStorage.getItem('fa_token');
-      const response = await fetch('https://localhost/api/users/update/password/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          new_password: newPassword
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        // 백엔드에서 전달한 에러 메시지를 그대로 사용
-        throw new Error(errorData.message || 'Failed to update password');
-      }
-
-      const result = await response.json();
-      messageDiv.textContent = result.message || 'Password updated successfully';
-      messageDiv.className = 'alert alert-success';
-
-      // 1초 뒤 모달 닫기
-      setTimeout(() => {
-        const modalInstance = bootstrap.Modal.getInstance(modalDiv);
-        modalInstance.hide();
-      }, 1000);
-
+      const updateMessage = await fetchUpdatePassword(currentPassword, newPassword);
+      alert(updateMessage || 'success to change');
+      const modalInstance = bootstrap.Modal.getInstance(modalDiv);
+      modalInstance.hide();
     } catch (error) {
-      messageDiv.textContent = error.message || 'Error updating password';
-      messageDiv.className = 'alert alert-danger';
+      alert(error.message || 'Failed to update password');
+      currentPasswordInput.value = "";
+      newPasswordInput.value = "";
+      confirmPasswordInput.value = "";
+      savePasswordBtn.disabled = true;
       console.error('Password update error:', error);
     }
   });
-}
-
-function renderSettings() {
-  const settingsContainer = document.getElementById('setting');
-  if (!settingsContainer) return;
-
-  settingsContainer.innerHTML = `
-    <!-- Username Field -->
-    <div class="mb-3">
-      <label for="username" class="form-label text-start w-100">Username</label>
-      <div class="input-group">
-        <input type="text" class="form-control" id="username" placeholder="Enter your username" disabled>
-        <button class="btn btn-outline-secondary" type="button" id="editUsernameBtn">
-          <i class="bi bi-gear"></i>
-        </button>
-      </div>
-    </div>
-    <!-- Password Field -->
-    <div class="mb-3">
-      <label for="password" class="form-label text-start w-100">Password</label>
-      <div class="input-group">
-        <input type="password" class="form-control" id="password" placeholder="Enter your password" disabled>
-        <button class="btn btn-outline-secondary" type="button" id="editPasswordBtn">
-          <i class="bi bi-gear"></i>
-        </button>
-      </div>
-    </div>
-    <button class="btn btn-danger w-100" id="deleteAccountBtn">Delete account</button>
-    <div id="setting-message" class="mt-3"></div>
-        <!-- Privacy Settings Section -->
-        <div class="card mt-4">
-          <div class="card-header">
-            Privacy Settings
-          </div>
-          <div class="card-body">
-            <div class="form-check mb-2">
-              <input type="checkbox" class="form-check-input" id="showInSearchCheckbox" checked>
-              <label class="form-check-label" for="showInSearchCheckbox">Show in friend search</label>
-            </div>
-            <div class="form-check mb-2">
-              <input type="checkbox" class="form-check-input" id="shareProfileImageCheckbox" checked>
-              <label class="form-check-label" for="shareProfileImageCheckbox">Share profile image</label>
-            </div>
-            <div class="form-check mb-2">
-              <input type="checkbox" class="form-check-input" id="shareOnlineStatusCheckbox" checked>
-              <label class="form-check-label" for="shareOnlineStatusCheckbox">Share online status</label>
-            </div>
-            <button class="btn btn-primary w-100" id="updateSettingsBtn">Update Settings</button>
-          </div>
-        </div>
-        
-        <div id="setting-message" class="mt-3"></div>
-  `;
-
-  // Delete Account 모달 생성 및 이벤트 등록
-  if (!document.getElementById('deleteAccountModal')) {
-    createDeleteAccountModal();
-  }
-  const deleteAccountBtn = settingsContainer.querySelector('#deleteAccountBtn');
-  if (deleteAccountBtn) {
-    deleteAccountBtn.addEventListener('click', () => {
-      const modal = new bootstrap.Modal(document.getElementById('deleteAccountModal'));
-      modal.show();
-    });
-  }
-
-  // Username 모달 생성 및 이벤트 등록
-  if (!document.getElementById('usernameModal')) {
-    createUsernameModal();
-  }
-  const editUsernameBtn = settingsContainer.querySelector('#editUsernameBtn');
-  if (editUsernameBtn) {
-    editUsernameBtn.addEventListener('click', () => {
-      // 현재 username 값을 모달에 미리 채워넣음
-      const currentUsername = settingsContainer.querySelector('#username').value;
-      document.getElementById('newUsername').value = currentUsername;
-      const modal = new bootstrap.Modal(document.getElementById('usernameModal'));
-      modal.show();
-    });
-  }
-
-  // Password 모달 생성 및 이벤트 등록
-  if (!document.getElementById('passwordModal')) {
-    createPasswordModal();
-  }
-
-  const editPasswordBtn = settingsContainer.querySelector('#editPasswordBtn');
-  if (editPasswordBtn) {
-    editPasswordBtn.addEventListener('click', () => {
-      const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
-      modal.show();
-    });
-
-  const editPasswordBtn = container.querySelector('#editPasswordBtn');
-  editPasswordBtn.addEventListener('click', () => {
-    const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
-    modal.show();
-  });
-
-  // << 추가된 부분: Privacy Settings 업데이트 버튼 이벤트 등록 >>
-  const updateSettingsBtn = container.querySelector('#updateSettingsBtn');
-  if (updateSettingsBtn) {
-    updateSettingsBtn.addEventListener('click', async () => {
-      const token = sessionStorage.getItem('fa_token');
-      const showInSearch = document.getElementById('showInSearchCheckbox').checked;
-      const shareProfileImage = document.getElementById('shareProfileImageCheckbox').checked;
-      const shareOnlineStatus = document.getElementById('shareOnlineStatusCheckbox').checked;
-      try {
-        const response = await fetch('https://localhost/api/users/update/settings/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            show_in_search: showInSearch,
-            share_profile_image: shareProfileImage,
-            share_online_status: shareOnlineStatus
-          })
-        });
-        const result = await response.json();
-        if (response.ok) {
-          showMessage(result.message, 'success');
-        } else {
-          showMessage(result.error || 'Failed to update settings', 'error');
-        }
-      } catch (error) {
-        showMessage(error.message, 'error');
-        console.error('Settings update error:', error);
-      }
-    });
-  } else {
-    console.error('updateSettingsBtn not found in container.');
-  }
-
-  return container;
-}
-
-function showMessage(message, type) {
-  const messageDiv = document.getElementById('setting-message');
-  if (!messageDiv) return;
-
-  messageDiv.textContent = message;
-  messageDiv.className = `alert ${type === 'success' ? 'alert-success' : 'alert-danger'}`;
-}
-
-async function fetchLogout() {
-  const token = sessionStorage.getItem('fa_token');
-  const response = await fetch('https://localhost/api/users/signout/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    }
-  });
-
-  if (!response.ok) {
-    throw new Error('Logout failed');
-  }
-
-  return await response.json();
-}
-
-async function handleLogout() {
-  try {
-    const response = await fetchLogout();
-    showMessage(response.message, 'success');
-    
-    // 세션 스토리지 클리어
-    sessionStorage.removeItem('fa_token');
-    sessionStorage.removeItem('userId');
-    
-    setTimeout(() => {
-      window.location.href = '#login';
-    }, 1000);
-
-  } catch (error) {
-    showMessage('Failed to logout. Please try again.', 'error');
-    console.error('Logout error:', error);
-  }
 }
 
 export { renderSettings };
