@@ -5,7 +5,7 @@ from django.http import HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
-from authentication.views import generate_jwt, jwt_required
+from authentication.views import generate_jwt, jwt_required, verify_otp
 from friends.views import update_last_activate
 from matchresult.models import MatchResult
 from .models import User
@@ -75,10 +75,15 @@ def signout(request: HttpRequest) -> JsonResponse:
 @require_POST
 @jwt_required(expected_factor_level=2)
 def withdraw(request: HttpRequest) -> JsonResponse:
-    if request.user.is_authenticated:
-        request.user.delete()
-        return JsonResponse({'message': 'User deleted successfully'}, status=200)
-    return JsonResponse({'error': 'User not authenticated'}, status=401)
+    user: User = request.user
+    if not user.is_authenticated:
+        return JsonResponse({'error': 'User not authenticated'}, status=401)
+    data = json.loads(request.body)
+    otp_code = data.get('otp')
+    if not verify_otp(user.otp, otp_code, otp_type='withdraw'):
+        return JsonResponse({'error': '유효하지 않거나 만료된 OTP입니다.'}, status=401)
+    request.user.delete()
+    return JsonResponse({'message': 'User deleted successfully'}, status=200)
 
 @csrf_exempt
 @require_POST
