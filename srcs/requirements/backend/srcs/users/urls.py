@@ -8,6 +8,7 @@ from .views import (
     signup,
     update_password,
     update_username,
+    update_user_settings,    
     upload_profile_image,
     withdraw,
 )
@@ -22,4 +23,5 @@ urlpatterns = [
     path('name/', get_name, name='name'),
     path('update/username/', update_username, name='update_username'),
     path('update/password/', update_password, name='update_password'),
+  	path('update/settings/', update_user_settings, name='update_user_settings'),
 ]

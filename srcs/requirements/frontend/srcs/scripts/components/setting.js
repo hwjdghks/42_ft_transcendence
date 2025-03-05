@@ -258,6 +258,29 @@ function renderSettings() {
     </div>
     <button class="btn btn-danger w-100" id="deleteAccountBtn">Delete account</button>
     <div id="setting-message" class="mt-3"></div>
+        <!-- Privacy Settings Section -->
+        <div class="card mt-4">
+          <div class="card-header">
+            Privacy Settings
+          </div>
+          <div class="card-body">
+            <div class="form-check mb-2">
+              <input type="checkbox" class="form-check-input" id="showInSearchCheckbox" checked>
+              <label class="form-check-label" for="showInSearchCheckbox">Show in friend search</label>
+            </div>
+            <div class="form-check mb-2">
+              <input type="checkbox" class="form-check-input" id="shareProfileImageCheckbox" checked>
+              <label class="form-check-label" for="shareProfileImageCheckbox">Share profile image</label>
+            </div>
+            <div class="form-check mb-2">
+              <input type="checkbox" class="form-check-input" id="shareOnlineStatusCheckbox" checked>
+              <label class="form-check-label" for="shareOnlineStatusCheckbox">Share online status</label>
+            </div>
+            <button class="btn btn-primary w-100" id="updateSettingsBtn">Update Settings</button>
+          </div>
+        </div>
+        
+        <div id="setting-message" class="mt-3"></div>
   `;
 
   // Delete Account 모달 생성 및 이벤트 등록
@@ -291,12 +314,100 @@ function renderSettings() {
   if (!document.getElementById('passwordModal')) {
     createPasswordModal();
   }
+
   const editPasswordBtn = settingsContainer.querySelector('#editPasswordBtn');
   if (editPasswordBtn) {
     editPasswordBtn.addEventListener('click', () => {
       const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
       modal.show();
     });
+
+  const editPasswordBtn = container.querySelector('#editPasswordBtn');
+  editPasswordBtn.addEventListener('click', () => {
+    const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+    modal.show();
+  });
+
+  // << 추가된 부분: Privacy Settings 업데이트 버튼 이벤트 등록 >>
+  const updateSettingsBtn = container.querySelector('#updateSettingsBtn');
+  if (updateSettingsBtn) {
+    updateSettingsBtn.addEventListener('click', async () => {
+      const token = sessionStorage.getItem('fa_token');
+      const showInSearch = document.getElementById('showInSearchCheckbox').checked;
+      const shareProfileImage = document.getElementById('shareProfileImageCheckbox').checked;
+      const shareOnlineStatus = document.getElementById('shareOnlineStatusCheckbox').checked;
+      try {
+        const response = await fetch('https://localhost/api/users/update/settings/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            show_in_search: showInSearch,
+            share_profile_image: shareProfileImage,
+            share_online_status: shareOnlineStatus
+          })
+        });
+        const result = await response.json();
+        if (response.ok) {
+          showMessage(result.message, 'success');
+        } else {
+          showMessage(result.error || 'Failed to update settings', 'error');
+        }
+      } catch (error) {
+        showMessage(error.message, 'error');
+        console.error('Settings update error:', error);
+      }
+    });
+  } else {
+    console.error('updateSettingsBtn not found in container.');
+  }
+
+  return container;
+}
+
+function showMessage(message, type) {
+  const messageDiv = document.getElementById('setting-message');
+  if (!messageDiv) return;
+
+  messageDiv.textContent = message;
+  messageDiv.className = `alert ${type === 'success' ? 'alert-success' : 'alert-danger'}`;
+}
+
+async function fetchLogout() {
+  const token = sessionStorage.getItem('fa_token');
+  const response = await fetch('https://localhost/api/users/signout/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error('Logout failed');
+  }
+
+  return await response.json();
+}
+
+async function handleLogout() {
+  try {
+    const response = await fetchLogout();
+    showMessage(response.message, 'success');
+    
+    // 세션 스토리지 클리어
+    sessionStorage.removeItem('fa_token');
+    sessionStorage.removeItem('userId');
+    
+    setTimeout(() => {
+      window.location.href = '#login';
+    }, 1000);
+
+  } catch (error) {
+    showMessage('Failed to logout. Please try again.', 'error');
+    console.error('Logout error:', error);
   }
 }
 

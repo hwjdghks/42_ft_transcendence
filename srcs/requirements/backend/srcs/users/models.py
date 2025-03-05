@@ -7,6 +7,10 @@ class User(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
+    
+    show_in_search = models.BooleanField(default=False)         # 친구 검색 시 노출 여부
+    share_profile_image = models.BooleanField(default=False)      # 프로필 사진 공유 여부
+    share_online_status = models.BooleanField(default=False)      # 온라인 상태 공유 여부
 
     def __str__(self):
         return self.email
