@@ -6,8 +6,8 @@ User = get_user_model()
 
 class MatchResult(models.Model):
     email = models.ForeignKey(User, on_delete=models.CASCADE, related_name='match_results')
-    username = models.CharField(max_length=20)
-    guestname = models.CharField(max_length=20)
+    username = models.CharField(max_length=10)
+    guestname = models.CharField(max_length=10)
     user_score = models.IntegerField(default=0, validators=[MinValueValidator(0)]) # 기본값을 0으로 지정 및 최소값을 0으로 지정
     guest_score = models.IntegerField(default=0, validators=[MinValueValidator(0)])# 기본값을 0으로 지정 및 최소값을 0으로 지정
     match_date = models.DateTimeField(auto_now_add=True)

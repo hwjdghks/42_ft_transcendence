@@ -14,5 +14,5 @@ down:
 
 .PHONY: clean
 clean: down
-	docker volume prune -f
+	docker volume prune -a -f
 	docker system prune -a -f

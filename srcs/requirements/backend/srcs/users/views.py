@@ -1,4 +1,5 @@
 import json
+import re
 
 from django.contrib.auth import authenticate
 from django.http import HttpRequest, JsonResponse
@@ -32,6 +33,12 @@ def signup(request: HttpRequest) -> JsonResponse:
     if response:
         return response
     
+    if len(username) > 10:
+        return JsonResponse({'error': '유저 이름은 10글자 이하여야합니다다.'}, status=400)
+
+    if not re.fullmatch(r'[0-9a-zA-Z]+', username):
+        return JsonResponse({'error': '유저 이름은 알파벳과 숫자로만 이루어져야 합니다.'}, status=400)
+
     show_in_search = data.get('show_in_search', True)
     share_profile_image = data.get('share_profile_image', True)
     share_online_status = data.get('share_online_status', True)
@@ -138,6 +145,12 @@ def update_username(request: HttpRequest) -> JsonResponse:
         return JsonResponse({
             'error': '유저 이름은 공백일 수 없습니다.'
         }, status=400)
+
+    if len(new_username) > 10:
+        return JsonResponse({'error': '유저 이름은 10글자 이하여야합니다다.'}, status=400)
+
+    if not re.fullmatch(r'[0-9a-zA-Z]+', new_username):
+        return JsonResponse({'error': '유저 이름은 알파벳과 숫자로만 이루어져야 합니다.'}, status=400)
 
     old_username = user.get_username()
     if old_username == new_username:
