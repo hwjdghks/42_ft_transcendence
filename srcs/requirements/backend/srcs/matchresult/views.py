@@ -1,5 +1,6 @@
 import json
 import pytz
+import re
 
 from django.http import HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -63,7 +64,12 @@ def add(request: HttpRequest) -> JsonResponse:
         guest_score = data.get('guest_score')
         game_result = data.get('game_result')
         session_id = data.get('session_id')
+        
+        if len(username) > 10 or len(guestname):
+            return JsonResponse({'error': '이름은 10글자 이하여야합니다다.'}, status=400)
 
+        if not re.fullmatch(r'[0-9a-zA-Z]+', username) or not re.fullmatch(r'[0-9a-zA-Z]+', guestname):
+            return JsonResponse({'error': '이름은 알파벳과 숫자로만 이루어져야 합니다.'}, status=400)
 
         if not all([session_id, user_score, guest_score is not None, guestname is not None, game_result]):
             return JsonResponse({'error': 'Missing required fields'}, status=400)
