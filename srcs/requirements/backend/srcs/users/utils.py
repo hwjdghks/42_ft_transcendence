@@ -1,4 +1,6 @@
 import datetime
+import re
+
 from typing import Optional
 
 from django.http import JsonResponse
@@ -23,4 +25,39 @@ def check_existing_user(user, field: str) -> Optional[JsonResponse]:
                     return JsonResponse({'error': f'{field} already in use'}, status=400)
             except UserOTP.DoesNotExist:
                 user.delete()
+    return None
+
+# 비밀번호 조건: 8~50자, 영어 대소문자, 숫자, 특수문자 각각 최소 하나
+def is_valid_password(password: str) -> bool:
+    
+    password_pattern = re.compile(r'^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$')
+    return bool(password_pattern.match(password))
+
+def handle_invalid_password(user, current_password, new_password):
+    
+    if not user.has_usable_password():
+        return JsonResponse({
+            'error': '42계정의 비밀번호를 변경할 수 없습니다.'
+        }, status=400)
+
+    if not user.check_password(current_password):
+        return JsonResponse({
+            'error': '현재 비밀번호가 틀렸습니다.'
+        }, status=400)
+    
+    if not new_password or not new_password.strip():
+        return JsonResponse({
+            'error': '비밀번호는 공백일 수 없습니다.'
+        }, status=400)
+
+    if user.check_password(new_password):
+        return JsonResponse({
+            'error': '기존 비밀번호와 같은 비밀번호로 변경할 수 없습니다.'
+        }, status=400)
+
+    if not is_valid_password(new_password):
+        return JsonResponse({
+            'error': '비밀번호는 최소 8자에서 50자 사이여야 하며, 영어 대소문자, 숫자, 특수문자를 각각 하나 이상 포함해야 합니다.'
+        }, status=400)
+    
     return None
