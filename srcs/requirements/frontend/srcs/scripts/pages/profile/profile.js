@@ -151,7 +151,7 @@ function ProfilePage() {
     }
 
   // 프로필 데이터, 드롭다운, 프로필 업로드 초기화
-  fetchProfileData();
+  updateProfilePage();
   initializeDropdowns();
   initProfileUpload(container);
 
@@ -195,23 +195,28 @@ function initializeDropdowns() {
  * @param {number} [data.lose] 패배 수
  * @param {number} [data.draw] 무승부 수
  */
-function updateProfilePage(data) {
-  const usernameElement = document.querySelector('.fs-2.fw-bold');
-  if (usernameElement && data.username) {
-    usernameElement.textContent = data.username;
-  }
-
-  const profileImg = document.querySelector('.profile-img');
-  if (profileImg) {
-    profileImg.src = data.profile_image || '/static/profile.jpg';
-  }
-
-  const statElements = document.querySelectorAll('.stat-card + .text-center .fs-1.fw-bold');
-  if (statElements.length >= 4) {
-    statElements[0].textContent = data.total  || 0; // Totals
-    statElements[1].textContent = data.win    || 0; // Wins
-    statElements[2].textContent = data.lose   || 0; // Losses
-    statElements[3].textContent = data.draw   || 0; // Draws
+async function updateProfilePage() {
+  try {
+    const data = await fetchProfileData();
+    const usernameElement = document.querySelector('.fs-2.fw-bold');
+    if (usernameElement && data.username) {
+      usernameElement.textContent = data.username;
+    }
+  
+    const profileImg = document.querySelector('.profile-img');
+    if (profileImg) {
+      profileImg.src = data.profile_image || '/static/profile.jpg';
+    }
+  
+    const statElements = document.querySelectorAll('.stat-card + .text-center .fs-1.fw-bold');
+    if (statElements.length >= 4) {
+      statElements[0].textContent = data.total  || 0; // Totals
+      statElements[1].textContent = data.win    || 0; // Wins
+      statElements[2].textContent = data.lose   || 0; // Losses
+      statElements[3].textContent = data.draw   || 0; // Draws
+    }
+  } catch (error) {
+    alert('프로필 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
   }
 }
 

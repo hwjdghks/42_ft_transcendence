@@ -1,24 +1,5 @@
-// 프로필 username을 API에서 가져오는 함수
-async function fetchProfileUsername() {
-  const token = sessionStorage.getItem('fa_token');
-  try {
-    const response = await fetch('https://localhost/api/users/profile/', {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (response.ok) {
-      const data = await response.json();
-      return data.username || "Me";
-    } else {
-      console.error("프로필 username을 가져오지 못했습니다.");
-    }
-  } catch (error) {
-    console.error("프로필 username 호출 에러:", error);
-  }
-  return "Me"; // 기본값
-}
+import { fetchProfileData } from '../profile/profileApi.js'
+import { resetTournamentSession } from '../game/tournament.js'
 
 // 모든 플레이어 입력에 대해 유효성 검증 후 시각적 피드백 및 Next 버튼 상태 업데이트
 function updateValidationState(container) {
@@ -43,13 +24,13 @@ function updateValidationState(container) {
       errorMsg = "최대 10자까지 입력 가능합니다.";
     }
     
-    // 인풋의 부모 요소에 있는 invalid-feedback 엘리먼트를 찾음
     const feedback = input.parentNode.querySelector('.invalid-feedback');
     if (input.dataset.touched === "true" && !valid) {
       input.classList.add("is-invalid");
       if (feedback) {
         feedback.textContent = errorMsg;
       }
+      isAllValid = false;
     } else {
       input.classList.remove("is-invalid");
       if (feedback) {
@@ -83,9 +64,17 @@ function updateValidationState(container) {
     }
   });
   
-  // Next 버튼 활성화 여부 업데이트
+  // 최초 진입 시 아무 입력도 터치되지 않았다면 무조건 버튼 비활성화
+  const anyTouched = Array.from(playerInputs).some(input => input.dataset.touched === "true");
+  if (!anyTouched) {
+    isAllValid = false;
+  }
+  
+  // GameOptionPage의 Next 버튼은 id가 'game-option-next'를 사용
   const nextButton = container.querySelector('#game-option-next');
-  nextButton.disabled = !isAllValid;
+  if (nextButton) {
+    nextButton.disabled = !isAllValid;
+  }
 }
 
 // 플레이어 입력 필드를 렌더링하는 함수
@@ -104,7 +93,7 @@ function renderPlayerInputs(container, players) {
   firstInput.className = 'form-control';
   firstInput.placeholder = 'username';
   firstInput.disabled = true;
-  firstInput.value = 'Me';
+  firstInput.value = 'Loading';
   // 에러 메시지 엘리먼트 추가
   const firstFeedback = document.createElement('div');
   firstFeedback.className = 'invalid-feedback';
@@ -114,9 +103,8 @@ function renderPlayerInputs(container, players) {
   firstDiv.appendChild(firstFeedback);
   playerInputs.appendChild(firstDiv);
 
-  // API 호출 후 첫 번째 플레이어 이름 업데이트 및 유효성 검사 갱신
-  fetchProfileUsername().then(username => {
-    firstInput.value = username;
+  fetchProfileData().then(data => {
+    firstInput.value = data.username;
     updateValidationState(container);
     saveOptionsToSessionStorage(container);
   });
@@ -133,7 +121,6 @@ function renderPlayerInputs(container, players) {
     input.className = 'form-control';
     input.placeholder = 'Enter username';
     
-    // 에러 메시지 엘리먼트 추가
     const feedback = document.createElement('div');
     feedback.className = 'invalid-feedback';
     
@@ -159,17 +146,16 @@ function renderPlayerInputs(container, players) {
     playerInputs.appendChild(div);
   }
   
-  // 새 플레이어 인풋 생성 후에도 Next 버튼 상태 업데이트
   updateValidationState(container);
 }
 
-// 옵션 저장 함수
+// 옵션 저장 함수 (플레이어 수, 패들 사이즈, 공 속도, 장애물 수, 플레이어 이름 배열 저장)
 function saveOptionsToSessionStorage(container) {
   // 1. 플레이어 수 (data-players 속성이 있는 버튼에서 가져옴)
   const playersElement = container.querySelector('.btn-group .active[data-players]');
   const players = playersElement ? parseInt(playersElement.getAttribute('data-players'), 10) : 2;
   
-  // 2. 패들 사이즈: "x1", "x1.2" 등으로 되어 있을 수 있으므로 "x" 제거 후 숫자형 변환
+  // 2. 패들 사이즈
   const rawPaddleSize = container
     .querySelectorAll('.btn-group')[1]
     .querySelector('.active')?.textContent.trim() || "1";
@@ -177,7 +163,7 @@ function saveOptionsToSessionStorage(container) {
     ? parseFloat(rawPaddleSize.substring(1))
     : parseFloat(rawPaddleSize);
   
-  // 3. 공 속도: "x1", "x1.5" 등으로 되어 있을 수 있으므로 "x" 제거 후 숫자형 변환
+  // 3. 공 속도
   const rawBallSpeed = container
     .querySelectorAll('.btn-group')[2]
     .querySelector('.active')?.textContent.trim() || "1";
@@ -185,7 +171,7 @@ function saveOptionsToSessionStorage(container) {
     ? parseFloat(rawBallSpeed.substring(1))
     : parseFloat(rawBallSpeed);
   
-  // 4. 장애물 수: 정수형으로 변환
+  // 4. 장애물 수
   const obstaclesElement = container
     .querySelectorAll('.btn-group')[3]
     .querySelector('.active');
@@ -193,9 +179,8 @@ function saveOptionsToSessionStorage(container) {
   
   // 5. 플레이어 이름 배열: 모든 인풋에서 값 추출 (첫 번째 플레이어 포함)
   const playerInputs = container.querySelectorAll('#playerInputs input');
-  const usernameArr = Array.from(playerInputs).map(input => input.value.trim());
+  const playerListArr = Array.from(playerInputs).map(input => input.value.trim());
   
-  // 옵션 객체 구성 (paddleSize와 ballSpeed는 숫자형 multiplier로 저장)
   const options = {
     players,
     paddleSize: paddleMultiplier,
@@ -204,11 +189,13 @@ function saveOptionsToSessionStorage(container) {
   };
   
   sessionStorage.setItem('game_option', JSON.stringify(options));
-  sessionStorage.setItem('username', JSON.stringify(usernameArr));
+  sessionStorage.setItem('playerList', JSON.stringify(playerListArr));
 }
 
-// 게임 옵션 페이지 생성 함수
+// --- 게임 옵션 페이지 ---
+// 플레이어 입력, 옵션 설정 등 UI 구성 후, Next 버튼 클릭 시 최종 유효성(빈 값, 유효성, 첫번째 이름 비교) 체크
 function GameOptionPage() {
+  resetTournamentSession();
   const container = document.createElement('div');
   container.className = 'container py-5';
   container.innerHTML = `
@@ -220,17 +207,12 @@ function GameOptionPage() {
       <!-- Players Section -->
       <div class="card mb-4">
         <div class="card-body">
-          <h5 class="card-title">
-            Players
-          </h5>
+          <h5 class="card-title">Players</h5>
           <div class="btn-group w-100" role="group">
-            <!-- data-players로 인원수 표시 -->
             <button type="button" class="btn btn-primary active" data-players="2">2</button>
             <button type="button" class="btn btn-outline-primary" data-players="4">4</button>
             <button type="button" class="btn btn-outline-primary" data-players="8">8</button>
           </div>
-
-          <!-- Player Input Section (inside the card) -->
           <div id="playerInputs" class="mt-3"></div>
         </div>
       </div>
@@ -277,49 +259,41 @@ function GameOptionPage() {
       </div>
   `;
 
-  // 옵션 버튼 선택 시 이벤트 리스너 설정
+  // 옵션 버튼 클릭 시 active 상태 전환 및 옵션 저장
   const btnGroups = container.querySelectorAll('.btn-group');
   btnGroups.forEach((btnGroup) => {
     btnGroup.addEventListener('click', (event) => {
       if (event.target.tagName === 'BUTTON') {
-        // 같은 그룹 내 모든 버튼의 active 제거
         btnGroup.querySelectorAll('button').forEach(btn => {
           btn.classList.remove('active', 'btn-primary');
           btn.classList.add('btn-outline-primary');
         });
-    
-        // 클릭된 버튼에 active 적용
         event.target.classList.add('active', 'btn-primary');
         event.target.classList.remove('btn-outline-primary');
-    
-        // data-players 속성이 있으면 플레이어 인풋 렌더링
+        // data-players 버튼이면 플레이어 인풋 렌더링
         if (event.target.hasAttribute('data-players')) {
           const players = parseInt(event.target.getAttribute('data-players'));
           renderPlayerInputs(container, players);
         }
-    
-        // 선택 사항 저장
         saveOptionsToSessionStorage(container);
       }
     });    
   });
 
-  // 초기 2인용 렌더링
+  // 초기 2인용 렌더링 및 검증
   renderPlayerInputs(container, 2);
+  updateValidationState(container);
 
-  // Next 버튼 이벤트 설정
+  // Next 버튼 클릭 시, 최종 검증 (빈값, 유효성, 첫 플레이어 비교) 후 토너먼트 페이지로 이동
   const nextButton = container.querySelector('#game-option-next');
-  nextButton.addEventListener('click', () => {
-    if (!nextButton.disabled) {
-      saveOptionsToSessionStorage(container);
-      sessionStorage.setItem('tournament_in_progress', 'true');
-      // 토너먼트 페이지로 이동
-      window.location.hash = '#gameplay/tournament';
-    }
+  nextButton.addEventListener('click', async () => {
+    saveOptionsToSessionStorage(container);
+    sessionStorage.setItem('tournament_in_progress', 'true');
+    window.location.hash = '#gameplay/tournament';
   });
 
   return container;
 }
 
-// 외부에서 사용할 수 있도록 GameOptionPage 함수 export
+// --- 외부에서 사용할 수 있도록 export ---
 export { GameOptionPage };

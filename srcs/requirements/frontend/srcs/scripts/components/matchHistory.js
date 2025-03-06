@@ -62,6 +62,8 @@ async function renderMatchHistory() {
 * @returns {string} HTML 문자열
 */
 function createMatchHistoryItem(match) {
+	const currentProfileUrl = sessionStorage.getItem('user_profile_image') || '/static/profile.jpg';
+	const profileUrl = match.profile_image_url ? match.profile_image_url : currentProfileUrl;
   // 경기 결과에 따른 CSS 클래스 지정
   const statusColorClass = {
       'win': 'border-primary bg-primary bg-opacity-10',
@@ -77,7 +79,7 @@ function createMatchHistoryItem(match) {
                   <!-- 사용자 정보 -->
                   <div class="d-flex flex-column align-items-center">
                       <div class="rounded-circle bg-light" style="width: 48px; height: 48px;">
-                          <img src="${match.profile_image_url}" alt="Player 1"
+                          <img src="${profileUrl}" alt="Player 1"
                                style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                       </div>
                       <span class="fw-bold mt-1">${match.username}</span>

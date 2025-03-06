@@ -1,4 +1,4 @@
-import { updateProfilePage } from "./profile.js";
+import { renderMatchHistory } from "../../components/matchHistory.js";
 
 /**
  * 프로필 데이터(이미지, 매치 결과, 친구 목록 등)를 가져오는 함수
@@ -23,9 +23,10 @@ async function fetchProfileData() {
 				throw new Error(error.error || 'Failed fetchProfileData');
 			}
 			const result = await response.json();
-			updateProfilePage(result);
+			return result;
 	} catch (error) {
-			console.error('Error:', error);
+			console.error(error);
+			throw error
 	}
 }
 
@@ -61,6 +62,7 @@ async function uploadProfileImage(file) {
 				profileImg.src = result.profile_image_url;
 			}
 		}
+		renderMatchHistory();
 		alert('Success to upload profile image');
 	} catch (error) {
 		console.error('Error:', error.message);
@@ -86,4 +88,4 @@ async function fetchLogout() {
 	return result.message;
 }
 
-export { fetchProfileData, uploadProfileImage, fetchLogout};
+export { fetchProfileData, uploadProfileImage, fetchLogout };
