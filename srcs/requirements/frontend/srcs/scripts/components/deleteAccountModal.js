@@ -1,5 +1,4 @@
 export function createDeleteAccountModal() {
-    // 모달 HTML 생성: 기존 username 확인 필드를 제거하고 OTP 입력 필드를 추가함
     const modal = document.createElement('div');
     modal.innerHTML = `
       <div id="deleteAccountModal" class="modal fade" tabindex="-1">
@@ -30,21 +29,17 @@ export function createDeleteAccountModal() {
   
     document.body.appendChild(modal);
   
-    // Bootstrap 모달 인스턴스 생성
     const deleteAccountModalEl = document.getElementById('deleteAccountModal');
     const bootstrapModal = new bootstrap.Modal(deleteAccountModalEl);
   
-    // sessionStorage에서 JWT 토큰(fa_token) 가져오기
     const token = sessionStorage.getItem('fa_token');
   
-    // 모달 내 메시지 표시 함수 (로그인 방식과 동일한 형식)
     function showMessage(message, type = 'success') {
       const messageDiv = document.getElementById('deleteAccountMessage');
       messageDiv.textContent = message;
       messageDiv.className = type === 'success' ? 'text-success' : 'text-danger';
     }
   
-    // OTP 요청 API 호출 함수
     function requestOTP() {
       fetch('https://localhost/api/auth/2fa/withdraw/request/', {
         method: 'POST',
@@ -56,7 +51,6 @@ export function createDeleteAccountModal() {
       })
         .then(response => response.json())
         .then(data => {
-          // OTP 요청 성공 시, 백엔드에서 전달된 메시지를 표시
           if (data && data.message) {
             showMessage(data.message, 'success');
           } else {
@@ -68,19 +62,14 @@ export function createDeleteAccountModal() {
         });
     }
   
-    // 모달이 열리면 OTP 자동 요청 (Bootstrap 이벤트 활용)
     deleteAccountModalEl.addEventListener('shown.bs.modal', () => {
-      // 이전 메시지 초기화
       showMessage('');
-      // OTP 요청
       requestOTP();
     });
   
-    // OTP 입력 필드와 탈퇴 확인 버튼 요소 가져오기
     const otpInput = modal.querySelector('#otpInput');
     const confirmDeleteBtn = modal.querySelector('#confirmDelete');
   
-    // OTP 입력이 있으면 탈퇴 버튼 활성화
     otpInput.addEventListener('input', () => {
       if (otpInput.value.trim() !== '') {
         confirmDeleteBtn.disabled = false;
@@ -89,7 +78,6 @@ export function createDeleteAccountModal() {
       }
     });
   
-    // 탈퇴 요청 처리
     confirmDeleteBtn.addEventListener('click', () => {
       const otpValue = otpInput.value.trim();
       if (!otpValue) {
@@ -110,7 +98,6 @@ export function createDeleteAccountModal() {
         )
         .then(({ ok, data }) => {
           if (ok) {
-            // 탈퇴 성공: 성공 메시지 출력 후 세션 클리어 및 로그인 페이지로 이동
             alert(data.message || '계정이 성공적으로 삭제되었습니다.');
             sessionStorage.clear();
             bootstrapModal.hide();
@@ -118,7 +105,6 @@ export function createDeleteAccountModal() {
               window.location.href = '#login';
             }, 500);
           } else {
-            // 탈퇴 실패: 백엔드에서 받은 오류 메시지를 표시
             showMessage(data.message || '탈퇴 실패. 다시 시도해주세요.', 'error');
           }
         })
