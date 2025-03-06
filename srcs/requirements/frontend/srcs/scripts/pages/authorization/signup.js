@@ -151,6 +151,7 @@ export function SignupPage() {
         </form>
       <div id="signup-message" class="mt-3"></div>
       </div>
+	<a href="/#login" class="btn btn-link mt-3">Login</a>
     </div>
 	`;
 }
