@@ -148,10 +148,8 @@ export function SignupPage() {
           </div>
 
           <button type="submit" class="btn signup-btn" id="signup-btn">Send Code</button>
+          <a href="/#login" class="btn btn-link mt-3">Login</a>
         </form>
-      <div id="signup-message" class="mt-3"></div>
-      </div>
-	<a href="/#login" class="btn btn-link mt-3">Login</a>
     </div>
 	`;
 }

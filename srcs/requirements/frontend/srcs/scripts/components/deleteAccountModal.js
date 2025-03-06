@@ -96,15 +96,32 @@ export function createDeleteAccountModal() {
       .then(response => response.json().then(data => ({ ok: response.ok, data })))
       .then(({ ok, data }) => {
         if (ok) {
-          alert(data.message || '계정이 성공적으로 삭제되었습니다.');
+          // 성공 처리
           sessionStorage.clear();
           otpInput.value = '';
           showMessage('');
+          if (document.activeElement) document.activeElement.blur();
+  
+          // 모달 닫기
           bootstrapModal.hide();
+  
+          // ★ 모달 닫힘 애니메이션 대기 후 처리
           setTimeout(() => {
+            // 백드롭 제거
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) backdrop.remove();
+  
+            // 모달 DOM 제거
+            modal.remove();
+  
+            // 로그인 페이지로 이동
             window.location.href = '#login';
-          }, 500);
+  
+            // 알림 표시 (비차단식 토스트 사용도 고려 가능)
+            alert(data.message || '계정이 성공적으로 삭제되었습니다.');
+          }, 500); // 모달 fade 애니메이션 시간이 보통 300~500ms 정도
         } else {
+          // 실패 처리
           showMessage(data.message || '탈퇴 실패. 다시 시도해주세요.', 'error');
         }
       })
@@ -112,6 +129,8 @@ export function createDeleteAccountModal() {
         showMessage(error.message || '탈퇴 요청 중 오류가 발생했습니다.', 'error');
       });
   });
-
+  
+  
+  
   return modal;
 }
