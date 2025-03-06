@@ -10,7 +10,7 @@ from authentication.views import generate_jwt, jwt_required
 from friends.views import update_last_activate
 from matchresult.models import MatchResult
 from .models import User
-from .utils import check_existing_user
+from .utils import check_existing_user, is_valid_password, handle_invalid_password
 
 @csrf_exempt
 @require_POST
@@ -22,6 +22,11 @@ def signup(request: HttpRequest) -> JsonResponse:
 
     if not email or not password:
         return JsonResponse({'error': 'Email and password are required'}, status=400)
+    
+    if not is_valid_password(password):
+        return JsonResponse({
+            'error': '비밀번호는 최소 8자에서 50자 사이여야 하며, 영어 대소문자, 숫자, 특수문자를 각각 하나 이상 포함해야 합니다.'
+        }, status=400)
 
     # 이메일 중복 검사 단 유저가 is_active가 false이고 otp를 발송한지 30분이 지난상태면 삭제
     response = check_existing_user(User.objects.filter(email=email).first(), "Email")
@@ -174,27 +179,16 @@ def update_username(request: HttpRequest) -> JsonResponse:
 def update_password(request: HttpRequest) -> JsonResponse:
     user: User = request.user
     new_password = json.loads(request.body).get('new_password')
+    current_password = json.loads(request.body).get('current_password')
 
-    if user.has_usable_password() == False:
-        return JsonResponse({
-            'error': '42계정의 비밀번호를 변경할 수 없습니다.'
-        }, status=400)
-
-    if not new_password or not new_password.strip():
-        return JsonResponse({
-            'error': '비밀번호는 공백일 수 없습니다.'
-        }, status=400)
-
-    if user.check_password(new_password):
-        return JsonResponse({
-            'error': '기존 비밀번호와 같은 비밀번호로 변경할 수 없습니다.'
-        }, status=400)
+    error_response = handle_invalid_password(user, current_password, new_password)
+    if error_response:
+        return error_response
 
     user.set_password(new_password)
     user.save()
 
     return JsonResponse({'message': 'password updated successfully'}, status=200)
-
 
 @csrf_exempt
 @require_POST
