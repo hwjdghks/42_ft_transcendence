@@ -1,15 +1,11 @@
-function getToken() {
-  return sessionStorage.getItem('fa_token');
-}
-
 let friends = [];
 
 export function fetchFriends() {
   const friendListPromise = fetch("https://localhost/api/friends/list/", {
     method: "GET",
+    credentials: 'include',
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${getToken()}`
     }
   }).then(response => {
     if (!response.ok) {
@@ -20,9 +16,9 @@ export function fetchFriends() {
 
   const onlineListPromise = fetch("https://localhost/api/friends/online/", {
     method: "GET",
+    credentials: 'include',
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${getToken()}`
     }
   }).then(response => {
     if (!response.ok) {
@@ -157,9 +153,9 @@ export function performFriendSearch(query) {
 
   fetch(`https://localhost/api/friends/search/?search_query=${encodeURIComponent(query)}`, {
     method: "GET",
+    credentials: 'include',
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${getToken()}`
     }
   })
     .then(response => response.json())
@@ -185,9 +181,9 @@ export function addFriendFromSearch(friendname) {
 
   fetch("https://localhost/api/friends/add/", {
     method: "POST",
+    credentials: 'include',
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${getToken()}`
     },
     body: JSON.stringify({ friendname: friendname })
   })
@@ -214,9 +210,9 @@ export function addFriendFromSearch(friendname) {
 export function removeFriend(friendname) {
   fetch("https://localhost/api/friends/delete/", {
     method: "POST",
+    credentials: 'include',
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${getToken()}`
     },
     body: JSON.stringify({ friendname: friendname })
   })

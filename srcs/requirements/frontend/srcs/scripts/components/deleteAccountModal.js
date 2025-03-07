@@ -29,7 +29,6 @@ export function createDeleteAccountModal() {
   document.body.appendChild(modal);
   const deleteAccountModalEl = document.getElementById('deleteAccountModal');
   const bootstrapModal = new bootstrap.Modal(deleteAccountModalEl);
-  const token = sessionStorage.getItem('fa_token');
 
   function showMessage(message, type = 'success') {
     const messageDiv = document.getElementById('deleteAccountMessage');
@@ -40,9 +39,9 @@ export function createDeleteAccountModal() {
   function requestOTP() {
     fetch('https://localhost/api/auth/2fa/withdraw/request/', {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({})
     })
@@ -87,9 +86,9 @@ export function createDeleteAccountModal() {
     }
     fetch('https://localhost/api/users/withdraw/', {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({ otp: otpValue })
     })

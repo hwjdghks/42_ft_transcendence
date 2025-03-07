@@ -9,9 +9,8 @@ async function handleLoginSubmit(event) {
 
   try {
     const response = await fetchLogin({ email, password });
-    sessionStorage.setItem('fa_temp_token', response.token);
 
-    const otpResponse = await fetchLoginOTPRequest(response.token);
+    const otpResponse = await fetchLoginOTPRequest();
     showMessage(otpResponse.message || 'OTP has been sent. Check your email.', 'success');
 
     setTimeout(async () => {
@@ -32,6 +31,7 @@ async function handleOauthSubmit(event) {
   try {
     const response = await fetch("https://localhost/api/oauth/42intra/signin/", {
       method: "GET",
+      credentials: 'include',
       headers: {
         "Content-Type": "application/json"
       }

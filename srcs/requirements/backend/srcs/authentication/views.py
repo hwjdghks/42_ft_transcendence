@@ -10,7 +10,7 @@ from django.core.mail import send_mail
 from django.http import HttpRequest, JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 
 from users.models import User
 from .models import UserOTP
@@ -29,11 +29,14 @@ def jwt_required(*, expected_factor_level: int):
     def decorator(view_func):
         @wraps(view_func)
         def wrapper(request: HttpRequest, *args, **kwargs):
-            auth_header = request.headers.get('Authorization')
-            if not auth_header or not auth_header.startswith('Bearer '):
+            if expected_factor_level == 1:
+                token = request.COOKIES.get('temp')
+            else:
+                token = request.COOKIES.get('jwt')
+
+            if not token:
                 return JsonResponse({'error': '토큰이 필요합니다.'}, status=401)
 
-            token = auth_header.split(' ')[1]
             try:
                 payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
                 request.user = User.objects.get(email=payload['id'])
@@ -49,11 +52,38 @@ def jwt_required(*, expected_factor_level: int):
             except User.DoesNotExist:
                 return JsonResponse({'error': '사용자를 찾을 수 없습니다.'}, status=401)
             except Exception as e:
-                return JsonResponse({'error': '서버 에러 발생', 'detail': e}, status=500)
+                return JsonResponse({'error': '서버 에러 발생', 'detail': str(e)}, status=500)
 
             return view_func(request, *args, **kwargs)
         return wrapper
     return decorator
+
+def set_jwt_cookie(response: JsonResponse, token: str, key: str):
+    response.set_cookie(
+        key=key,
+        value=token,
+        httponly=True,
+        secure=True,
+        samesite='Strict',
+        max_age=settings.JWT_EXPIRATION_DELTA.total_seconds()
+    )
+
+@require_GET
+def check_cookie(request):
+    cookies_to_check = {'temp': 'tempCookieExists', 'jwt': 'cookieExists'}
+    result = {}
+
+    for cookie_key, cookie_value in cookies_to_check.items():
+        token = request.COOKIES.get(cookie_key)
+        if token:
+            try:
+                payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+                result[cookie_value] = True  # 유효한 토큰
+            except (jwt.ExpiredSignatureError, jwt.DecodeError, jwt.InvalidTokenError):
+                result[cookie_value] = False  # 유효하지 않은 토큰
+        else:
+            result[cookie_value] = False  # 쿠키 없음 또는 유효하지 않은 토큰
+    return JsonResponse(result)
 
 def refresh_otp(user_otp, otp_type):
     if otp_type == 'login':
@@ -65,7 +95,7 @@ def refresh_otp(user_otp, otp_type):
     else:
         raise ValueError("Invalid otp_type")
     user_otp.save()
-    
+
 def generate_otp(user_otp, otp_type, interval=180):
     if otp_type == 'login':
         totp = pyotp.TOTP(user_otp.login_secret, interval=interval)
@@ -138,49 +168,51 @@ def send_signup_2fa(request: HttpRequest) -> JsonResponse:
 @require_POST
 @jwt_required(expected_factor_level=1)
 def send_signin_2fa(request: HttpRequest) -> JsonResponse:
-	user: User = request.user
+    user: User = request.user
 
-	if User.objects.filter(email=user.email, is_active=False).exists():
-		return JsonResponse({'error': 'Users who are not two-factor authentication'}, status=400)
-	try:
-		send_otp_email(user, otp_type='login')
-	except Exception as e:
-		return JsonResponse({'error': 'Failed to send OTP email'}, status=500)
-	return JsonResponse({'message': 'email send your email in successfully'}, status=200)
+    if User.objects.filter(email=user.email, is_active=False).exists():
+        return JsonResponse({'error': 'Users who are not two-factor authentication'}, status=400)
+    try:
+        send_otp_email(user, otp_type='login')
+    except Exception as e:
+        return JsonResponse({'error': 'Failed to send OTP email'}, status=500)
+    return JsonResponse({'message': 'email send your email in successfully'}, status=200)
 
 @csrf_exempt
 @require_POST
 @jwt_required(expected_factor_level=2)
 def send_withdraw_2fa(request: HttpRequest) -> JsonResponse:
-	user: User = request.user
+    user: User = request.user
 
-	try:
-		send_otp_email(user, otp_type='withdraw')
-	except Exception as e:
-		return JsonResponse({'error': 'Failed to send OTP email'}, status=500)
-	return JsonResponse({'message': 'email send your email in successfully'}, status=200)
+    try:
+        send_otp_email(user, otp_type='withdraw')
+    except Exception as e:
+        return JsonResponse({'error': 'Failed to send OTP email'}, status=500)
+    return JsonResponse({'message': 'email send your email in successfully'}, status=200)
 
 @csrf_exempt
 @require_POST
 @jwt_required(expected_factor_level=1)
 def check_signup_2fa(request: HttpRequest) -> JsonResponse:
-	user: User = request.user
-	data = json.loads(request.body)
-	otp_code = data.get('otp')
+    user: User = request.user
+    data = json.loads(request.body)
+    otp_code = data.get('otp')
 
-	if User.objects.filter(email=user.email, is_active=True).exists():
-		return JsonResponse({'error': 'Email already in signup'}, status=400)
-	try:
-		user_otp = user.otp
-	except UserOTP.DoesNotExist:
-		return JsonResponse({'error': 'otp 생성이 이루어지지 않았습니다.'}, status=401)
+    if User.objects.filter(email=user.email, is_active=True).exists():
+        return JsonResponse({'error': 'Email already in signup'}, status=400)
+    try:
+        user_otp = user.otp
+    except UserOTP.DoesNotExist:
+        return JsonResponse({'error': 'otp 생성이 이루어지지 않았습니다.'}, status=401)
 
-	if (verify_otp(user_otp, otp_code, otp_type='login') == False):
-		return JsonResponse({'error': '유효하지 않거나 만료된 OTP입니다.'}, status=401)
-	user.is_active = True
-	user.save()
-	token = generate_jwt(user, 2)
-	return JsonResponse({'message': 'User created successfully', 'token': token}, status=201)
+    if (verify_otp(user_otp, otp_code, otp_type='login') == False):
+        return JsonResponse({'error': '유효하지 않거나 만료된 OTP입니다.'}, status=401)
+    user.is_active = True
+    user.save()
+    token = generate_jwt(user, 2)
+    response = JsonResponse({'message': 'User created successfully'}, status=201)
+    set_jwt_cookie(response, token, 'jwt')
+    return response
 
 @csrf_exempt
 @require_POST
@@ -199,4 +231,6 @@ def check_signin_2fa(request: HttpRequest) -> JsonResponse:
     if (verify_otp(user_otp, otp_code, otp_type='login') == False):
         return JsonResponse({'error': '유효하지 않거나 만료된 OTP입니다.'}, status=401)
     token = generate_jwt(user, 2)
-    return JsonResponse({'message': 'Signed in successfully', 'token': token}, status=200)
+    response = JsonResponse({'message': 'Signed in successfully'}, status=200)
+    set_jwt_cookie(response, token, 'jwt')
+    return response

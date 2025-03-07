@@ -2,6 +2,7 @@ export async function fetchSignup(data) {
     console.log("Signup Request Data:", JSON.stringify(data, null, 2));
     const response = await fetch('https://localhost/api/users/signup/', {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -17,12 +18,12 @@ export async function fetchSignup(data) {
     return responseData;
   }
   
-  export async function fetchOTPRequest(token) {
+  export async function fetchOTPRequest() {
     const response = await fetch('https://localhost/api/auth/2fa/signup/request/', {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({})
     });
@@ -32,12 +33,12 @@ export async function fetchSignup(data) {
     return responseData;
   }
   
-  export async function fetchOTPVerify(token, otp) {
+  export async function fetchOTPVerify(otp) {
     const response = await fetch('https://localhost/api/auth/2fa/signup/verify/', {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({ otp })
     });

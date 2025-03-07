@@ -255,7 +255,6 @@ async function handleLogout() {
     alert(logoutLog);
 
     // 세션 스토리지 클리어
-    sessionStorage.removeItem('fa_token');
     sessionStorage.removeItem('userId');
     sessionStorage.removeItem("tournament_in_progress");
     sessionStorage.removeItem("game_option");

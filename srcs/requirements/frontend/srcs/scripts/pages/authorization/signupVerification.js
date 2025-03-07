@@ -1,8 +1,9 @@
 import { fetchOTPVerify, showMessage } from './signupApi.js';
+import { checkTempCookie } from '../../validation/cookie.js';
 
 export function SignupVerificationPage() {
   async function verifyTokenOnLoad() {
-    const existingToken = sessionStorage.getItem("fa_temp_token");
+    const existingToken = await checkTempCookie();
     if (!existingToken) {
       alert("접근 할 수 없는 페이지 입니다.");
       window.location.hash = '#signup';
@@ -12,7 +13,7 @@ export function SignupVerificationPage() {
   async function handleVerificationSubmit(event) {
     event.preventDefault();
 
-    const existingToken = sessionStorage.getItem("fa_temp_token");
+    const existingToken = await checkTempCookie();
     if (!existingToken) {
       showMessage('No token found. Please go back to signup page.', 'error');
       return;
@@ -27,11 +28,7 @@ export function SignupVerificationPage() {
     try {
       // 중복 제출 방지: 버튼 비활성화
       document.getElementById('verify-btn').disabled = true;
-      const verifyResponse = await fetchOTPVerify(existingToken, otp);
-      
-      // OTP 검증 성공 시 최종 토큰으로 업데이트하고 임시 토큰 제거
-      sessionStorage.setItem('fa_token', verifyResponse.token);
-      sessionStorage.removeItem('fa_temp_token');
+      const verifyResponse = await fetchOTPVerify(otp);
       
       showMessage(verifyResponse.message || 'Signup successful!', 'success');
       setTimeout(() => {

@@ -1,9 +1,10 @@
 import { fetchLoginOTPVerify, showMessage } from './loginApi.js';
 import { fetchFriends } from '../../components/friends.js'
+import { checkTempCookie } from '../../validation/cookie.js';
 
 export function LoginVerificationPage() {
   async function verifyTokenOnLoad() {
-    const existingToken = sessionStorage.getItem("fa_temp_token");
+    const existingToken = await checkTempCookie();
     if (!existingToken) {
       alert("접근 할 수 없는 페이지 입니다.");
       window.location.hash = '#login';
@@ -13,7 +14,7 @@ export function LoginVerificationPage() {
   async function handleVerificationSubmit(event) {
     event.preventDefault();
     
-    const existingToken = sessionStorage.getItem("fa_temp_token");
+    const existingToken = await checkTempCookie();
     if (!existingToken) {
       showMessage('No token found. Please go back to login page.', 'error');
       return;
@@ -27,11 +28,9 @@ export function LoginVerificationPage() {
   
     try {
       document.getElementById('verify-btn').disabled = true;
-      const verifyResponse = await fetchLoginOTPVerify(existingToken, otp);
+      const verifyResponse = await fetchLoginOTPVerify(otp);
   
-      sessionStorage.setItem('fa_token', verifyResponse.token);
       sessionStorage.setItem('username', verifyResponse.username);
-      sessionStorage.removeItem('fa_temp_token');
 
   
       setTimeout(async () => {

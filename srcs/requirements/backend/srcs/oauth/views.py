@@ -6,7 +6,7 @@ from django.http import HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
-from authentication.views import generate_jwt
+from authentication.views import generate_jwt, set_jwt_cookie
 from .utils import get_oauth_token, get_user_info, get_or_create_user
 
 #app -> 42intra login
@@ -49,5 +49,6 @@ def oauth_callback(request):
 
     user = get_or_create_user(email, username)
     token = generate_jwt(user, 2)
-
-    return JsonResponse({'message': 'User created successfully', 'token': token}, status=201)
+    response = JsonResponse({'message': 'User created successfully'}, status=201)
+    set_jwt_cookie(response, token, 'jwt')
+    return response

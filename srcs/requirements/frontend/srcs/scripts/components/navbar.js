@@ -1,7 +1,9 @@
+import { checkCookie } from '../validation/cookie.js';
+
 const navbar = document.getElementById('navbar');
 
-function isLoggedIn() {
-  const token = sessionStorage.getItem('fa_token');
+async function isLoggedIn() {
+  const token = await checkCookie();
   console.log("🔹 [isLoggedIn] JWT Token 상태:", token);
   return token !== null && token !== "undefined"; 
 }

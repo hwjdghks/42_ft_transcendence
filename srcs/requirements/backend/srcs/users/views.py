@@ -6,7 +6,7 @@ from django.http import HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
-from authentication.views import generate_jwt, jwt_required, verify_otp
+from authentication.views import generate_jwt, jwt_required, verify_otp, set_jwt_cookie
 from friends.views import update_last_activate
 from matchresult.models import MatchResult
 from .models import User
@@ -55,7 +55,9 @@ def signup(request: HttpRequest) -> JsonResponse:
     user.share_online_status = share_online_status
     user.save()
     token = generate_jwt(user, 1)
-    return JsonResponse({'message': 'User created successfully', 'token': token}, status=201)
+    response = JsonResponse({'message': 'User created successfully'}, status=201)
+    set_jwt_cookie(response, token, 'temp')
+    return response
 
 @csrf_exempt
 @require_POST
@@ -73,7 +75,9 @@ def signin(request: HttpRequest) -> JsonResponse:
     user = authenticate(email=email, password=password)
     if user is not None:
         token = generate_jwt(user, 1)
-        return JsonResponse({'message': 'Signed in successfully', 'token': token}, status=200)
+        response = JsonResponse({'message': 'Signed in successfully'}, status=200)
+        set_jwt_cookie(response, token, 'temp')
+        return response
 
     return JsonResponse({'error': 'Invalid credentials'}, status=400)
 
