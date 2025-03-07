@@ -1,126 +1,136 @@
-async function fetchAccountDeletion() {
-    const token = sessionStorage.getItem('fa_token');
-    
-    const response = await fetch('https://localhost/api/users/withdraw/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        }
-    });
-
-    if (!response.ok) {
-        throw new Error('Account deletion failed');
-    }
-
-    return await response.json();
-}
-
 export function createDeleteAccountModal() {
-    const modal = document.createElement('div');
-    modal.innerHTML = `
-        <div id="deleteAccountModal" class="modal fade" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                   <div class="modal-header">
-                        <h2 class="h4 mb-3">
-                            <span class="fs-1 fw-bold text-purple">
-                                Warning
-                            </span>
-                         </h2>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Once you confirm, all game records and your account will be permanently deleted and cannot be recovered!</p>
-                        <input type="text" id="confirmUsername" class="form-control is-invalid" placeholder="Enter username to confirm">
-                        <small class="text-danger" id="confirmError">Wrong username</small>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-danger" id="confirmDelete" disabled>Delete Account</button>
-                    </div>
-                </div>
+  const modal = document.createElement('div');
+  modal.innerHTML = `
+      <div id="deleteAccountModal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2 class="h4 mb-3">
+                <span class="fs-1 fw-bold text-danger">Warning</span>
+              </h2>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
+            <div class="modal-body">
+              <p>
+                계정 탈퇴를 진행하기 위해 이메일로 OTP가 전송되었습니다.<br>
+                OTP 코드를 입력해주세요.
+              </p>
+              <input type="text" id="otpInput" class="form-control" placeholder="Enter OTP code">
+              <div id="deleteAccountMessage" class="mt-2"></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-danger" id="confirmDelete" disabled>Delete Account</button>
+            </div>
+          </div>
         </div>
+      </div>
     `;
+  document.body.appendChild(modal);
+  const deleteAccountModalEl = document.getElementById('deleteAccountModal');
+  const bootstrapModal = new bootstrap.Modal(deleteAccountModalEl);
+  const token = sessionStorage.getItem('fa_token');
 
-    document.body.appendChild(modal);
+  function showMessage(message, type = 'success') {
+    const messageDiv = document.getElementById('deleteAccountMessage');
+    messageDiv.textContent = message;
+    messageDiv.className = type === 'success' ? 'text-success' : 'text-danger';
+  }
 
-    const bootstrapModal = new bootstrap.Modal(document.getElementById('deleteAccountModal'));
+  function requestOTP() {
+    fetch('https://localhost/api/auth/2fa/withdraw/request/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({})
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.message) {
+          showMessage(data.message, 'success');
+        } else {
+          showMessage('OTP가 전송되었습니다.', 'success');
+        }
+      })
+      .catch(error => {
+        showMessage(error.message || 'OTP 요청 중 오류가 발생했습니다.', 'error');
+      });
+  }
 
-    const confirmUsernameInput = modal.querySelector('#confirmUsername');
+  deleteAccountModalEl.addEventListener('shown.bs.modal', () => {
+    showMessage('');
+    requestOTP();
+  });
+
+  deleteAccountModalEl.addEventListener('hidden.bs.modal', () => {
+    const otpInput = modal.querySelector('#otpInput');
+    otpInput.value = '';
+    showMessage('');
     const confirmDeleteBtn = modal.querySelector('#confirmDelete');
-    const confirmErrorText = modal.querySelector('#confirmError');
+    confirmDeleteBtn.disabled = true;
+  });
 
-    let storedUsername = null;
+  const otpInput = modal.querySelector('#otpInput');
+  const confirmDeleteBtn = modal.querySelector('#confirmDelete');
 
-    const token = sessionStorage.getItem('fa_token');
+  otpInput.addEventListener('input', () => {
+    confirmDeleteBtn.disabled = otpInput.value.trim() === '';
+  });
 
-    fetch('https://localhost/api/users/name/', {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${token}`
+  confirmDeleteBtn.addEventListener('click', () => {
+    const otpValue = otpInput.value.trim();
+    if (!otpValue) {
+      showMessage('OTP 코드를 입력해주세요.', 'error');
+      return;
+    }
+    fetch('https://localhost/api/users/withdraw/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ otp: otpValue })
+    })
+      .then(response => response.json().then(data => ({ ok: response.ok, data })))
+      .then(({ ok, data }) => {
+        if (ok) {
+          // 성공 처리
+          sessionStorage.clear();
+          otpInput.value = '';
+          showMessage('');
+          if (document.activeElement) document.activeElement.blur();
+  
+          // 모달 닫기
+          bootstrapModal.hide();
+  
+          // ★ 모달 닫힘 애니메이션 대기 후 처리
+          setTimeout(() => {
+            // 백드롭 제거
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) backdrop.remove();
+  
+            // 모달 DOM 제거
+            modal.remove();
+  
+            // 로그인 페이지로 이동
+            window.location.href = '#login';
+  
+            // 알림 표시 (비차단식 토스트 사용도 고려 가능)
+            alert(data.message || '계정이 성공적으로 삭제되었습니다.');
+          }, 500); // 모달 fade 애니메이션 시간이 보통 300~500ms 정도
+        } else {
+          // 실패 처리
+          showMessage(data.message || '탈퇴 실패. 다시 시도해주세요.', 'error');
         }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Failed to fetch username');
-        }
-        return response.json();
-    })
-    .then(data => {
-        storedUsername = data.username;
-        console.log('Fetched username:', storedUsername);
-    })
-    .catch(error => {
-        console.error('Error fetching username:', error);
-    });
-    
-    confirmUsernameInput.addEventListener('input', () => {
-      if (storedUsername === null) return;
-    
-      if (confirmUsernameInput.value === storedUsername) {
-        confirmUsernameInput.classList.remove('is-invalid');
-        confirmUsernameInput.classList.add('is-valid');
-        confirmErrorText.style.display = 'none';
-        confirmDeleteBtn.disabled = false;
-      } else {
-        confirmUsernameInput.classList.remove('is-valid');
-        confirmUsernameInput.classList.add('is-invalid');
-        confirmErrorText.style.display = 'block';
-        confirmDeleteBtn.disabled = true;
-      }
-    })
-    
-
-    confirmDeleteBtn.addEventListener('click', async () => {
-        try {
-            const response = await fetchAccountDeletion();
-            alert(response.message || 'Account deleted successfully.');
-    
-            sessionStorage.clear();
-    
-            const modalElement = document.getElementById('deleteAccountModal');
-            const bootstrapModal = bootstrap.Modal.getInstance(modalElement);
-    
-            if (bootstrapModal) {
-                bootstrapModal.hide();
-                bootstrapModal.dispose();
-            }
-    
-            setTimeout(() => {
-                if (modalElement) {
-                    modalElement.remove();
-                }
-                window.location.href = '#login';
-            }, 500);
-    
-        } catch (error) {
-            alert('Failed to delete account. Please try again.');
-            console.error('Account deletion error:', error);
-        }
-    });
-    
-
-    return modal;
+      })
+      .catch(error => {
+        showMessage(error.message || '탈퇴 요청 중 오류가 발생했습니다.', 'error');
+      });
+  });
+  
+  
+  
+  return modal;
 }

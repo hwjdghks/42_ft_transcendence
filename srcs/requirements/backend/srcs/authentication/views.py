@@ -55,32 +55,66 @@ def jwt_required(*, expected_factor_level: int):
         return wrapper
     return decorator
 
+def refresh_otp(user_otp, otp_type):
+    if otp_type == 'login':
+        user_otp.login_secret = pyotp.random_base32()
+        user_otp.login_updated_at = timezone.now()
+    elif otp_type == 'withdraw':
+        user_otp.withdraw_secret = pyotp.random_base32()
+        user_otp.withdraw_updated_at = timezone.now()
+    else:
+        raise ValueError("Invalid otp_type")
+    user_otp.save()
+    
+def generate_otp(user_otp, otp_type, interval=180):
+    if otp_type == 'login':
+        totp = pyotp.TOTP(user_otp.login_secret, interval=interval)
+    elif otp_type == 'withdraw':
+        totp = pyotp.TOTP(user_otp.withdraw_secret, interval=interval)
+    else:
+        raise ValueError("Invalid otp_type")
+    return totp.now()
 
-def refresh_otp(user_otp):
-	user_otp.secret = pyotp.random_base32()
-	user_otp.save()
+def verify_otp(user_otp, otp_code, otp_type, interval=180):
+    if otp_type == 'login':
+        totp = pyotp.TOTP(user_otp.login_secret, interval=interval)
+        expires_at = user_otp.login_updated_at + datetime.timedelta(minutes=3)
+    elif otp_type == 'withdraw':
+        totp = pyotp.TOTP(user_otp.withdraw_secret, interval=interval)
+        expires_at = user_otp.withdraw_updated_at + datetime.timedelta(minutes=3)
+    else:
+        raise ValueError("Invalid otp_type")
+    
+    if totp.verify(otp_code, valid_window=1) and timezone.now() < expires_at:
+        refresh_otp(user_otp, otp_type)
+        return True
+    else:
+        return False
 
-def generate_otp(user_otp, interval=180):
-	totp = pyotp.TOTP(user_otp.secret, interval=interval)
-	return totp.now()
-
-def verify_otp(user_otp, otp_code, interval=180):
-	totp = pyotp.TOTP(user_otp.secret, interval=interval)
-	if totp.verify(otp_code, valid_window=1) and timezone.now() < user_otp.expires_at:
-		refresh_otp(user_otp)
-		return True
-	else:
-		return False
-
-def send_otp_email(user):
+def send_otp_email(user, otp_type):
     user_otp, created = UserOTP.objects.get_or_create(user=user)
-    refresh_otp(user_otp)
-    otp = generate_otp(user_otp)
-    seoul_tz = pytz.timezone('Asia/Seoul') # 메일에 알려줄 otp 만료시간 타임존 설정정
-    expires_at = timezone.localtime(user_otp.expires_at, seoul_tz)
+    refresh_otp(user_otp, otp_type)
+    otp = generate_otp(user_otp, otp_type)
+    
+    # otp 만료시간 계산
+    if otp_type == 'login':
+        expires_at = user_otp.login_updated_at + datetime.timedelta(minutes=3)
+    elif otp_type == 'withdraw':
+        expires_at = user_otp.withdraw_updated_at + datetime.timedelta(minutes=3)
+    else:
+        raise ValueError("otp_type은 'login' 또는 'withdraw'여야 합니다.")
+    
+    seoul_tz = pytz.timezone('Asia/Seoul')
+    expires_at_local = timezone.localtime(expires_at, seoul_tz)
+    
+    subject = "Your 2FA Code"
+    message = (
+        f"Your One-Time Password (OTP) is: {otp}\n"
+        f"This code will expire at {expires_at_local.strftime('%Y-%m-%d %H:%M:%S')}."
+    )
     send_mail(
-        "Your 2FA Code", # 메일제목
-        f"Your One-Time Password (OTP) is: {otp}\nThis code will expire at {expires_at.strftime('%Y-%m-%d %H:%M:%S')}.", # 메일 본문
+        subject,
+        message,
         settings.EMAIL_HOST_USER,
         [user.email],
         fail_silently=False,
@@ -95,7 +129,7 @@ def send_signup_2fa(request: HttpRequest) -> JsonResponse:
         return JsonResponse({'error': 'Email already in signup'}, status=400)
 
     try:
-        send_otp_email(user)
+        send_otp_email(user, otp_type='login')
     except Exception as e:
         return JsonResponse({'error': 'Failed to send OTP email'}, status=500)
     return JsonResponse({'message': 'OTP email sent successfully'}, status=200)
@@ -109,7 +143,19 @@ def send_signin_2fa(request: HttpRequest) -> JsonResponse:
 	if User.objects.filter(email=user.email, is_active=False).exists():
 		return JsonResponse({'error': 'Users who are not two-factor authentication'}, status=400)
 	try:
-		send_otp_email(user)
+		send_otp_email(user, otp_type='login')
+	except Exception as e:
+		return JsonResponse({'error': 'Failed to send OTP email'}, status=500)
+	return JsonResponse({'message': 'email send your email in successfully'}, status=200)
+
+@csrf_exempt
+@require_POST
+@jwt_required(expected_factor_level=2)
+def send_withdraw_2fa(request: HttpRequest) -> JsonResponse:
+	user: User = request.user
+
+	try:
+		send_otp_email(user, otp_type='withdraw')
 	except Exception as e:
 		return JsonResponse({'error': 'Failed to send OTP email'}, status=500)
 	return JsonResponse({'message': 'email send your email in successfully'}, status=200)
@@ -129,7 +175,7 @@ def check_signup_2fa(request: HttpRequest) -> JsonResponse:
 	except UserOTP.DoesNotExist:
 		return JsonResponse({'error': 'otp 생성이 이루어지지 않았습니다.'}, status=401)
 
-	if (verify_otp(user_otp, otp_code) == False):
+	if (verify_otp(user_otp, otp_code, otp_type='login') == False):
 		return JsonResponse({'error': '유효하지 않거나 만료된 OTP입니다.'}, status=401)
 	user.is_active = True
 	user.save()
@@ -150,7 +196,7 @@ def check_signin_2fa(request: HttpRequest) -> JsonResponse:
         user_otp = user.otp
     except UserOTP.DoesNotExist:
         return JsonResponse({'error': 'otp 생성이 이루어지지 않았습니다.'}, status=401)
-    if (verify_otp(user_otp, otp_code) == False):
+    if (verify_otp(user_otp, otp_code, otp_type='login') == False):
         return JsonResponse({'error': '유효하지 않거나 만료된 OTP입니다.'}, status=401)
     token = generate_jwt(user, 2)
     return JsonResponse({'message': 'Signed in successfully', 'token': token}, status=200)
