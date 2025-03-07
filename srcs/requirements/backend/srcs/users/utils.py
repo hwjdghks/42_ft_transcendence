@@ -19,7 +19,7 @@ def check_existing_user(user, field: str) -> Optional[JsonResponse]:
         else:
             try:
                 user_otp = user.otp
-                if user_otp.updated_at + datetime.timedelta(minutes=30) < timezone.now():
+                if user_otp.login_updated_at + datetime.timedelta(minutes=30) < timezone.now():
                     user.delete()
                 else:
                     return JsonResponse({'error': f'{field} already in use'}, status=400)
