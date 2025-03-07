@@ -1,6 +1,7 @@
 import { fetchLoginOTPVerify, showMessage } from './loginApi.js';
 import { fetchFriends } from '../../components/friends.js'
 import { checkTempCookie } from '../../validation/cookie.js';
+import { trans } from '../../language.js';
 
 export function LoginVerificationPage() {
   async function verifyTokenOnLoad() {
@@ -57,13 +58,13 @@ export function LoginVerificationPage() {
   return `
     <div class="login-page">
       <div class="login-container">
-        <h1 class="login-heading">Verify Code</h1>
+        <h1 class="login-heading">${trans[window.curLang].verifyHeader}</h1>
         <form class="mt-3" id="verification-form">
           <div class="mb-3">
-            <label for="otp" class="form-label">Verification Code</label>
-            <input type="text" class="form-control" id="otp" placeholder="Enter OTP code" />
+            <label for="otp" class="form-label">${trans[window.curLang].verifyCode}</label>
+            <input type="text" class="form-control" id="otp" placeholder="${trans[window.curLang].verifyCodeHolder}" />
           </div>
-          <button type="submit" class="btn login-btn" id="verify-btn">Verify</button>
+          <button type="submit" class="btn login-btn" id="verify-btn">${trans[window.curLang].verifyBtn}</button>
         </form>
         <div id="login-message" class="mt-3"></div>
       </div>

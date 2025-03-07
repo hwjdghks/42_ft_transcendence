@@ -1,4 +1,5 @@
 import { fetchSignup, fetchOTPRequest, showMessage } from './signupApi.js';
+import { trans } from '../../language.js';
 
 export function SignupPage() {
   async function handleSendCodeSubmit(event) {
@@ -67,23 +68,23 @@ export function SignupPage() {
     </style>
     <div class="signup-page">
       <div class="signup-container">
-        <h1 class="signup-heading">Sign Up</h1>
+        <h1 class="signup-heading">${trans[window.curLang].signupHeader}</h1>
         <form class="mt-3" id="signup-form">
           <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" id="username" placeholder="Enter your username" />
+            <label for="username" class="form-label">${trans[window.curLang].signupUsername}</label>
+            <input type="text" class="form-control" id="username" placeholder="${trans[window.curLang].signupUsernameHolder}" />
           </div>
           <div class="mb-3">
-            <label for="email" class="form-label">Email address</label>
-            <input type="email" class="form-control" id="email" placeholder="Enter your email" />
+            <label for="email" class="form-label">${trans[window.curLang].signupEmail}</label>
+            <input type="email" class="form-control" id="email" placeholder="${trans[window.curLang].signupEmailHolder}" />
           </div>
           <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input type="password" class="form-control" id="password" placeholder="Enter your password" />
+            <label for="password" class="form-label">${trans[window.curLang].signupPassword}</label>
+            <input type="password" class="form-control" id="password" placeholder="${trans[window.curLang].signupPasswordHolder}" />
           </div>
           <div class="mb-3">
-            <label for="confirm_password" class="form-label">Confirm Password</label>
-            <input type="password" class="form-control" id="confirm_password" placeholder="Confirm your password" />
+            <label for="confirm_password" class="form-label">${trans[window.curLang].signupConfirmPassword}</label>
+            <input type="password" class="form-control" id="confirm_password" placeholder="${trans[window.curLang].signupConfirmPasswordHolder}" />
           </div>
 
           <!-- 필수 동의 항목 -->
@@ -146,8 +147,8 @@ export function SignupPage() {
             </div>
           </div>
 
-          <button type="submit" class="btn signup-btn" id="signup-btn">Send Code</button>
-          <a href="/#login" class="btn btn-link mt-3">Login</a>
+          <button type="submit" class="btn signup-btn" id="signup-btn">${trans[window.curLang].signupSendBtn}</button>
+          <a href="/#login" class="btn btn-link mt-3">${trans[window.curLang].signupLoginBtn}</a>
         </form>
     </div>
 	`;

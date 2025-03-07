@@ -1,41 +1,95 @@
 import { checkCookie } from '../validation/cookie.js';
-import { trans } from '../language.js';
+import { trans, changeLanguage } from '../language.js';
+import { postLogout } from '../api/scriptApi.js';
 
-const navbar = document.getElementById('navbar');
+// 토큰 쿠키 삭제 함수
+function clearTokenCookie() {
+  document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+}
 
 async function isLoggedIn() {
   const token = await checkCookie();
   console.log("🔹 [isLoggedIn] JWT Token 상태:", token);
-  return token !== null && token !== "undefined"; 
+  return token !== null && token !== "undefined";
 }
 
 function updateNavbar() {
   const navbar = document.getElementById('navbar');
-  navbar.innerHTML = `
-    <nav>
-      <div>
-        <div>
-          <img src="../static/logo.png" alt="Logo">
-          <a href="#profile" class="nav-link protected-link">${trans[window.curLang].navProfile}</a>
-          <a href="#gameplay/option" class="nav-link protected-link">${trans[window.curLang].navGamePlay}</a>
+  const currentHash = window.location.hash;
+  
+  // 인증 관련 페이지: 로그인, 회원가입, OTP 인증 등 (해시가 없는 경우도 포함)
+  const authPages = ["#login", "#signup", "#login-verification", "#signup-verification", "#oauth-callback"];
+  const isAuthPage = !currentHash || authPages.some(page => currentHash.startsWith(page));
+
+  if (isAuthPage) {
+    // 인증 페이지에서는 로고와 언어 전환 이모지만 렌더링
+    navbar.innerHTML = `
+      <nav>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <img src="../static/logo.png" alt="Logo" style="height: 30px;">
+          </div>
+          <div class="position-relative">
+            <!-- 이모지 사용: 🌐 -->
+            <span id="language-switcher" style="font-size: 1.5rem; cursor: pointer;">🌏</span>
+            <!-- 언어 선택 드롭다운 -->
+            <div id="language-dropdown" class="position-absolute bg-white border" style="display: none; right: 0; top: 100%; z-index: 10;">
+              <div data-lang="en" class="lang-option p-4" style="cursor: pointer;">English</div>
+              <div data-lang="ko" class="lang-option p-4" style="cursor: pointer;">한국어</div>
+            </div>
+          </div>
         </div>
-      </div>
-    </nav>
-  `;
+      </nav>
+    `;
+  } else {
+    // 보호된 페이지에서는 프로필, 게임 메뉴 링크도 함께 렌더링
+    navbar.innerHTML = `
+      <nav>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 20px;">
+            <img src="../static/logo.png" alt="Logo" style="height: 30px;">
+            <a href="#profile" class="nav-link protected-link">${trans[window.curLang].navProfile}</a>
+            <a href="#gameplay/option" class="nav-link protected-link">${trans[window.curLang].navGamePlay}</a>
+          </div>
+          <div class="position-relative">
+            <!-- 이모지 사용: 🌐 -->
+            <span id="language-switcher" style="font-size: 1.5rem; cursor: pointer;">🌏</span>
+            <div id="language-dropdown" class="position-absolute bg-white border" style="display: none; right: 0; top: 100%; z-index: 10;">
+              <div data-lang="en" class="lang-option p-4" style="cursor: pointer;">English</div>
+              <div data-lang="ko" class="lang-option p-4" style="cursor: pointer;">한국어</div>
+            </div>
+          </div>
+        </div>
+      </nav>
+    `;
 
-  // console.log("🔹 [updateNavbar] 네비게이션 업데이트 완료");
-
-  document.querySelectorAll('.protected-link').forEach(link => {
-      link.addEventListener('click', (event) => {
-          console.log("🔹 [protected-link] 클릭됨, 로그인 상태:", isLoggedIn());
-
-          if (!isLoggedIn()) {
-              event.preventDefault();
-              alert('Log in is required.');
-              window.location.hash = "#login";
-          }
+    // 보호된 링크 클릭 시 로그인 상태 검증
+    document.querySelectorAll('.protected-link').forEach(link => {
+      link.addEventListener('click', async (event) => {
+        if (!(await isLoggedIn())) {
+          event.preventDefault();
+          alert('Log in is required.');
+          window.location.hash = "#login";
+        }
       });
-  });
+    });
+  }
+
+  // 언어 전환 드롭다운 이벤트 처리
+  const switcher = document.getElementById('language-switcher');
+  const dropdown = document.getElementById('language-dropdown');
+  if (switcher && dropdown) {
+    switcher.addEventListener('click', () => {
+      dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    });
+    dropdown.querySelectorAll('.lang-option').forEach(option => {
+      option.addEventListener('click', (e) => {
+        const selectedLang = e.target.getAttribute('data-lang');
+        changeLanguage(selectedLang);
+        dropdown.style.display = 'none';
+      });
+    });
+  }
 
   updateActiveLink();
 }
@@ -46,6 +100,26 @@ function updateActiveLink() {
     link.classList.toggle('active', link.getAttribute('href') === currentHash);
   });
 }
+
+// 로그아웃 시 서버 로그아웃 API 호출 후 쿠키와 세션 데이터 삭제
+async function handleLogout() {
+  try {
+    await postLogout();
+    clearTokenCookie();
+    alert('Logged out successfully.');
+    sessionStorage.removeItem('userId');
+    sessionStorage.removeItem("tournament_in_progress");
+    sessionStorage.removeItem("game_option");
+    sessionStorage.removeItem("matches");
+    sessionStorage.removeItem("currentMatch");
+    window.location.href = '#login';
+  } catch (error) {
+    alert("Logout error: " + error.message);
+  }
+}
+
+// 창 닫거나 새로고침할 때 쿠키 토큰 삭제
+window.addEventListener('beforeunload', clearTokenCookie);
 
 window.updateNavbar = updateNavbar;
 window.addEventListener('DOMContentLoaded', updateNavbar);

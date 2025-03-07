@@ -7,8 +7,34 @@ const trans = {
     navProfile: "Profile",
     navGamePlay: "Gameplay",
 
-    // Login & Signup
-    greeting: "Hello",
+    // Login
+    loginHeader: "ft_transcendence",
+    loginEmail: "Email",
+    loginEmailHolder: "Enter your e-mail",
+    loginPassword: "Password",
+    loginPasswordHolder: "Enter your password",
+    loginBtn: "Submit",
+    loginOauthBtn: "42 account",
+    loginSingupBtn: "Sing up",
+
+    // Verify
+    verifyHeader: "Verify Code",
+    verifyCode: "Verification Code",
+    verifyCodeHolder: "Enter OTP code",
+    verifyBtn : "Verify",
+
+    // Signup
+    signupHeader: "Sign Up",
+    signupUsername: "Username",
+    signupUsernameHolder: "Enter your username",
+    signupEmail: "Email",
+    signupEmailHolder: "Enter your e-mail",
+    signupPassword: "Password",
+    signupPasswordHolder: "Enter your password",
+    signupConfirmPassword: "Confirm Password",
+    signupConfirmPasswordHolder: "Confirm your password",
+    signupSendBtn: "Send Code",
+    signupLoginBtn: "Login",
 
     // Profile
     profileUpload: "Profile Upload",
@@ -54,6 +80,12 @@ const trans = {
     settingModalConPasswordHolder: "Enter confirm password",
     settingModalPasswordSmall:
       "Must contain at least one number, one letter, and one special character (8-50 characters)",
+
+    // Profile Settings Modal - Delete Account
+    settingModalDelete: "Warning",
+    settingModalDeleteBody: "OTP has been emailed to proceed with account withdrawal. Please enter the OTP code.",
+    settingModalDeleteHolder: "Enter OTP code",
+    settingModalBtn: "Delete Account",
 
     // Modal Buttons
     Cancel: "Cancel",
@@ -105,8 +137,34 @@ const trans = {
     navProfile: "프로필",
     navGamePlay: "게임 플레이",
 
-    // Login & Signup
-    greeting: "안녕하세요",
+    // Login
+    loginHeader: "ft_transcendence",
+    loginEmail: "이메일",
+    loginEmailHolder: "이메일을 입력하세요",
+    loginPassword: "비밀번호",
+    loginPasswordHolder: "비밀번호를 입력하세요",
+    loginBtn: "로그인",
+    loginOauthBtn: "42 계정",
+    loginSingupBtn: "회원가입",
+
+    // Verify
+    verifyHeader: "인증 코드",
+    verifyCode: "인증 코드",
+    verifyCodeHolder: "OTP 코드를 입력하세요",
+    verifyBtn : "인증",
+
+    // Signup
+    signupHeader: "회원가입",
+    signupUsername: "사용자명",
+    signupUsernameHolder: "사용자명을 입력하세요",
+    signupEmail: "이메일",
+    signupEmailHolder: "이메일을 입력하세요",
+    signupPassword: "비밀번호",
+    signupPasswordHolder: "비밀번호를 입력하세요",
+    signupConfirmPassword: "비밀번호 확인",
+    signupConfirmPasswordHolder: "비밀번호를 확인하세요",
+    signupSendBtn: "코드 전송",
+    signupLoginBtn: "로그인",
 
     // Profile
     profileUpload: "프로필 업로드",
@@ -151,6 +209,12 @@ const trans = {
     settingModalConPassword: "새 비밀번호 확인",
     settingModalConPasswordHolder: "새 비밀번호 확인 입력",
     settingModalPasswordSmall: "숫자, 영문, 특수문자 중 최소 하나씩 포함 (8~50자)",
+
+    // Profile Settings Modal - Delete Account
+    settingModalDelete: "경고",
+    settingModalDeleteBody: "계정 탈퇴를 진행하기 위해 이메일로 OTP가 전송되었습니다. OTP 코드를 입력해주세요.",
+    settingModalDeleteHolder: "OTP 코드 입력",
+    settingModalBtn: "계정 삭제",
 
     // Modal Buttons
     Cancel: "취소",

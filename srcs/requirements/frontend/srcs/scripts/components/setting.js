@@ -443,12 +443,14 @@ function updateModals() {
     privacyModal.querySelector('label[for="modalShareOnlineStatusCheckbox"]').textContent = trans[window.curLang].settingModalPrivacy3;
   }
 
-  // const deleteAccountModal = document.getElementById('deleteAccountModal');
-  // if (deleteAccountModal) {
-  //   deleteAccountModal.querySelector('.fs-1.fw-bold.text-purple').textContent = "⚠️ " + trans[window.curLang].settingDeleteAccount;
-  //   deleteAccountModal.querySelector('.btn-danger').textContent = trans[window.curLang].settingDeleteAccount;
-  //   deleteAccountModal.querySelector('.btn-secondary').textContent = trans[window.curLang].Cancel;
-  // }
+  const deleteAccountModal = document.getElementById('deleteAccountModal');
+  if (deleteAccountModal) {
+    deleteAccountModal.querySelector('.modal-header h2 span').textContent = trans[window.curLang].settingModalDelete;
+    deleteAccountModal.querySelector('.modal-body p').textContent = trans[window.curLang].settingModalDeleteBody;
+    deleteAccountModal.querySelector('#otpInput').placeholder = trans[window.curLang].settingModalDeleteHolder;
+    deleteAccountModal.querySelector('.modal-footer .btn-secondary').textContent = trans[window.curLang].Cancel;
+    deleteAccountModal.querySelector('.modal-footer #confirmDelete').textContent = trans[window.curLang].settingModalBtn;
+  }  
 }
 
 document.addEventListener("DOMContentLoaded", () => {
