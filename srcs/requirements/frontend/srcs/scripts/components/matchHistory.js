@@ -4,7 +4,7 @@
  * @returns {Promise<Array>} 경기 결과 배열을 반환
  * @throws {Error} API 호출 실패 시 예외 발생
  */
-async function fetchMatchResults() {
+async function postMatchResults() {
   const response = await fetch('https://localhost/api/match/results/', {
       method: 'GET',
       credentials: 'include',
@@ -15,7 +15,7 @@ async function fetchMatchResults() {
   });
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || 'Failed fetchMatchResults()');
+    throw new Error(error.error || 'Failed postMatchResults()');
   }
   const result = await response.json();
   return result.match_results;
@@ -28,7 +28,7 @@ async function fetchMatchResults() {
 */
 async function renderMatchHistory() {
   try {
-      const allMatches = await fetchMatchResults();
+      const allMatches = await postMatchResults();
 
       // 경기 결과가 없을 경우, 사용자에게 알림 표시
       if (!allMatches || allMatches.length === 0) {

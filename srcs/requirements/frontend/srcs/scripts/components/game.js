@@ -1,31 +1,30 @@
-import { fetchProfileData } from '../pages/profile/profileApi.js';
-import { postMatchResult } from './gameApi.js';
+import { trans } from '../language.js';
+import { getProfileData } from '../api/scriptApi.js';
+import { postMatchResult } from '../api/scriptApi.js';
 
 function initializePingPongGame(parentContainer, configJson) {
   // gameContainer, scoreBoard 등 DOM 참조
   const gameContainer = parentContainer.querySelector('#gameContainer');
   if (!gameContainer) {
-    console.error('게임 컨테이너를 찾을 수 없습니다.');
     return () => {};
   }
 
   // 세션에서 현재 경기 정보 가져오기
   const currentMatch = JSON.parse(sessionStorage.getItem('currentMatch') || '{}');
 
-  // ---------- 1) config 준비 ----------
+  // config 준비
   const config = prepareGameConfig(configJson);
 
-  // ---------- 2) Three.js 기본 세팅 ----------
+  // Three.js 기본 세팅
   const { scene, camera, renderer } = createSceneAndRenderer(gameContainer, config);
 
-  // ---------- 3) 게임 오브젝트 생성 (패들, 공, 장애물) ----------
-  const { leftPaddle, rightPaddle, ball, ballVelocity, obstacles } 
-    = createGameObjects(scene, config);
+  // 게임 오브젝트 생성 (패들, 공, 장애물)
+  const { leftPaddle, rightPaddle, ball, ballVelocity, obstacles } = createGameObjects(scene, config);
 
-  // ---------- 4) 키보드 입력 처리 ----------
+  // 키보드 입력 처리
   const { keysPressed, removeKeyListeners } = setupKeyListeners();
 
-  // ---------- 5) 게임 상태 변수 ----------
+  // 게임 상태 변수
   let gameScore = { player1: 0, player2: 0 };
   let gameOver = false;
   let scoringInProgress = false;
@@ -33,25 +32,23 @@ function initializePingPongGame(parentContainer, configJson) {
 
   const countdownOverlay = document.getElementById('countdownOverlay');
 
-  // ---------- 매 프레임마다 실행되는 update ----------
+  // 매 프레임마다 실행되는 update
   function update() {
     if (gameOver || isCountdownActive) return;
-
+  
     movePaddles(leftPaddle, rightPaddle, keysPressed, config);
     moveBall(ball, ballVelocity, config);
     checkPaddleCollision(ball, ballVelocity, leftPaddle, rightPaddle, config);
     checkObstacleCollision(ball, ballVelocity, obstacles);
-
-    // 득점 처리
+  
     if (!scoringInProgress) {
       handleScoring(
         ball, ballVelocity, gameScore, config, currentMatch,
-        () => { scoringInProgress = true; }, 
-        (winnerText) => { endGame(winnerText); },
+        () => { scoringInProgress = true; },
+        endGame,
         (countdownTime, direction) => startCountdown(countdownTime, direction)
       );
     }
-
     // 스코어보드 갱신
     const scoreBoard = document.getElementById('scoreBoard');
     if (scoreBoard) {
@@ -59,7 +56,7 @@ function initializePingPongGame(parentContainer, configJson) {
     }
   }
 
-  // ---------- 카운트다운 ----------
+  //  카운트다운 
   function startCountdown(time, direction) {
     isCountdownActive = true;
     countdownOverlay.style.display = 'block';
@@ -79,56 +76,60 @@ function initializePingPongGame(parentContainer, configJson) {
     }, 1000);
   }
 
-  // ---------- 게임 종료 ----------
-  async function endGame(message) {
-    gameOver = true;
-    const winnerMessage = document.getElementById('winnerMessage');
-    const response = await fetchProfileData();
-    const profileUsername = response.username;
+  //  게임 종료 
+  async function endGame(winMessage) {
+    try {
+      const response = await getProfileData();
+      gameOver = true;
+      const winnerMessage = document.getElementById('winnerMessage');
+      const profileUsername = response.username;
+      const currentMatch = JSON.parse(sessionStorage.getItem('currentMatch'));
+      const matches = JSON.parse(sessionStorage.getItem('matches')) || [];
+      const { winnerName, userScore, opponentScore, opponentName } = determineWinner(
+        profileUsername, currentMatch, gameScore
+      );
 
-    const currentMatch = JSON.parse(sessionStorage.getItem('currentMatch'));
-    const matches = JSON.parse(sessionStorage.getItem('matches')) || [];
-
-    // 승패 계산
-    const { winnerName, userScore, opponentScore, opponentName } = determineWinner(
-      profileUsername, currentMatch, gameScore
-    );
-
-    // 결과 메시지 표시
-    winnerMessage.innerHTML = `
-      <div style="text-align: center;">
-        <div style="font-size: 24px; margin-bottom: 10px;">${winnerName} 승리</div>
-        <div>${gameScore.player1} - ${gameScore.player2}</div>
-        <button id="exitButton" class="btn btn-primary" style="margin-top: 20px;">토너먼트로 돌아가기</button>
-      </div>
-    `;
-    winnerMessage.style.display = 'block';
-
-    // 로컬 matches 업데이트
-    updateMatchStorage(currentMatch, matches, gameScore, winnerName);
-
-    // finishedGames 처리
-    let finishedGames = JSON.parse(sessionStorage.getItem('finishedGames')) || [];
-    if (currentMatch.id) {
-      finishedGames.push(currentMatch.id);
-      sessionStorage.setItem('finishedGames', JSON.stringify(finishedGames));
+      // winMessage가 전달되면 해당 메시지를, 아니면 기본 승리 메시지를 사용
+      const displayMessage = winMessage || `${winnerName} ${trans[window.curLang].gameWin}`;
+    
+      winnerMessage.innerHTML = `
+        <div style="text-align: center;">
+          <div style="font-size: 24px; margin-bottom: 10px;">${displayMessage}</div>
+          <div>${gameScore.player1} - ${gameScore.player2}</div>
+          <button id="exitButton" class="btn btn-primary" style="margin-top: 20px;">
+            ${trans[window.curLang].gameBackBtn}
+          </button>
+        </div>
+      `;
+      winnerMessage.style.display = 'block';
+    
+      updateMatchStorage(currentMatch, matches, gameScore, winnerName);
+    
+      let finishedGames = JSON.parse(sessionStorage.getItem('finishedGames')) || [];
+      if (currentMatch.id) {
+        finishedGames.push(currentMatch.id);
+        sessionStorage.setItem('finishedGames', JSON.stringify(finishedGames));
+      }
+    
+      // 서버로 경기 결과 전송 (플레이어1인 경우만)
+      if (currentMatch.player1 === profileUsername) {
+        const matchResultData = createMatchResultData(profileUsername, currentMatch, opponentName, userScore, opponentScore, winnerName);
+        try {
+          await postMatchResult(matchResultData);
+        } catch (error) {
+          alert('Error: ' + error.message);
+        }
+      }
+      document.getElementById('exitButton').addEventListener('click', () => {
+        window.location.hash = '#gameplay/tournament';
+      });
+    } catch (error) {
+      alert('Error: ' + error.message);
     }
-
-    // 서버 전송 (player1이 본인일 경우만)
-    if (currentMatch.player1 === profileUsername) {
-      const matchResultData = createMatchResultData(currentMatch, opponentName, userScore, opponentScore, winnerName);
-      await postMatchResult(matchResultData);
-    } else {
-      console.log("실제 username과 일치하지 않아 백엔드로 결과를 전송하지 않습니다.");
-    }
-
-    // 종료 버튼
-    document.getElementById('exitButton').addEventListener('click', () => {
-      window.location.hash = '#gameplay/tournament';
-    });
   }
+  
 
-  // ---------- 애니메이션 루프 ----------
+  // 애니메이션 루프 
   let requestId;
   function animate() {
     requestId = requestAnimationFrame(animate);
@@ -141,7 +142,7 @@ function initializePingPongGame(parentContainer, configJson) {
   startCountdown(3, 1);
   animate();
 
-  // ---------- cleanup 함수 ----------
+  // cleanup 함수 
   function cleanup() {
     cancelAnimationFrame(requestId);
     removeKeyListeners();
@@ -150,13 +151,7 @@ function initializePingPongGame(parentContainer, configJson) {
   return cleanup;
 }
 
-/* ===================================
- * 아래는 세부 로직을 분할한 함수들
- * =================================== */
-
-/**
- * configJson을 해석해 최종 설정 객체를 반환
- */
+// configJson을 해석해 최종 설정 객체를 반환
 function prepareGameConfig(configJson) {
   const defaultConfig = {
     winningScore: 7,
@@ -191,9 +186,7 @@ function prepareGameConfig(configJson) {
   return config;
 }
 
-/**
- * Three.js 씬, 카메라, 렌더러 생성 및 설정
- */
+// Three.js 씬, 카메라, 렌더러 생성 및 설정
 function createSceneAndRenderer(gameContainer, config) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(config.mapSkin);
@@ -219,9 +212,7 @@ function createSceneAndRenderer(gameContainer, config) {
   return { scene, camera, renderer };
 }
 
-/**
- * 패들, 공, 장애물 생성
- */
+// 패들, 공, 장애물 생성
 function createGameObjects(scene, config) {
   // 재질(Material)
   const paddleMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
@@ -255,9 +246,7 @@ function createGameObjects(scene, config) {
   return { leftPaddle, rightPaddle, ball, ballVelocity, obstacles };
 }
 
-/**
- * 장애물 배치
- */
+// 장애물 배치
 function createObstacles(scene, config, obstacleMaterial) {
   const obstacles = [];
   const safeZoneRadius = 3;
@@ -306,9 +295,8 @@ function createObstacles(scene, config, obstacleMaterial) {
   return obstacles;
 }
 
-/**
- * 키보드 입력 처리
- */
+
+// 키보드 입력 처리
 function setupKeyListeners() {
   const keysPressed = {};
 
@@ -330,9 +318,7 @@ function setupKeyListeners() {
   return { keysPressed, removeKeyListeners };
 }
 
-/**
- * 매 프레임마다 공 이동
- */
+// 매 프레임마다 공 이동
 function moveBall(ball, ballVelocity, config) {
   ball.position.add(ballVelocity);
 
@@ -342,9 +328,7 @@ function moveBall(ball, ballVelocity, config) {
   }
 }
 
-/**
- * 매 프레임마다 패들 이동
- */
+// 매 프레임마다 패들 이동
 function movePaddles(leftPaddle, rightPaddle, keysPressed, config) {
   // 왼쪽 패들 (W, S)
   if (keysPressed['KeyW'] && leftPaddle.position.y < config.boundaryY - config.paddleSize.height / 2) {
@@ -363,9 +347,7 @@ function movePaddles(leftPaddle, rightPaddle, keysPressed, config) {
   }
 }
 
-/**
- * 패들과의 충돌 처리
- */
+// 패들과의 충돌 처리
 function checkPaddleCollision(ball, ballVelocity, leftPaddle, rightPaddle, config) {
   // 왼쪽 패들
   if (
@@ -388,9 +370,7 @@ function checkPaddleCollision(ball, ballVelocity, leftPaddle, rightPaddle, confi
   }
 }
 
-/**
- * 장애물 충돌 처리
- */
+// 장애물 충돌 처리
 function checkObstacleCollision(ball, ballVelocity, obstacles) {
   obstacles.forEach(obstacle => {
     const ballBox = new THREE.Box3().setFromObject(ball);
@@ -405,38 +385,34 @@ function checkObstacleCollision(ball, ballVelocity, obstacles) {
   });
 }
 
-/**
- * 득점 처리
- */
+// 득점 처리
 function handleScoring(
   ball, ballVelocity, gameScore, config, currentMatch,
-  onScoreStart, onGameEnd, onStartCountdown
+  onScoreStart, endGame, onStartCountdown
 ) {
-  // 왼쪽 경계(왼쪽 패들 뒤로 통과) => 오른쪽 플레이어 득점
+  // 왼쪽 경계: ball이 왼쪽으로 벗어나면 오른쪽 플레이어(즉, currentMatch.player2)가 득점
   if (ball.position.x - 0.1 < -13) {
     onScoreStart();
     gameScore.player2++;
     if (gameScore.player2 >= config.winningScore) {
-      onGameEnd("Player 2 Wins!");
+      endGame(`${currentMatch.player2} ${trans[window.curLang].gameWin}`);
       return;
     }
     onStartCountdown(3, 1);
   } 
-  // 오른쪽 경계 => 왼쪽 플레이어 득점
+  // 오른쪽 경계: ball이 오른쪽으로 벗어나면 왼쪽 플레이어(즉, currentMatch.player1)가 득점
   else if (ball.position.x + 0.1 > 13) {
     onScoreStart();
     gameScore.player1++;
     if (gameScore.player1 >= config.winningScore) {
-      onGameEnd("Player 1 Wins!");
+      endGame(`${currentMatch.player1} ${trans[window.curLang].gameWin}`);
       return;
     }
     onStartCountdown(3, -1);
   }
 }
 
-/**
- * 공 각도에 약간 변화를 주어 난이도 증가
- */
+// 공 각도에 약간 변화를 주어 난이도 증가
 function adjustBallAngle(ballVelocity, invertX = false) {
   const speed = ballVelocity.length();
   let currentAngle = Math.atan2(ballVelocity.y, ballVelocity.x);
@@ -454,9 +430,8 @@ function adjustBallAngle(ballVelocity, invertX = false) {
   ballVelocity.y = speed * Math.sin(newAngle);
 }
 
-/**
- * 공을 중앙에 재배치
- */
+
+// 공을 중앙에 재배치
 function resetBall(ball, ballVelocity, config, direction) {
   ball.position.set(0, 0, 0);
   ballVelocity.set(
@@ -466,9 +441,8 @@ function resetBall(ball, ballVelocity, config, direction) {
   );
 }
 
-/**
- * 승패 및 점수 계산
- */
+
+// 승패 및 점수 계산
 function determineWinner(profileUsername, currentMatch, gameScore) {
   let winnerName;
   let userScore, opponentScore, opponentName;
@@ -505,10 +479,7 @@ function determineWinner(profileUsername, currentMatch, gameScore) {
   return { winnerName, userScore, opponentScore, opponentName };
 }
 
-
-/**
- * 경기 기록을 matches에 저장
- */
+// 경기 기록을 matches에 저장
 function updateMatchStorage(currentMatch, matches, gameScore, winnerName) {
   const matchIndex = matches.findIndex(m =>
     m.player1 === currentMatch.player1 &&
@@ -524,11 +495,8 @@ function updateMatchStorage(currentMatch, matches, gameScore, winnerName) {
   sessionStorage.setItem('matches', JSON.stringify(matches));
 }
 
-
-/**
- * matchResultData 생성
- */
-function createMatchResultData(currentMatch, opponentName, userScore, opponentScore, winnerName) {
+// matchResultData 생성
+function createMatchResultData(username, currentMatch, opponentName, userScore, opponentScore, winnerName) {
   let gameResult = 'draw';
   if (userScore > opponentScore) {
     gameResult = 'win';
@@ -537,6 +505,7 @@ function createMatchResultData(currentMatch, opponentName, userScore, opponentSc
   }
 
   return {
+    username: username,
     session_id: currentMatch.id,
     guestname: opponentName,
     user_score: userScore,

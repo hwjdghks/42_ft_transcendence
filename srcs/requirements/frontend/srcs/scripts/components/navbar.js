@@ -1,4 +1,5 @@
 import { checkCookie } from '../validation/cookie.js';
+import { trans } from '../language.js';
 
 const navbar = document.getElementById('navbar');
 
@@ -8,23 +9,21 @@ async function isLoggedIn() {
   return token !== null && token !== "undefined"; 
 }
 
-
 function updateNavbar() {
   const navbar = document.getElementById('navbar');
-
   navbar.innerHTML = `
     <nav>
       <div>
         <div>
           <img src="../static/logo.png" alt="Logo">
-          <a href="#profile" class="nav-link protected-link">Profile</a>
-          <a href="#gameplay/option" class="nav-link protected-link">GamePlay</a>
+          <a href="#profile" class="nav-link protected-link">${trans[window.curLang].navProfile}</a>
+          <a href="#gameplay/option" class="nav-link protected-link">${trans[window.curLang].navGamePlay}</a>
         </div>
       </div>
     </nav>
   `;
 
-  console.log("🔹 [updateNavbar] 네비게이션 업데이트 완료");
+  // console.log("🔹 [updateNavbar] 네비게이션 업데이트 완료");
 
   document.querySelectorAll('.protected-link').forEach(link => {
       link.addEventListener('click', (event) => {
@@ -32,7 +31,7 @@ function updateNavbar() {
 
           if (!isLoggedIn()) {
               event.preventDefault();
-              alert("로그인이 필요합니다.");
+              alert('Log in is required.');
               window.location.hash = "#login";
           }
       });
@@ -48,5 +47,6 @@ function updateActiveLink() {
   });
 }
 
-updateNavbar();
+window.updateNavbar = updateNavbar;
+window.addEventListener('DOMContentLoaded', updateNavbar);
 window.addEventListener('hashchange', updateNavbar);
