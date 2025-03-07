@@ -1,5 +1,7 @@
 import { createDeleteAccountModal } from './deleteAccountModal.js';
 import { fetchUpdateUsername, fetchUpdatePrivacySettings, fetchUpdatePassword } from './settingApi.js';
+import { isInputUsernameValid, isInputPasswordValid } from '../validation/inputData.js';
+import { renderMatchHistory } from '../components/matchHistory.js';
 
 /**
  * 세팅 컴포넌트 렌더 함수
@@ -139,11 +141,11 @@ function createUsernameModal() {
   const newUsernameInput = modalDiv.querySelector('#newUsername');
   const usernameSaveBtn = modalDiv.querySelector('#usernameSaveBtn');
 
-  // 실시간 유효성 검사: 입력값이 비어있지 않고 오직 영어,숫자만 있는지 확인(최대 10자 까지)
+  // 실시간 유효성 검사
   newUsernameInput.addEventListener('input', () => {
     const value = newUsernameInput.value.trim();
-    const valid = /^[A-Za-z0-9]{0,10}$/.test(value);
-    usernameSaveBtn.disabled = !value || !valid;
+    const valid = isInputUsernameValid(value);
+    usernameSaveBtn.disabled = !valid;
   });
 
   // 모달 닫힐 때 초기화
@@ -167,6 +169,9 @@ function createUsernameModal() {
       if (usernameElement) {
         usernameElement.textContent = newUsername;
       }
+
+      renderMatchHistory();
+
       const modalInstance = bootstrap.Modal.getInstance(modalDiv);
       modalInstance.hide();
     } catch (error) {
@@ -275,7 +280,7 @@ function createPasswordModal() {
              <div class="mb-3">
                <label for="newPassword" class="form-label">New Password</label>
                <input type="password" class="form-control" id="newPassword" placeholder="Enter new password">
-               <small class="form-text text-muted">영어, 숫자만 입력 가능합니다. (최소 8자, 최대 50자)</small>
+               <small class="form-text text-muted">영어, 숫자, 특수문자 최소 각 1개 이상 조합해야 합니다. (최소 8자, 최대 50자)</small>
              </div>
              <div class="mb-3">
                <label for="confirmPassword" class="form-label">Confirm New Password</label>
@@ -304,8 +309,8 @@ function createPasswordModal() {
     const currentPassword = currentPasswordInput.value.trim();
     const newPassword = newPasswordInput.value.trim();
     const confirmPassword = confirmPasswordInput.value.trim();
-    // 새 패스워드는 숫자와 영어만 포함, 8자 이상 50자 이하
-    const newPasswordValid = /^[A-Za-z0-9]{8,50}$/.test(newPassword);
+  
+    const newPasswordValid = isInputPasswordValid(newPassword);
     const passwordsMatch = newPassword === confirmPassword;
     
     if (currentPassword && newPassword && confirmPassword && newPasswordValid && passwordsMatch) {
