@@ -5,12 +5,11 @@
  * @throws {Error} API 호출 실패 시 예외 발생
  */
 async function fetchMatchResults() {
-  const token = sessionStorage.getItem('fa_token');
   const response = await fetch('https://localhost/api/match/results/', {
       method: 'GET',
+      credentials: 'include',
       headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
       }
       // 
   });

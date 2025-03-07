@@ -38,9 +38,8 @@ export function SignupPage() {
 		console.log("Signup Response:", signupResponse);
   
 		// 임시 토큰으로 저장
-		sessionStorage.setItem('fa_temp_token', signupResponse.token);
   
-		const otpResponse = await fetchOTPRequest(signupResponse.token);
+		const otpResponse = await fetchOTPRequest();
 		console.log("OTP Response:", otpResponse);
 		showMessage(otpResponse.message || 'OTP has been sent. Check your email.', 'success');
   

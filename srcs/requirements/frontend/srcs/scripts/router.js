@@ -8,6 +8,7 @@ import { SignupVerificationPage } from './pages/authorization/signupVerification
 import { LoginVerificationPage } from './pages/authorization/loginVerification.js';
 import { OauthCallbackPage } from './pages/authorization/oauthCallback.js';
 import { validateTournamentSession } from './validation/sessionData.js';
+import { checkCookie } from './validation/cookie.js';
 
 /**
  * 라우트 목록 (정적 페이지)
@@ -61,10 +62,9 @@ async function router() {
   }
 
   // 보호된 라우트에 대해 토큰이 없거나 만료된 경우 로그인 페이지로 리다이렉트
-  const token = sessionStorage.getItem('fa_token');
-  if (isProtectedRoute(newRoute) && (!token || isTokenExpired(token))) {
+  const token = await checkCookie();
+  if (isProtectedRoute(newRoute) && (!token)) {
     alert('토큰이 만료되었거나 존재하지 않습니다. 다시 로그인 해주세요.');
-    sessionStorage.removeItem('fa_token');
     window.location.hash = '#login';
     return;
   }
@@ -248,22 +248,6 @@ function isProtectedRoute(route) {
          route === 'gameplay/option' ||
          route === 'gameplay/tournament' ||
          isGamePlayRoute(route);
-}
-
-/**
- * JWT 토큰이 만료되었는지 검사합니다.
- * @param {string} token 
- * @returns {boolean} 만료되었다면 true 반환
- */
-function isTokenExpired(token) {
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    // exp는 보통 초 단위이므로 밀리초로 변환
-    return (payload.exp * 1000) < Date.now();
-  } catch (e) {
-    console.error("토큰 디코딩 실패:", e);
-    return true;
-  }
 }
 
 // 이벤트 리스너 등록

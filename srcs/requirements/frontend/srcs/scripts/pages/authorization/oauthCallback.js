@@ -1,3 +1,5 @@
+import { checkCookie } from '../../validation/cookie.js';
+
 export function OauthCallbackPage() {
   const container = document.createElement("div");
   container.innerHTML = "<p>로그인 처리 중입니다. 잠시만 기다려주세요...</p>";
@@ -28,6 +30,7 @@ async function handleOauthCallback() {
   try {
     const response = await fetch(`https://localhost/api/oauth/42intra/oauth-callback/`, {
       method: "POST",
+      credentials: 'include',
       headers: {
         "Content-Type": "application/json"
       },
@@ -43,12 +46,10 @@ async function handleOauthCallback() {
     }
 
     const data = await response.json();
-    const token = data.token;
-    if (!token) {
+    if (!await checkCookie()) {
       throw new Error("토큰이 없습니다.");
     }
 
-    sessionStorage.setItem("fa_token", token);
     setTimeout(async () => {
       fetchFriends();
       window.location.hash = "#profile"; 

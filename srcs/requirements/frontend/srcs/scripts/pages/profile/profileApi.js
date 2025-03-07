@@ -10,12 +10,11 @@ import { renderMatchHistory } from "../../components/matchHistory.js";
  */
 async function fetchProfileData() {
 	try {
-			const token = sessionStorage.getItem('fa_token');
 			const response = await fetch('https://localhost/api/users/profile/', {
 					method: 'GET',
+					credentials: 'include',
 					headers: {
 							'Content-Type': 'application/json',
-							'Authorization': `Bearer ${token}`
 					}
 			});
 			if (!response.ok) {
@@ -40,14 +39,14 @@ async function fetchProfileData() {
  * 
  */
 async function uploadProfileImage(file) {
-	const token = sessionStorage.getItem('fa_token');
 	const formData = new FormData();
 	formData.append('profile_image', file);
 	try {
 		const response = await fetch('https://localhost/api/users/upload/', {
 			method: 'POST',
+			credentials: 'include',
 			headers: {
-				'Authorization': `Bearer ${token}`
+				'Content-Type': 'application/json',
 			},
 			body: formData
 		});
@@ -71,12 +70,11 @@ async function uploadProfileImage(file) {
 }
 
 async function fetchLogout() {
-	const token = sessionStorage.getItem('fa_token');
 	const response = await fetch('https://localhost/api/users/signout/', {
 	  method: 'POST',
+	  credentials: 'include',
 	  headers: {
 		'Content-Type': 'application/json',
-		'Authorization': `Bearer ${token}`
 	  }
 	});
   

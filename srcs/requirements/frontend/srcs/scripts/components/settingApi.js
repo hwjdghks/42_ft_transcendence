@@ -2,13 +2,12 @@
  * 유저 이름 업데이트를 위한 fetch 호출 함수
  */
 async function fetchUpdateUsername(newUsername) {
-    const token = sessionStorage.getItem('fa_token');
 
     const response = await fetch('https://localhost/api/users/update/username/', {
         method: 'POST',
+		credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ new_username: newUsername })
     });
@@ -32,13 +31,12 @@ async function fetchUpdateUsername(newUsername) {
  * 개인정보 업데이트를 위한 fetch 호출 함수
  */
 async function fetchUpdatePrivacySettings(showInSearch, shareProfileImage, shareOnlineStatus) {
-	const token = sessionStorage.getItem('fa_token');
 	try {
 		const response = await fetch('https://localhost/api/users/update/settings/', {
 			method: 'POST',
+			credentials: 'include',
 			headers: {
 				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${token}`
 			},
 			body: JSON.stringify({
 				show_in_search: showInSearch,
@@ -61,13 +59,12 @@ async function fetchUpdatePrivacySettings(showInSearch, shareProfileImage, share
  * 패스워드 업데이트를 위한 fetch 호출 함수
  */
 async function fetchUpdatePassword(currentPassword, newPassword) {
-	const token = sessionStorage.getItem('fa_token');
 	try {
 	  const response = await fetch('https://localhost/api/users/update/password/', {
 			method: 'POST',
+			credentials: 'include',
 			headers: {
 				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${token}`
 			},
 			body: JSON.stringify({ 
 				current_password: currentPassword,
