@@ -38,8 +38,8 @@ def signup(request: HttpRequest) -> JsonResponse:
     if response:
         return response
     
-    if len(username) > 10 or len(guestname) > 10:
-        return JsonResponse({'error': '이름은 10글자 이하여야합니다다.'}, status=400)
+    if len(username) > 10:
+        return JsonResponse({'error': '유저 이름은 10글자 이하여야합니다다.'}, status=400)
 
     if not re.fullmatch(r'[0-9a-zA-Z]+', username):
         return JsonResponse({'error': '유저 이름은 알파벳과 숫자로만 이루어져야 합니다.'}, status=400)
