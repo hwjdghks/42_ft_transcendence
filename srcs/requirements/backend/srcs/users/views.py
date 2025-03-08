@@ -166,7 +166,7 @@ def update_username(request: HttpRequest) -> JsonResponse:
     if not re.fullmatch(r'[0-9a-zA-Z]+', new_username):
         return JsonResponse({'error': '유저 이름은 알파벳과 숫자로만 이루어져야 합니다.'}, status=400)
 
-    old_username = user.get_username()
+    old_username = user.username
     if old_username == new_username:
         return JsonResponse({
             'error': '기존 이름과 같은 이름으로 변경할 수 없습니다.'
