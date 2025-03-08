@@ -9,7 +9,7 @@ function GamePlayPage(configJson) {
   const container = document.createElement("div");
   container.className = "game-container";
   container.innerHTML = `
-    <div id="scoreBoard">Player1: 0 | Player2: 0</div>
+    <div id="scoreBoard">___ : 0 | ___ : 0</div>
     <div id="gameContainer"></div>
     <div id="winnerMessage"></div>
     <!-- 카운트다운 UI -->

@@ -1,29 +1,51 @@
 import { isInputUsernameValid } from "./inputData.js"
-import { fetchProfileData } from "../pages/profile/profileApi.js"
+import { getProfileData } from "../api/scriptApi.js"
 import { resetTournamentSession } from '../pages/game/tournament.js'
 
 // 플레이어리스트 검증 함수
 async function isSessionPlayerListValid() {
   console.log('Session storage: playerList 검증 시도');
-  const playerList = getSessionData('playerList');
-  if (!playerList) return false;
-  
-  // API에서 프로필 데이터 가져오기
-  const profileData = await fetchProfileData();
-  if (!profileData) {
-    console.error('프로필 데이터를 가져오지 못했습니다.');
+
+  try {
+    const playerList = getSessionData('playerList');
+    if (!playerList) {
+      console.warn('세션에 playerList 데이터가 없습니다.');
+      return false;
+    }
+
+    // API에서 프로필 데이터 가져오기
+    let profileData;
+    try {
+      profileData = await getProfileData();
+    } catch (error) {
+      // console.error('프로필 데이터를 가져오는 데 실패했습니다:', error.message);
+      return false;
+    }
+
+    if (!profileData || !profileData.username) {
+      // console.error('프로필 데이터가 비어 있거나 username이 없습니다.');
+      return false;
+    }
+
+    // 첫 번째 플레이어 이름이 API에서 가져온 username과 일치하는지 확인
+    if (playerList[0] !== profileData.username) {
+      // console.warn(`playerList[0](${playerList[0]})와 프로필의 username(${profileData.username})이 일치하지 않습니다.`);
+      return false;
+    }
+
+    // playerList의 각 이름이 유효한지 검사 (영어/숫자 1~10글자)
+    for (const name of playerList) {
+      if (!isInputUsernameValid(name)) {
+        // console.warn(`플레이어 이름이 유효하지 않음: ${name}`);
+        return false;
+      }
+    }
+    return true;
+  } catch (error) {
     return false;
   }
-  
-  // 첫번째 플레이어 이름이 API에서 가져온 username과 일치하는지 확인
-  if (playerList[0] !== profileData.username) return false;
-
-  // playerList의 각 이름이 유효한지 검사 (영어/숫자 1~10글자)
-  for (const name of playerList) {
-    if (!isInputUsernameValid(name)) return false;
-  }
-  return true;
 }
+
 
 // 게임 옵션 객체를 검증하는 함수
 function isSessionGameOptionsValid() {
@@ -133,7 +155,7 @@ function getSessionData(key) {
   }
 }
 
-async function validateTournamentSession(isTournamentPage = false) {
+export async function validateTournamentSession(isTournamentPage = false) {
   const validPlayerList = await isSessionPlayerListValid();
   const validGameOptions = isSessionGameOptionsValid();
   let validCurrentMatch = true;
@@ -146,12 +168,10 @@ async function validateTournamentSession(isTournamentPage = false) {
   }
 
   if (!validPlayerList || !validGameOptions || !validCurrentMatch || !validMatchArray) {
-    alert('세션 데이터에 문제가 있습니다. 토너먼트를 종료하고 옵션 페이지로 이동합니다.');
+    alert('There is a problem with the session data. Exit the tournament and go to the options page.');
     resetTournamentSession();
     window.location.hash = '#gameplay/option';
     return false;
   }
   return true;
 }
-
-export { validateTournamentSession };

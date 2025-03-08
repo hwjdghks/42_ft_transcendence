@@ -1,8 +1,10 @@
-function GameTournamentPage() {
+import { trans } from '../../language.js';
+
+export function GameTournamentPage() {
   const container = document.createElement('div');
   container.className = 'container py-5';
 
-  const options = JSON.parse(sessionStorage.getItem('game_option'));
+  // const options = JSON.parse(sessionStorage.getItem('game_option'));
   const playerList = JSON.parse(sessionStorage.getItem('playerList'));
 
   // 대진표(matches)가 없으면 생성
@@ -39,7 +41,7 @@ function generateUUID() {
   return `${hex.substr(0, 8)}-${hex.substr(8, 4)}-${hex.substr(12, 4)}-${hex.substr(16, 4)}-${hex.substr(20, 12)}`;
 }
 
-function resetTournamentSession() {
+export function resetTournamentSession() {
   sessionStorage.removeItem('tournament_in_progress');
   sessionStorage.removeItem('game_option');
   sessionStorage.removeItem('playerList');
@@ -71,7 +73,7 @@ function renderBracket(matchData, parent, nextButton) {
   parent.innerHTML = ''; // 기존 내용 초기화
 
   const title = document.createElement('h2');
-  title.textContent = 'Tournament Bracket';
+  title.textContent = trans[window.curLang].tournamentHeader;
   title.className = 'mb-4 fw-bold';
   parent.appendChild(title);
 
@@ -84,20 +86,20 @@ function renderBracket(matchData, parent, nextButton) {
     const cardBody = document.createElement('div');
     cardBody.className = 'card-body d-flex justify-content-between align-items-center';
     const matchTitle = document.createElement('div');
-    matchTitle.innerHTML = `<strong>Match ${index + 1}</strong> : ${match.player1} vs ${match.player2}`;
+    matchTitle.innerHTML = `<strong>${trans[window.curLang].tournamentMatch} ${index + 1}</strong> : ${match.player1} vs ${match.player2}`;
     cardBody.appendChild(matchTitle);
 
     if (match.winner) {
       let scoreText = '';
       if (match.score) {
-        scoreText = ` | 점수: ${match.score.player1} - ${match.score.player2}`;
+        scoreText = ` | ${trans[window.curLang].tournamentScore}: ${match.score.player1} - ${match.score.player2}`;
       }
       const winnerInfo = document.createElement('div');
-      winnerInfo.innerHTML = `<span class="text-success fw-bold">승자: ${match.winner}</span><small class="text-muted ms-2">${scoreText}</small>`;
+      winnerInfo.innerHTML = `<span class="text-success fw-bold">${trans[window.curLang].tournamentWinner}: ${match.winner}</span><small class="text-muted ms-2">${scoreText}</small>`;
       cardBody.appendChild(winnerInfo);
     } else {
       const tbdInfo = document.createElement('div');
-      tbdInfo.innerHTML = `<span class="text-muted">TBD</span>`;
+      tbdInfo.innerHTML = `<span class="text-muted">${trans[window.curLang].tournamentTBD}</span>`;
       cardBody.appendChild(tbdInfo);
     }
 
@@ -111,7 +113,7 @@ function renderBracket(matchData, parent, nextButton) {
 
 function createNextButton() {
   const nextButton = document.createElement('button');
-  nextButton.textContent = '다음 경기 진행';
+  nextButton.textContent = trans[window.curLang].tournamentNextMatch;
   nextButton.className = 'btn btn-primary mt-4';
   return nextButton;
 }
@@ -134,7 +136,7 @@ function handleNextButtonClick(matches, container, nextButton) {
       renderBracket(matches, container, nextButton);
     } else {
       // 최종 우승자 발표 후 토너먼트 세션 초기화
-      alert(`🏆 최종 우승자: ${winners[0]} 🏆`);
+      alert(`${trans[window.curLang].tournamentLastAlert} ${winners[0]} 🏆`);
       sessionStorage.setItem('tournament_in_progress', 'false');
       // resetTournamentSession();
       window.location.hash = '#gameplay/option';
@@ -142,5 +144,3 @@ function handleNextButtonClick(matches, container, nextButton) {
   }
   return matches;
 }
-
-export { GameTournamentPage, resetTournamentSession };

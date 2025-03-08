@@ -1,4 +1,5 @@
 import { checkCookie } from '../../validation/cookie.js';
+import { postOauthToken } from '../../api/scriptApi.js';
 
 export function OauthCallbackPage() {
   const container = document.createElement("div");
@@ -20,46 +21,21 @@ async function handleOauthCallback() {
   }
 
   if (!code) {
-    alert("인증 코드가 없습니다. 다시 로그인 해주세요.");
+    alert('There is no authentication code.Please login again.');
     window.location.hash = "#login";
     return;
   }
 
-	console.log(code);
-
   try {
-    const response = await fetch(`https://localhost/api/oauth/42intra/oauth-callback/`, {
-      method: "POST",
-      credentials: 'include',
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ code })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("백엔드 에러:", errorData);
-      alert("로그인 처리 중 에러가 발생했습니다.");
-      window.location.hash = "#login";
-      return;
-    }
-
-    const data = await response.json();
-    if (!await checkCookie()) {
-      throw new Error("토큰이 없습니다.");
-    }
-
-    setTimeout(async () => {
+    const token = await postOauthToken(code);
+    setTimeout(() => {
       fetchFriends();
-      window.location.hash = "#profile"; 
+      window.location.hash = "#profile";
     }, 1000);
 
     window.location.hash = "#profile";
   } catch (error) {
-    console.error("OAuth 코드 교환 에러:", error);
-    alert("로그인 처리 중 오류가 발생했습니다.");
+    alert('Error: ' + error.message);
     window.location.hash = "#login";
   }
 }
-

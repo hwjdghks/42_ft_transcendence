@@ -1,5 +1,6 @@
 import { fetchLogin, fetchLoginOTPRequest, showMessage } from './loginApi.js';
 import { fetchFriends } from '../../components/friends.js'
+import { trans } from '../../language.js';
 
 async function handleLoginSubmit(event) {
   event.preventDefault();
@@ -68,21 +69,21 @@ export function LoginPage() {
   return `
     <div class="login-page">
       <div class="login-container">
-        <h1 class="login-heading">Login</h1>
+        <h3 class="login-heading">${trans[window.curLang].loginHeader}</h3>
         <form class="mt-3" id="login-form">
           <div class="mb-3">
-            <label for="email" class="form-label">Email address</label>
-            <input type="email" class="form-control" id="email" placeholder="Enter your email">
+            <label for="email" class="form-label">${trans[window.curLang].loginEmail}</label>
+            <input type="email" class="form-control" id="email" placeholder="${trans[window.curLang].loginEmailHolder}">
           </div>
           <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input type="password" class="form-control" id="password" placeholder="Enter your password">
+            <label for="password" class="form-label">${trans[window.curLang].loginPassword}</label>
+            <input type="password" class="form-control" id="password" placeholder="${trans[window.curLang].loginPasswordHolder}">
           </div>
-          <button type="submit" class="btn login-btn">Submit</button>
-          <button type="submit" class="btn oauth-btn">42 login</button>
+          <button type="submit" class="btn login-btn">${trans[window.curLang].loginBtn}</button>
+          <button type="submit" class="btn oauth-btn">${trans[window.curLang].loginOauthBtn}</button>
         </form>
         <div id="login-message" class="mt-3"></div>
-        <a href="/#signup" class="btn btn-link mt-3">Sign up</a>
+        <a href="/#signup" class="btn btn-link mt-3">${trans[window.curLang].loginSingupBtn}</a>
       </div>
     </div>
   `;

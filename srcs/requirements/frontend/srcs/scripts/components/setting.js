@@ -1,5 +1,6 @@
+import { trans, changeLanguage } from '../language.js';
 import { createDeleteAccountModal } from './deleteAccountModal.js';
-import { fetchUpdateUsername, fetchUpdatePrivacySettings, fetchUpdatePassword } from './settingApi.js';
+import { postUpdateUsername, postUpdatePrivacySettings, postUpdatePassword } from '../api/scriptApi.js';
 import { isInputUsernameValid, isInputPasswordValid } from '../validation/inputData.js';
 import { renderMatchHistory } from '../components/matchHistory.js';
 
@@ -13,9 +14,9 @@ function renderSettings() {
   settingsContainer.innerHTML = `
     <!-- Username Field -->
     <div class="mb-3">
-      <label for="username" class="form-label text-start w-100">Username</label>
+      <label for="username" class="form-label text-start w-100">${trans[window.curLang].settingUsername}</label>
       <div class="input-group">
-        <input type="text" class="form-control" id="username" placeholder="change username" disabled>
+        <input type="text" class="form-control" id="username" placeholder="${trans[window.curLang].settingUsernameHolder}" disabled>
         <button class="btn btn-outline-secondary" type="button" id="editUsernameBtn">
           <i class="bi bi-gear"></i>
         </button>
@@ -23,9 +24,9 @@ function renderSettings() {
     </div>
     <!-- Password Field -->
     <div class="mb-3">
-      <label for="password" class="form-label text-start w-100">Password</label>
+      <label for="password" class="form-label text-start w-100">${trans[window.curLang].settingPassword}</label>
       <div class="input-group">
-        <input type="password" class="form-control" id="password" placeholder="change password" disabled>
+        <input type="password" class="form-control" id="password" placeholder="${trans[window.curLang].settingPasswordHolder}" disabled>
         <button class="btn btn-outline-secondary" type="button" id="editPasswordBtn">
           <i class="bi bi-gear"></i>
         </button>
@@ -33,15 +34,23 @@ function renderSettings() {
     </div>
     <!-- Privacy Field -->
     <div class="mb-3">
-      <label for="privacy" class="form-label text-start w-100">Privacy</label>
+      <label for="privacy" class="form-label text-start w-100">${trans[window.curLang].settingPrivacy}</label>
       <div class="input-group">
-        <input type="privacy" class="form-control" id="privacy" placeholder="set privacy options" disabled>
+        <input type="privacy" class="form-control" id="privacy" placeholder="${trans[window.curLang].settingPrivacyHolder}" disabled>
         <button class="btn btn-outline-secondary" type="button" id="editPrivacyBtn">
           <i class="bi bi-gear"></i>
         </button>
       </div>
     </div>
-    <button class="btn btn-danger w-100" id="deleteAccountBtn">Delete account</button>
+    <!-- Language Selection Dropdown -->
+    <div class="mb-3">
+      <label for="language-select" class="form-label text-start w-100">${trans[window.curLang].settingLanguage}</label>
+      <select id="language-select" class="form-select">
+        <option value="en">English</option>
+        <option value="ko">한국어</option>
+      </select>
+    </div>
+    <button class="btn btn-danger w-100" id="deleteAccountBtn">${trans[window.curLang].settingDeleteAccount}</button>
     <div id="setting-message" class="mt-3"></div>
   `;
 
@@ -87,7 +96,17 @@ function renderSettings() {
       modal.show();
     });
   }
-  
+
+  // 언어 변경 버튼 이벤트
+  const languageSelect = settingsContainer.querySelector('#language-select');
+  languageSelect.value = localStorage.getItem("lang") || "en";
+  languageSelect.addEventListener("change", (e) => {
+    const selectedLang = e.target.value;
+    localStorage.setItem("lang", selectedLang);
+    window.curLang = selectedLang;
+    changeLanguage(window.curLang);
+  });
+
   // Delete Account 버튼 이벤트
   const deleteAccountBtn = settingsContainer.querySelector('#deleteAccountBtn');
   if (deleteAccountBtn) {
@@ -100,11 +119,7 @@ function renderSettings() {
   return settingsContainer;
 }
 
-/**
- * 유저 이름 변경 모달 생성 함수
- * - 오직 영어 알파벳만 허용 (정규식: /^[A-Za-z]+$/)
- * - 입력 필드가 비었거나 정규식에 맞지 않으면 저장 버튼 비활성화
- */
+// 유저 이름 변경 모달 생성 함수
 function createUsernameModal() {
   if (document.getElementById('usernameModal')) return;
 
@@ -116,20 +131,20 @@ function createUsernameModal() {
     <div class="modal-dialog">
       <div class="modal-content">
          <div class="modal-header">
-           <h5 class="modal-title">Change Username</h5>
+           <h5 class="modal-title">${trans[window.curLang].settingModalUsername}</h5>
            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
          </div>
          <div class="modal-body">
            <form id="usernameForm">
              <div class="mb-3">
-               <label for="newUsername" class="form-label">New Username</label>
-               <input type="text" class="form-control" id="newUsername" placeholder="Enter new username">
-               <small class="form-text text-muted">영어, 숫자만 입력 가능합니다. (최대 10자)</small>
+               <label for="newUsername" class="form-label">${trans[window.curLang].settingModalNewUsername}</label>
+               <input type="text" class="form-control" id="newUsername" placeholder="${trans[window.curLang].settingModalNewUsernameHolder}">
+               <small class="form-text text-muted">${trans[window.curLang].settingModalUsernameSmall}</small>
              </div>
              <div id="usernameModalMessage" class="mb-3"></div>
              <div class="modal-footer">
-               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-               <button type="submit" class="btn btn-primary" id="usernameSaveBtn" disabled>Save</button>
+               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${trans[window.curLang].Cancel}</button>
+               <button type="submit" class="btn btn-primary" id="usernameSaveBtn" disabled>${trans[window.curLang].Save}</button>
              </div>
            </form>
          </div>
@@ -145,7 +160,16 @@ function createUsernameModal() {
   newUsernameInput.addEventListener('input', () => {
     const value = newUsernameInput.value.trim();
     const valid = isInputUsernameValid(value);
-    usernameSaveBtn.disabled = !valid;
+    
+    if (valid) {
+      newUsernameInput.classList.remove('is-invalid');
+      usernameSaveBtn.disabled = false;
+      document.querySelector("#newUsername").nextElementSibling.classList.remove('text-danger');
+    } else {
+      newUsernameInput.classList.add('is-invalid');
+      usernameSaveBtn.disabled = true;
+      document.querySelector("#newUsername").nextElementSibling.classList.add('text-danger');
+    }
   });
 
   // 모달 닫힐 때 초기화
@@ -161,8 +185,8 @@ function createUsernameModal() {
     e.preventDefault();
     const newUsername = newUsernameInput.value.trim();
     try {
-      const updateMessage = await fetchUpdateUsername(newUsername);
-      alert(updateMessage || "Success to change");
+      const updateMessage = await postUpdateUsername(newUsername);
+      alert(updateMessage.message || 'Success');
 
       // 화면 상단 username 업데이트
       const usernameElement = document.querySelector('.fs-2.fw-bold');
@@ -175,7 +199,7 @@ function createUsernameModal() {
       const modalInstance = bootstrap.Modal.getInstance(modalDiv);
       modalInstance.hide();
     } catch (error) {
-      alert(error.message);
+      alert('Error: ' + error.message);
       newUsernameInput.value = "";
       usernameSaveBtn.disabled = true;
     }
@@ -196,29 +220,29 @@ function createPrivacySettingsModal() {
     <div class="modal-dialog">
       <div class="modal-content">
          <div class="modal-header">
-           <h5 class="modal-title">Privacy Settings</h5>
+           <h5 class="modal-title">${trans[window.curLang].settingModalPrivacy}</h5>
            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
          </div>
          <div class="modal-body">
            <form id="privacySettingsForm">
              <div class="form-check mb-2">
                <input type="checkbox" class="form-check-input" id="modalShowInSearchCheckbox" checked>
-               <label class="form-check-label" for="modalShowInSearchCheckbox">Show in friend search</label>
+               <label class="form-check-label" for="modalShowInSearchCheckbox">${trans[window.curLang].settingModalPrivacy1}</label>
              </div>
              <div class="form-check mb-2">
                <input type="checkbox" class="form-check-input" id="modalShareProfileImageCheckbox" checked>
-               <label class="form-check-label" for="modalShareProfileImageCheckbox">Share profile image</label>
+               <label class="form-check-label" for="modalShareProfileImageCheckbox">${trans[window.curLang].settingModalPrivacy2}</label>
              </div>
              <div class="form-check mb-2">
                <input type="checkbox" class="form-check-input" id="modalShareOnlineStatusCheckbox" checked>
-               <label class="form-check-label" for="modalShareOnlineStatusCheckbox">Share online status</label>
+               <label class="form-check-label" for="modalShareOnlineStatusCheckbox">${trans[window.curLang].settingModalPrivacy3}</label>
              </div>
              <div id="privacySettingsModalMessage" class="mb-3"></div>
            </form>
          </div>
          <div class="modal-footer">
-           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-           <button type="button" class="btn btn-primary" id="privacySettingsSaveBtn">Save Changes</button>
+           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${trans[window.curLang].Cancel}</button>
+           <button type="button" class="btn btn-primary" id="privacySettingsSaveBtn">${trans[window.curLang].Save}</button>
          </div>
       </div>
     </div>
@@ -240,12 +264,13 @@ function createPrivacySettingsModal() {
     const shareProfileImage = document.getElementById('modalShareProfileImageCheckbox').checked;
     const shareOnlineStatus = document.getElementById('modalShareOnlineStatusCheckbox').checked;
 
-    const result = await fetchUpdatePrivacySettings(showInSearch, shareProfileImage, shareOnlineStatus);
-    if (result.success) {
-      alert('success to change');
-    } else {
-      alert('failed to change');
+    try {
+      await postUpdatePrivacySettings(showInSearch, shareProfileImage, shareOnlineStatus);
+      alert('Success');
+    } catch (error) {
+      alert('Error: ' + error.message);
     }
+
     const modalInstance = bootstrap.Modal.getInstance(modalDiv);
     modalInstance.hide();
   });
@@ -268,28 +293,28 @@ function createPasswordModal() {
     <div class="modal-dialog">
       <div class="modal-content">
          <div class="modal-header">
-           <h5 class="modal-title">Change Password</h5>
+           <h5 class="modal-title">${trans[window.curLang].settingModalPassword}</h5>
            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
          </div>
          <div class="modal-body">
            <form id="passwordForm">
              <div class="mb-3">
-               <label for="currentPassword" class="form-label">Current Password</label>
-               <input type="password" class="form-control" id="currentPassword" placeholder="Enter current password">
+               <label for="currentPassword" class="form-label">${trans[window.curLang].settingModalCurPassword}</label>
+               <input type="password" class="form-control" id="currentPassword" placeholder="${trans[window.curLang].settingModalCurPasswordHolder}">
              </div>
              <div class="mb-3">
-               <label for="newPassword" class="form-label">New Password</label>
-               <input type="password" class="form-control" id="newPassword" placeholder="Enter new password">
-               <small class="form-text text-muted">영어, 숫자, 특수문자 최소 각 1개 이상 조합해야 합니다. (최소 8자, 최대 50자)</small>
+               <label for="newPassword" class="form-label">${trans[window.curLang].settingModalNewPassword}</label>
+               <input type="password" class="form-control" id="newPassword" placeholder="${trans[window.curLang].settingModalNewPasswordHolder}">
+               <small class="form-text text-muted">${trans[window.curLang].settingModalPasswordSmall}</small>
              </div>
              <div class="mb-3">
-               <label for="confirmPassword" class="form-label">Confirm New Password</label>
-               <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm new password">
+               <label for="confirmPassword" class="form-label">${trans[window.curLang].settingModalConPassword}</label>
+               <input type="password" class="form-control" id="confirmPassword" placeholder="${trans[window.curLang].settingModalConPasswordHolder}">
              </div>
              <div id="passwordModalMessage" class="mb-3"></div>
              <div class="modal-footer">
-               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-               <button type="submit" class="btn btn-primary" id="savePasswordBtn" disabled>Save</button>
+               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${trans[window.curLang].Cancel}</button>
+               <button type="submit" class="btn btn-primary" id="savePasswordBtn" disabled>${trans[window.curLang].Save}</button>
              </div>
            </form>
          </div>
@@ -304,7 +329,6 @@ function createPasswordModal() {
   const confirmPasswordInput = modalDiv.querySelector('#confirmPassword');
   const savePasswordBtn = modalDiv.querySelector('#savePasswordBtn');
 
-  // 실시간 유효성 검사 함수
   function validatePasswordFields() {
     const currentPassword = currentPasswordInput.value.trim();
     const newPassword = newPasswordInput.value.trim();
@@ -312,20 +336,34 @@ function createPasswordModal() {
   
     const newPasswordValid = isInputPasswordValid(newPassword);
     const passwordsMatch = newPassword === confirmPassword;
-    
-    if (currentPassword && newPassword && confirmPassword && newPasswordValid && passwordsMatch) {
-      savePasswordBtn.disabled = false;
-      confirmPasswordInput.classList.remove('is-invalid');
+  
+    // newPassword 안내문을 찾음
+    const newPasswordHint = newPasswordInput.parentElement.querySelector('small');
+    const confirmPasswordHint = confirmPasswordInput.parentElement.querySelector('small');
+  
+    // 새 비밀번호 유효성 검사
+    if (!newPasswordValid) {
+      newPasswordInput.classList.add('is-invalid');
+      if (newPasswordHint) newPasswordHint.classList.add('text-danger');
     } else {
-      savePasswordBtn.disabled = true;
-      if (confirmPassword && !passwordsMatch) {
-        confirmPasswordInput.classList.add('is-invalid');
-      } else {
-        confirmPasswordInput.classList.remove('is-invalid');
-      }
+      newPasswordInput.classList.remove('is-invalid');
+      if (newPasswordHint) newPasswordHint.classList.remove('text-danger');
     }
+  
+    // 비밀번호 확인 검사
+    if (!passwordsMatch) {
+      confirmPasswordInput.classList.add('is-invalid');
+      if (confirmPasswordHint) confirmPasswordHint.classList.add('text-danger');
+    } else {
+      confirmPasswordInput.classList.remove('is-invalid');
+      if (confirmPasswordHint) confirmPasswordHint.classList.remove('text-danger');
+    }
+  
+    // 모든 조건을 만족하면 버튼 활성화
+    savePasswordBtn.disabled = !(currentPassword && newPasswordValid && passwordsMatch);
   }
-
+  
+  
   // 입력 이벤트로 실시간 검사 실행
   currentPasswordInput.addEventListener('input', validatePasswordFields);
   newPasswordInput.addEventListener('input', validatePasswordFields);
@@ -346,24 +384,84 @@ function createPasswordModal() {
 
     if (newPassword !== confirmPassword) {
       confirmPasswordInput.classList.add('is-invalid');
-      alert('입력한 패스워드가 다릅니다.');
+      alert('Passwords do not match.');
       return;
     }
 
     try {
-      const updateMessage = await fetchUpdatePassword(currentPassword, newPassword);
-      alert(updateMessage || 'success to change');
+      const updateMessage = await postUpdatePassword(currentPassword, newPassword);
+      alert('Success');
       const modalInstance = bootstrap.Modal.getInstance(modalDiv);
       modalInstance.hide();
     } catch (error) {
-      alert(error.message || 'Failed to update password');
+      alert('Error: ' + error.message);
       currentPasswordInput.value = "";
       newPasswordInput.value = "";
       confirmPasswordInput.value = "";
       savePasswordBtn.disabled = true;
-      console.error('Password update error:', error);
     }
   });
 }
 
-export { renderSettings };
+function updateModals() {
+  const usernameModal = document.getElementById('usernameModal');
+  if (usernameModal) {
+    usernameModal.querySelector('.modal-title').textContent = trans[window.curLang].settingModalUsername;
+    usernameModal.querySelector('.form-label').textContent = trans[window.curLang].settingModalNewUsername;
+    usernameModal.querySelector('#newUsername').placeholder = trans[window.curLang].settingModalNewUsernameHolder;
+    usernameModal.querySelector('.form-text').textContent = trans[window.curLang].settingModalUsernameSmall;
+    usernameModal.querySelector('#usernameSaveBtn').textContent = trans[window.curLang].Save;
+    usernameModal.querySelector('.btn-secondary').textContent = trans[window.curLang].Cancel;
+  }
+
+  const passwordModal = document.getElementById('passwordModal');
+  if (passwordModal) {
+    passwordModal.querySelector('.modal-title').textContent = trans[window.curLang].settingModalPassword;
+    passwordModal.querySelector('#savePasswordBtn').textContent = trans[window.curLang].Save;
+    passwordModal.querySelector('.btn-secondary').textContent = trans[window.curLang].Cancel;
+
+    passwordModal.querySelector('label[for="currentPassword"]').textContent = trans[window.curLang].settingModalCurPassword;
+    passwordModal.querySelector('#currentPassword').placeholder = trans[window.curLang].settingModalCurPasswordHolder;
+    
+    passwordModal.querySelector('label[for="newPassword"]').textContent = trans[window.curLang].settingModalNewPassword;
+    passwordModal.querySelector('#newPassword').placeholder = trans[window.curLang].settingModalNewPasswordHolder;
+    
+    passwordModal.querySelector('label[for="confirmPassword"]').textContent = trans[window.curLang].settingModalConPassword;
+    passwordModal.querySelector('#confirmPassword').placeholder = trans[window.curLang].settingModalConPasswordHolder;
+
+    passwordModal.querySelector('.form-text').textContent = trans[window.curLang].settingModalPasswordSmall;
+  }
+
+  const privacyModal = document.getElementById('privacySettingsModal');
+  if (privacyModal) {
+    privacyModal.querySelector('.modal-title').textContent = trans[window.curLang].settingModalPrivacy;
+    privacyModal.querySelector('.btn-secondary').textContent = trans[window.curLang].Cancel;
+    privacyModal.querySelector('#privacySettingsSaveBtn').textContent = trans[window.curLang].Save;
+
+    privacyModal.querySelector('label[for="modalShowInSearchCheckbox"]').textContent = trans[window.curLang].settingModalPrivacy1;
+    privacyModal.querySelector('label[for="modalShareProfileImageCheckbox"]').textContent = trans[window.curLang].settingModalPrivacy2;
+    privacyModal.querySelector('label[for="modalShareOnlineStatusCheckbox"]').textContent = trans[window.curLang].settingModalPrivacy3;
+  }
+
+  const deleteAccountModal = document.getElementById('deleteAccountModal');
+  if (deleteAccountModal) {
+    deleteAccountModal.querySelector('.modal-header h2 span').textContent = trans[window.curLang].settingModalDelete;
+    deleteAccountModal.querySelector('.modal-body p').textContent = trans[window.curLang].settingModalDeleteBody;
+    deleteAccountModal.querySelector('#otpInput').placeholder = trans[window.curLang].settingModalDeleteHolder;
+    deleteAccountModal.querySelector('.modal-footer .btn-secondary').textContent = trans[window.curLang].Cancel;
+    deleteAccountModal.querySelector('.modal-footer #confirmDelete').textContent = trans[window.curLang].settingModalBtn;
+  }  
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const modals = document.querySelectorAll(".modal");
+  modals.forEach(modal => {
+    modal.addEventListener("hidden.bs.modal", () => {
+      setTimeout(() => {
+        modal.removeAttribute("aria-hidden");
+      }, 100);
+    });
+  });
+});
+
+export { renderSettings, updateModals };

@@ -1,3 +1,5 @@
+import { trans } from '../language.js';
+
 export function createDeleteAccountModal() {
   const modal = document.createElement('div');
   modal.innerHTML = `
@@ -6,21 +8,18 @@ export function createDeleteAccountModal() {
           <div class="modal-content">
             <div class="modal-header">
               <h2 class="h4 mb-3">
-                <span class="fs-1 fw-bold text-danger">Warning</span>
+                <span class="fs-1 fw-bold text-danger">${trans[window.curLang].settingModalDelete}</span>
               </h2>
               <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-              <p>
-                계정 탈퇴를 진행하기 위해 이메일로 OTP가 전송되었습니다.<br>
-                OTP 코드를 입력해주세요.
-              </p>
-              <input type="text" id="otpInput" class="form-control" placeholder="Enter OTP code">
+              <p>${trans[window.curLang].settingModalDeleteBody}</p>
+              <input type="text" id="otpInput" class="form-control" placeholder="${trans[window.curLang].settingModalDeleteHolder}">
               <div id="deleteAccountMessage" class="mt-2"></div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              <button type="button" class="btn btn-danger" id="confirmDelete" disabled>Delete Account</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${trans[window.curLang].Cancel}</button>
+              <button type="button" class="btn btn-danger" id="confirmDelete" disabled>${trans[window.curLang].settingModalBtn}</button>
             </div>
           </div>
         </div>

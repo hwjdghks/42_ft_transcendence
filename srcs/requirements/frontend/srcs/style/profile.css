@@ -10,15 +10,15 @@
 }
 
 .profile-img {
-    width: 128px;
-    height: 128px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     object-fit: cover;
 }
 
 .stat-card {
     padding: 0.5rem;
-    border-radius: 0.5rem;
+    /* border-radius: 0.5rem; */
     color: white;
     font-size: 1.2rem;
     text-align: center;
@@ -70,7 +70,7 @@
 }
 
 /* Accordion Styles */
-.accordion-button {
+/* .accordion-button {
     width: 100%;
     padding: 1rem;
     background-color: #fff;
@@ -98,7 +98,7 @@
 
 .accordion-button:not(.collapsed) .bi-chevron-down {
     transform: rotate(180deg);
-}
+} */
 
 .content {
     box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);

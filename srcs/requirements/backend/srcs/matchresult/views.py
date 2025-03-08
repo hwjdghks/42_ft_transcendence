@@ -65,7 +65,7 @@ def add(request: HttpRequest) -> JsonResponse:
         game_result = data.get('game_result')
         session_id = data.get('session_id')
         
-        if len(username) > 10 or len(guestname):
+        if len(username) > 10 or len(guestname) > 10:
             return JsonResponse({'error': '이름은 10글자 이하여야합니다다.'}, status=400)
 
         if not re.fullmatch(r'[0-9a-zA-Z]+', username) or not re.fullmatch(r'[0-9a-zA-Z]+', guestname):
