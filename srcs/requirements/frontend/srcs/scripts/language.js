@@ -105,6 +105,8 @@ const trans = {
 
     // Option
     optionHeader: "Game Options",
+    optionRule: "Game Rule",
+    optionRuleBody: "First to 7 points wins.<br>- Player 1: Press 'W' to move up, 'S' to move down.<br>- Player 2: Press 'I' to move up, 'K' to move down.",
     optionHeaderSmall:
       "English letters and numbers only, no duplicates. (Maximum 10 characters)",
     optionPlayers: "Player List",
@@ -234,6 +236,8 @@ const trans = {
 
     // Option
     optionHeader: "게임 옵션",
+    optionRule: "게임 규칙",
+    optionRuleBody: "먼저 7점을 얻는 사람이 승리합니다.<br>- 플레이어 1: 'W' 키를 누르면 위로 이동, 'S' 키를 누르면 아래로 이동<br>- 플레이어 2: 'I' 키를 누르면 위로 이동, 'K' 키를 누르면 아래로 이동",
     optionHeaderSmall: "영문 및 숫자만 사용 가능, 중복 불가. (최대 10자)",
     optionPlayers: "플레이어 리스트",
     optionUserInputHeader: "나",
