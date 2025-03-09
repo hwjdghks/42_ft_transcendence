@@ -130,6 +130,21 @@ const trans = {
     // Game
     gameWin: "win!",
     gameBackBtn: "Back to tournament",
+
+    //Friends
+    friendsAddFriend: "Add Friend",
+    friendsModalTitle: "Add Friend",
+    friendsSearchPlaceholder: "Search for friends...",
+    friendsClose: "Close",
+    errorFetchingFriends: "Error fetching friends:",
+    errorSearchingFriends: "Error searching friends:",
+    attemptingToAddFriend: "Attempting to add friend:",
+    httpStatusCode: "HTTP Status Code:",
+    responseData: "Response data:",
+    errorAddingFriend: "Error occurred while adding friend:",
+    friendAddedSuccessfully: "Friend added successfully!",
+    friendRemovedSuccessfully: "Friend removed successfully!",
+    errorDeletingFriend: "Error deleting friend:",
   },
 
   ko: {
@@ -176,7 +191,7 @@ const trans = {
     friends: "친구",
     setting: "설정",
     logout: "로그아웃",
-
+  
     // Profile Settings
     settingUsername: "사용자 이름",
     settingUsernameHolder: "사용자 이름 변경",
@@ -258,6 +273,21 @@ const trans = {
     // Game
     gameWin: "승리!",
     gameBackBtn: "토너먼트로 돌아가기",
+
+    //Friends
+    friendsAddFriend: "친구 추가",
+    friendsModalTitle: "친구 추가",
+    friendsSearchPlaceholder: "친구 검색...",
+    friendsClose: "닫기",
+    errorFetchingFriends: "친구 목록 가져오기 에러:",
+    errorSearchingFriends: "친구 검색 에러:",
+    attemptingToAddFriend: "친구 추가 시도 중:",
+    httpStatusCode: "HTTP 상태 코드:",
+    responseData: "응답 데이터:",
+    errorAddingFriend: "친구 추가 중 에러 발생:",
+    friendAddedSuccessfully: "친구가 성공적으로 추가되었습니다!",
+    friendRemovedSuccessfully: "친구가 성공적으로 삭제되었습니다!",
+    errorDeletingFriend: "친구 삭제 에러:",
   }
 };
 
