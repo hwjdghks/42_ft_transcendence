@@ -1,15 +1,15 @@
+import { trans } from '../language.js';
+
 let friends = [];
 
 export function fetchFriends() {
   const friendListPromise = fetch("https://localhost/api/friends/list/", {
     method: "GET",
     credentials: 'include',
-    headers: {
-      "Content-Type": "application/json",
-    }
+    headers: { "Content-Type": "application/json" }
   }).then(response => {
     if (!response.ok) {
-      throw new Error("Friend list fetch error: " + response.status);
+      throw new Error(trans[window.curLang].errorFetchingFriends + " " + response.status);
     }
     return response.json();
   });
@@ -17,12 +17,10 @@ export function fetchFriends() {
   const onlineListPromise = fetch("https://localhost/api/friends/online/", {
     method: "GET",
     credentials: 'include',
-    headers: {
-      "Content-Type": "application/json",
-    }
+    headers: { "Content-Type": "application/json" }
   }).then(response => {
     if (!response.ok) {
-      console.error("Online status fetch error, using fallback. Status:", response.status);
+      console.error(trans[window.curLang].errorFetchingFriends, response.status);
       return { results: [] };
     }
     return response.json();
@@ -45,11 +43,13 @@ export function fetchFriends() {
       console.log("[fetchFriends] merged friends data:", friends);
       renderFriends();
     })
-    .catch(error => console.error('Error fetching friends:', error));
+    .catch(error => console.error(trans[window.curLang].errorFetchingFriends, error));
 }
 
 export function renderFriends() {
   const friendsContainer = document.getElementById('friends');
+  if (!friendsContainer) return;
+  
   friendsContainer.innerHTML = '';
 
   friendsContainer.style.display = 'grid';
@@ -58,15 +58,7 @@ export function renderFriends() {
 
   friends.forEach(friend => {
     const friendElement = document.createElement('div');
-    friendElement.classList.add(
-      'd-flex',
-      'align-items-center',
-      'mb-2',
-      'justify-content-between',
-      'border',
-      'p-2',
-      'rounded'
-    );
+    friendElement.classList.add('d-flex', 'align-items-center', 'mb-2', 'justify-content-between', 'border', 'p-2', 'rounded');
     friendElement.style.flexDirection = 'column';
     friendElement.style.alignItems = 'center';
 
@@ -92,7 +84,7 @@ export function renderFriends() {
   const addButton = document.createElement('button');
   addButton.classList.add('btn', 'btn-success', 'mt-2');
   addButton.style.gridColumn = 'span 2';
-  addButton.textContent = 'Add Friend';
+  addButton.textContent = trans[window.curLang].friendsAddFriend;
   addButton.onclick = openAddFriendPopup;
   friendsContainer.appendChild(addButton);
 }
@@ -118,13 +110,13 @@ export function openAddFriendPopup() {
   popupContent.style.width = '400px';
 
   const title = document.createElement('h3');
-  title.textContent = 'Add Friend';
+  title.textContent = trans[window.curLang].friendsModalTitle;
   title.classList.add('add-friend-title');
   popupContent.appendChild(title);
 
   const searchInput = document.createElement('input');
   searchInput.type = 'text';
-  searchInput.placeholder = 'Search for friends...';
+  searchInput.placeholder = trans[window.curLang].friendsSearchPlaceholder;
   searchInput.classList.add('form-control', 'mb-3');
   searchInput.addEventListener('keydown', function(event) {
     if (event.key === "Enter") {
@@ -139,7 +131,7 @@ export function openAddFriendPopup() {
 
   const closeButton = document.createElement('button');
   closeButton.classList.add('btn', 'btn-secondary');
-  closeButton.textContent = 'Close';
+  closeButton.textContent = trans[window.curLang].friendsClose;
   closeButton.onclick = () => popup.remove();
   popupContent.appendChild(closeButton);
 
@@ -154,9 +146,7 @@ export function performFriendSearch(query) {
   fetch(`https://localhost/api/friends/search/?search_query=${encodeURIComponent(query)}`, {
     method: "GET",
     credentials: 'include',
-    headers: {
-      "Content-Type": "application/json",
-    }
+    headers: { "Content-Type": "application/json" }
   })
     .then(response => response.json())
     .then(data => {
@@ -173,54 +163,50 @@ export function performFriendSearch(query) {
         searchResults.appendChild(userElement);
       });
     })
-    .catch(error => console.error("Error searching friends:", error));
+    .catch(error => console.error(trans[window.curLang].errorSearchingFriends, error));
 }
 
 export function addFriendFromSearch(friendname) {
-  console.log("Attempting to add friend:", friendname);
+  console.log(trans[window.curLang].attemptingToAddFriend, friendname);
 
   fetch("https://localhost/api/friends/add/", {
     method: "POST",
     credentials: 'include',
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ friendname: friendname })
   })
   .then(response => {
-    console.log(`HTTP Status Code: ${response.status}`);
+    console.log(trans[window.curLang].httpStatusCode, response.status);
     return response.json().then(data => ({ status: response.status, data }));
   })
   .then(result => {
-    console.log("Response data:", result.data);
+    console.log(trans[window.curLang].responseData, result.data);
     if (result.status >= 400) {
-      console.error("Error occurred while adding friend:", JSON.stringify(result.data, null, 2));
+      console.error(trans[window.curLang].errorAddingFriend, JSON.stringify(result.data, null, 2));
     } else {
       fetchFriends();
+      alert(trans[window.curLang].friendAddedSuccessfully);
     }
   })
-  .catch(error => console.error("Error adding friend:", error));
+  .catch(error => console.error(trans[window.curLang].errorAddingFriend, error));
 
   const popup = document.querySelector('.popup');
   if (popup) popup.remove();
 }
 
-
-
 export function removeFriend(friendname) {
   fetch("https://localhost/api/friends/delete/", {
     method: "POST",
     credentials: 'include',
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ friendname: friendname })
   })
     .then(response => response.json())
     .then(data => {
       fetchFriends();
+      alert(trans[window.curLang].friendRemovedSuccessfully);
     })
-    .catch(error => console.error("Error deleting friend:", error));
+    .catch(error => console.error(trans[window.curLang].errorDeletingFriend, error));
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -228,5 +214,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 window.removeFriend = removeFriend;
-window.fetchFriends= fetchFriends;
+window.fetchFriends = fetchFriends;
 window.addFriendFromSearch = addFriendFromSearch;
