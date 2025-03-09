@@ -84,7 +84,6 @@ export function renderFriends() {
   const addButton = document.createElement('button');
   addButton.classList.add('btn', 'btn-success', 'mt-2');
   addButton.style.gridColumn = 'span 2';
-  // 번역 키를 사용하여 버튼 텍스트 설정
   addButton.textContent = trans[window.curLang].friendsAddFriend;
   addButton.onclick = openAddFriendPopup;
   friendsContainer.appendChild(addButton);
@@ -111,14 +110,12 @@ export function openAddFriendPopup() {
   popupContent.style.width = '400px';
 
   const title = document.createElement('h3');
-  // 모달 타이틀에 번역 키 사용
   title.textContent = trans[window.curLang].friendsModalTitle;
   title.classList.add('add-friend-title');
   popupContent.appendChild(title);
 
   const searchInput = document.createElement('input');
   searchInput.type = 'text';
-  // 검색 placeholder에도 번역 키 사용
   searchInput.placeholder = trans[window.curLang].friendsSearchPlaceholder;
   searchInput.classList.add('form-control', 'mb-3');
   searchInput.addEventListener('keydown', function(event) {
@@ -134,7 +131,6 @@ export function openAddFriendPopup() {
 
   const closeButton = document.createElement('button');
   closeButton.classList.add('btn', 'btn-secondary');
-  // Close 버튼에도 번역 키 사용
   closeButton.textContent = trans[window.curLang].friendsClose;
   closeButton.onclick = () => popup.remove();
   popupContent.appendChild(closeButton);
