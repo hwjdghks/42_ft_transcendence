@@ -85,6 +85,18 @@ def check_cookie(request):
             result[cookie_value] = False  # 쿠키 없음 또는 유효하지 않은 토큰
     return JsonResponse(result)
 
+@require_GET
+def remove_cookie(request):
+    cookie_name = request.GET.get("cookie_name")  # 쿼리 파라미터에서 쿠키 이름 가져오기
+
+    if not cookie_name:
+        return JsonResponse({"error": "cookieName parameter is required"}, status=400)
+
+    response = JsonResponse({"message": f"Cookie '{cookie_name}' has been removed"})
+    response.delete_cookie(cookie_name)  # 쿠키 삭제
+
+    return response
+
 def refresh_otp(user_otp, otp_type):
     if otp_type == 'login':
         user_otp.login_secret = pyotp.random_base32()
