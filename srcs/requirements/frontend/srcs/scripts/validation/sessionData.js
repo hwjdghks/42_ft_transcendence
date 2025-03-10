@@ -52,24 +52,22 @@ function isSessionGameOptionsValid() {
   console.log('Session storage: game_option 검증 시도');
   const gameOption = getSessionData('game_option');
   if (!gameOption) {
-    console.log("1");
     return false;
   }
 
 	const validPlayers = [2, 4, 8];
+  const validPaddleSize = [1, 1.2, 2.0];
 	const validBallSpeeds = [1, 1.5, 2.0];
 	const validObstacles = [0, 1, 2];
 
   if (!gameOption || typeof gameOption !== 'object') {
-    console.log("2");
     return false;
   }
 
 	if (!validPlayers.includes(gameOption.players) ||
-			!validBallSpeeds.includes(gameOption.paddleSize) ||
+			!validPaddleSize.includes(gameOption.paddleSize) ||
 			!validBallSpeeds.includes(gameOption.ballSpeed) ||
 			!validObstacles.includes(gameOption.obstacles)) {
-    console.log("3");
 		return false;
 	}
   return true;

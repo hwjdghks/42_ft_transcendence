@@ -14,7 +14,7 @@ async function handleApiResponse(response) {
   if (response.ok) {
     return data;
   } else {
-    throw new Error(data.error || '알 수 없는 오류가 발생했습니다.');
+    throw new Error(data.error || 'error not defined.');
   }
 }
 
@@ -197,6 +197,45 @@ export async function postUpdatePassword(currentPassword, newPassword) {
       current_password: currentPassword,
       new_password: newPassword 
     })
+  });
+  const data = await handleApiResponse(response);
+  if (!await checkCookie()) {
+    throw new Error('There are no tokens.');
+  }
+  return data;
+}
+
+/**
+ * OTP 전송 요청 함수
+ */
+export async function postRequestOTP() {
+  const response = await fetch('https://localhost/api/auth/2fa/withdraw/request/', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({})
+  });
+  const data = await handleApiResponse(response);
+  if (!await checkCookie()) {
+    throw new Error('There are no tokens.');
+  }
+  return data;
+}
+
+/**
+ * 계정 탈퇴 요청 함수
+ * @param {string} otp - 사용자 입력 OTP 값
+ */
+export async function postWithdrawAccount(otp) {
+  const response = await fetch('https://localhost/api/users/withdraw/', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ otp })
   });
   const data = await handleApiResponse(response);
   if (!await checkCookie()) {

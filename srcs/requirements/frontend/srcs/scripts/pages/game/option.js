@@ -11,7 +11,15 @@ function GameOptionPage() {
   container.innerHTML = `
       <!-- Header Section -->
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">${trans[window.curLang].optionHeader}</h2>
+        <h2 class="fw-bold ">${trans[window.curLang].optionHeader}</h2>
+      </div>
+
+      <!-- Players Section -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title">${trans[window.curLang].optionRule}</h5>
+          <p class ="text-danger" >${trans[window.curLang].optionRuleBody}</p>
+        </div>
       </div>
 
       <!-- Players Section -->

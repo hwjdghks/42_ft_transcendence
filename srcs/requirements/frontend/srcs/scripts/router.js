@@ -36,13 +36,14 @@ export async function router() {
   const app = document.getElementById('app');
   const newRoute = parseRoute(window.location.hash);
 
+
   if (
     currentRoute &&
     isTournamentRoute(currentRoute) &&
     !isTournamentRoute(newRoute) &&
     sessionStorage.getItem("tournament_in_progress") === "true"
   ) {
-    const confirmLeave = confirm("토너먼트가 진행 중입니다. 정말로 토너먼트를 종료하고 이동하시겠습니까?");
+    const confirmLeave = confirm("Tournament is in progress. Do you really want to end and move on?");
     if (!confirmLeave) {
       return;
     } else {

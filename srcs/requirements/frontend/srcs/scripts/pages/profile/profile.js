@@ -15,7 +15,7 @@ function ProfilePage() {
         <div class="mb-4">
           <img src="/static/profile.jpg" alt="Profile" class="profile-img mb-3">
           <h2 class="h4 mb-3">
-            <span class="fs-2 fw-bold">username</span>
+            <span class="fs-2 fw-bold"></span>
           </h2>
           <button id="profile-upload-btn" class="btn btn-secondary">
             <span class="fw-bold">${trans[window.curLang].profileUpload}</span>
