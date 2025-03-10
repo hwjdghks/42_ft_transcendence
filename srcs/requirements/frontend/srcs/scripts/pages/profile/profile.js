@@ -3,6 +3,7 @@ import { renderMatchHistory } from "../../components/matchHistory.js";
 import { renderFriends } from "../../components/friends.js";
 import { renderSettings } from "../../components/setting.js";
 import { trans } from '../../language.js'
+import { removeCookie } from "../../validation/cookie.js";
 
 // 프로필 페이지를 생성하여 반환하는 함수
 function ProfilePage() {
@@ -228,6 +229,7 @@ function initProfileUpload(container) {
 async function handleLogout() {
   try {
     await postLogout();
+    await removeCookie('jwt');
     alert('Success');
     sessionStorage.removeItem('userId');
     sessionStorage.removeItem("tournament_in_progress");

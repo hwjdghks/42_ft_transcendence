@@ -101,23 +101,6 @@ function updateActiveLink() {
   });
 }
 
-// 로그아웃 시 서버 로그아웃 API 호출 후 쿠키와 세션 데이터 삭제
-async function handleLogout() {
-  try {
-    await postLogout();
-    clearTokenCookie();
-    alert('Logged out successfully.');
-    sessionStorage.removeItem('userId');
-    sessionStorage.removeItem("tournament_in_progress");
-    sessionStorage.removeItem("game_option");
-    sessionStorage.removeItem("matches");
-    sessionStorage.removeItem("currentMatch");
-    window.location.href = '#login';
-  } catch (error) {
-    alert("Logout error: " + error.message);
-  }
-}
-
 // 창 닫거나 새로고침할 때 쿠키 토큰 삭제
 window.addEventListener('beforeunload', clearTokenCookie);
 
