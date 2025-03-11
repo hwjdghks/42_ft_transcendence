@@ -70,13 +70,7 @@ export function createPrivacyModal() {
   modalDiv.addEventListener('shown.bs.modal', () => {
     loadPrivacySettingsLocally();
   });
-  
-  // 모달 닫힐 때 폼 리셋 (필요하다면 주석 해제)
-  modalDiv.addEventListener('hidden.bs.modal', () => {
-    // const privacyForm = modalDiv.querySelector('#privacySettingsForm');
-    // if (privacyForm) privacyForm.reset();
-  });
-  
+    
   // 개인정보 업데이트 요청 처리
   const saveBtn = modalDiv.querySelector('#privacySettingsSaveBtn');
   saveBtn.addEventListener('click', async () => {

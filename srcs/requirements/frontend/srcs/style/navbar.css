@@ -1,3 +1,10 @@
+#navbar {
+  position: sticky;
+  top: 0;  /* 화면 상단에 고정 */
+  width: 100%;  /* 전체 너비 */
+  z-index: 1000; /* 다른 요소 위에 표시 */
+}
+
 #navbar nav {
   display: flex;
   width: 100%;

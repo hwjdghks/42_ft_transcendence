@@ -197,6 +197,20 @@ async function updateProfilePage() {
       statElements[2].textContent = data.lose   || 0; // Losses
       statElements[3].textContent = data.draw   || 0; // Draws
     }
+
+    const showInSearch = data.show_in_search;
+    const shareProfileImage = data.share_profile_image;
+    const shareOnlineStatus = data.share_online_status;
+
+    const settings = {
+      showInSearch,
+      shareProfileImage,
+      shareOnlineStatus
+    };
+
+    console.log(settings);
+    localStorage.setItem('privacySettings', JSON.stringify(settings));
+
   } catch (error) {
     alert('Error' + error.message);
   }
