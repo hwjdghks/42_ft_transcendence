@@ -5,60 +5,70 @@ export function SignupPage() {
   async function handleSendCodeSubmit(event) {
     event.preventDefault();
 
+    // 가입 버튼을 비활성화하여 중복 클릭 방지
+    const signupBtn = document.querySelector('.btn.signup-btn');
+    signupBtn.disabled = true;
+
     const username = document.getElementById('username').value.trim();
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm_password').value;
 
-	// 필수 동의 여부 확인
+    // 필수 동의 여부 확인
     const requiredConsent = document.getElementById('requiredConsent').checked;
     if (!requiredConsent) {
       showMessage('You must agree to the required privacy policy to sign up.', 'error');
+      signupBtn.disabled = false;
       return;
     }
 
     if (password !== confirmPassword) {
       showMessage('Passwords do not match. Please try again.', 'error');
+      signupBtn.disabled = false;
       return;
     }
 
-	// 선택 동의 항목 개별 체크 (체크 여부에 따라 각각 전송)
+    // 선택 동의 항목 개별 체크 (체크 여부에 따라 각각 전송)
     const friendSearchConsent = document.getElementById('friendSearchConsent').checked;
     const profileImageConsent = document.getElementById('profileImageConsent').checked;
     const onlineStatusConsent = document.getElementById('onlineStatusConsent').checked;
 
     try {
-		const signupResponse = await fetchSignup({ 
-		  username, 
-		  email, 
-		  password, 
-		  show_in_search: friendSearchConsent, 
-      share_profile_image: profileImageConsent, 
-      share_online_status: onlineStatusConsent 
-		});
-		console.log("Signup Response:", signupResponse);
+      const signupResponse = await fetchSignup({ 
+        username, 
+        email, 
+        password, 
+        show_in_search: friendSearchConsent, 
+        share_profile_image: profileImageConsent, 
+        share_online_status: onlineStatusConsent 
+      });
+      console.log("Signup Response:", signupResponse);
   
-		// 임시 토큰으로 저장
-  
-		const otpResponse = await fetchOTPRequest();
-		console.log("OTP Response:", otpResponse);
-		showMessage(otpResponse.message || 'OTP has been sent. Check your email.', 'success');
-    sessionStorage.setItem('verificationAllowed', 'true');
-		window.location.hash = '#signup-verification'; 
-	  } catch (error) {
-		console.error(error);
-		showMessage(error.message || 'Signup failed. Please try again.', 'error');
-	  }
+      const otpResponse = await fetchOTPRequest();
+      console.log("OTP Response:", otpResponse);
+      showMessage(otpResponse.message || 'OTP has been sent. Check your email.', 'success');
+      sessionStorage.setItem('verificationAllowed', 'true');
+
+      setTimeout(() => {
+        window.location.hash = '#signup-verification';
+        // 일정 시간 후 버튼을 다시 활성화
+        signupBtn.disabled = false;
+      }, 1000);
+    } catch (error) {
+      console.error(error);
+      showMessage(error.message || 'Signup failed. Please try again.', 'error');
+      signupBtn.disabled = false;
+    }
   }
 
-	setTimeout(() => {
-	const signupForm = document.getElementById('signup-form');
-	if (signupForm) {
-		signupForm.addEventListener('submit', handleSendCodeSubmit);
-	}
-	}, 0);
+  setTimeout(() => {
+    const signupForm = document.getElementById('signup-form');
+    if (signupForm) {
+      signupForm.addEventListener('submit', handleSendCodeSubmit);
+    }
+  }, 0);
 
-	return `
+  return `
   <!-- 인라인 스타일 추가 -->
   <style>
     .signup-container {
@@ -153,6 +163,5 @@ export function SignupPage() {
       </form>
     </div>
   </div>
-`;
-
+  `;
 }

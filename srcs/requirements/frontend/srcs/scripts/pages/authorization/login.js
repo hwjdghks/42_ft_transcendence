@@ -1,16 +1,19 @@
 import { fetchLogin, fetchLoginOTPRequest, showMessage } from './loginApi.js';
-import { fetchFriends } from '../../components/friends.js'
+import { fetchFriends } from '../../components/friends.js';
 import { trans } from '../../language.js';
 
 async function handleLoginSubmit(event) {
   event.preventDefault();
+  
+  // 로그인 버튼을 비활성화하여 중복 클릭 방지
+  const loginBtn = document.querySelector('.btn.login-btn');
+  loginBtn.disabled = true;
 
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
 
   try {
     const response = await fetchLogin({ email, password });
-
     const otpResponse = await fetchLoginOTPRequest();
     showMessage(otpResponse.message || 'OTP has been sent. Check your email.', 'success');
 
@@ -18,11 +21,16 @@ async function handleLoginSubmit(event) {
       fetchFriends();
       sessionStorage.setItem('verificationAllowed', 'true');
       window.location.hash = "#login-verification"; 
+      
+      // OTP 발송 후 버튼을 다시 활성화
+      loginBtn.disabled = false;
     }, 1000);
 
   } catch (error) {
     showMessage(error.message || 'An error occurred. Please try again later.', 'error');
     console.error('Login error:', error);
+    // 오류 발생 시 버튼을 다시 활성화
+    loginBtn.disabled = false;
   }
 }
 
@@ -46,11 +54,9 @@ async function handleOauthSubmit(event) {
     const data = await response.json();
     if (data.redirect_url) {
       window.location.href = data.redirect_url;
-
     } else {
       throw new Error("redirect_url not found in response");
     }
-
   } catch (error) {
     console.error("Redirection error:", error);
     showMessage(error.message || "Redirection error", "error");
