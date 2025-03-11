@@ -460,8 +460,6 @@ function determineWinner(profileUsername, currentMatch, gameScore) {
       winnerName = profileUsername;
     } else if (userScore < opponentScore) {
       winnerName = opponentName;
-    } else {
-      winnerName = "Draw";
     }
   } else {
     // 로그인 유저가 경기 참가자가 아니라면, 단순 비교로 결정
@@ -469,8 +467,6 @@ function determineWinner(profileUsername, currentMatch, gameScore) {
       winnerName = currentMatch.player1;
     } else if (gameScore.player1 < gameScore.player2) {
       winnerName = currentMatch.player2;
-    } else {
-      winnerName = "Draw";
     }
   }
   return { winnerName, userScore, opponentScore, opponentName };

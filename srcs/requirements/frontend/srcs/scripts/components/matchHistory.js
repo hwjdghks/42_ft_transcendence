@@ -66,7 +66,6 @@ function createMatchHistoryItem(match) {
   // 경기 결과에 따른 CSS 클래스 지정
   const statusColorClass = {
       'win': 'border-primary bg-primary bg-opacity-10',
-      'draw': 'border-secondary bg-secondary bg-opacity-10',
       'lose': 'border-danger bg-danger bg-opacity-10'
   }[match.game_result.toLowerCase()];
 
