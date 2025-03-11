@@ -2,7 +2,6 @@ import requests
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.http import JsonResponse
 
 def get_oauth_token(code):
     token_data = {
