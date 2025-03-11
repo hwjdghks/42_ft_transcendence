@@ -134,7 +134,10 @@ def get_profile(request: HttpRequest) -> JsonResponse:
         'total': total_games,
         'win': win,
         'lose': lose,
-        'draw': draw
+        'draw': draw,
+        'show_in_search': user.show_in_search,
+        'share_online_status': user.share_online_status,
+        'share_profile_image': user.share_profile_image
     }
     return JsonResponse(profile, status=200)
 
