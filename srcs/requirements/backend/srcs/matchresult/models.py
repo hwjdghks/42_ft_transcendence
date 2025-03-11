@@ -11,8 +11,7 @@ class MatchResult(models.Model):
     user_score = models.IntegerField(default=0, validators=[MinValueValidator(0)]) # 기본값을 0으로 지정 및 최소값을 0으로 지정
     guest_score = models.IntegerField(default=0, validators=[MinValueValidator(0)])# 기본값을 0으로 지정 및 최소값을 0으로 지정
     match_date = models.DateTimeField(auto_now_add=True)
-    game_result = models.CharField(max_length=5, choices=[('win', 'Win'), ('lose', 'Lose'), ('draw', 'Draw')])
-    session_id = models.UUIDField(primary_key=True, unique=True)  # 자동 생성하지 않고 외부에서 값을 지정합니다.
+    game_result = models.CharField(max_length=5, choices=[('win', 'Win'), ('lose', 'Lose')])
 
     class Meta:
         db_table = 'matchresult'  # 실제 테이블 이름을 'matchresult'로 명시적 지정

@@ -125,7 +125,6 @@ def get_profile(request: HttpRequest) -> JsonResponse:
     total_games = user_matches.count()
     win = user_matches.filter(game_result='win').count()
     lose = user_matches.filter(game_result='lose').count()
-    draw = user_matches.filter(game_result='draw').count()
 
     profile = {
         'email': user.email,
@@ -134,7 +133,6 @@ def get_profile(request: HttpRequest) -> JsonResponse:
         'total': total_games,
         'win': win,
         'lose': lose,
-        'draw': draw,
         'show_in_search': user.show_in_search,
         'share_online_status': user.share_online_status,
         'share_profile_image': user.share_profile_image

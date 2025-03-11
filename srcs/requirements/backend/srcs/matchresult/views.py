@@ -13,17 +13,6 @@ from .models import MatchResult
 
 @require_GET
 @jwt_required(expected_factor_level=2)
-def search(request: HttpRequest) -> JsonResponse:
-    user: User = request.user
-
-    data = json.loads(request.body)
-    session_id = data.get('session_id')
-    if MatchResult.objects.filter(session_id=session_id).exists():
-        return JsonResponse({'error': 'session is already finish'}, status=400)
-    return JsonResponse({'message': 'session is not finish'}, status=200)
-
-@require_GET
-@jwt_required(expected_factor_level=2)
 @update_last_activate
 def results(request: HttpRequest) -> JsonResponse:
     user: User = request.user
@@ -63,7 +52,6 @@ def add(request: HttpRequest) -> JsonResponse:
         user_score = data.get('user_score')
         guest_score = data.get('guest_score')
         game_result = data.get('game_result')
-        session_id = data.get('session_id')
         
         if len(username) > 10 or len(guestname) > 10:
             return JsonResponse({'error': '이름은 10글자 이하여야합니다다.'}, status=400)
@@ -71,7 +59,7 @@ def add(request: HttpRequest) -> JsonResponse:
         if not re.fullmatch(r'[0-9a-zA-Z]+', username) or not re.fullmatch(r'[0-9a-zA-Z]+', guestname):
             return JsonResponse({'error': '이름은 알파벳과 숫자로만 이루어져야 합니다.'}, status=400)
 
-        if not all([session_id, user_score is not None, guest_score is not None, guestname is not None, game_result]):
+        if not all([user_score is not None, guest_score is not None, guestname is not None, game_result]):
             return JsonResponse({'error': 'Missing required fields'}, status=400)
 
         match_result = MatchResult.objects.create(
@@ -80,7 +68,6 @@ def add(request: HttpRequest) -> JsonResponse:
             user_score=user_score,
             guest_score=guest_score,
             game_result=game_result,
-            session_id=session_id,
             username = username
         )
 
