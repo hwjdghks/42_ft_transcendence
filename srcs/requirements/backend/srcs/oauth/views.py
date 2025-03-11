@@ -48,6 +48,9 @@ def oauth_callback(request):
     username = user_info.get('login')
 
     user = get_or_create_user(email, username)
+    if not user:
+        return JsonResponse({'error': 'User already exists'}, status=400)
+    
     token = generate_jwt(user, 2)
     response = JsonResponse({'message': 'User created successfully'}, status=201)
     set_jwt_cookie(response, token, 'jwt')
