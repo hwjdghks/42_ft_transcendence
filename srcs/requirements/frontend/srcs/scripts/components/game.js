@@ -2,15 +2,12 @@ import { trans } from '../language.js';
 import { getProfileData } from '../api/scriptApi.js';
 import { postMatchResult } from '../api/scriptApi.js';
 
-function initializePingPongGame(parentContainer, configJson) {
+function initializePingPongGame(parentContainer, configJson, currentMatch) {
   // gameContainer, scoreBoard 등 DOM 참조
   const gameContainer = parentContainer.querySelector('#gameContainer');
   if (!gameContainer) {
     return () => {};
   }
-
-  // 세션에서 현재 경기 정보 가져오기
-  const currentMatch = JSON.parse(sessionStorage.getItem('currentMatch') || '{}');
 
   // config 준비
   const config = prepareGameConfig(configJson);
