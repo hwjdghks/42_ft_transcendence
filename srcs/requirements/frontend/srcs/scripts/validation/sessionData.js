@@ -56,7 +56,7 @@ function isSessionGameOptionsValid() {
   }
 
 	const validPlayers = [2, 4, 8];
-  const validPaddleSize = [1, 1.2, 2.0];
+  const validPaddleSize = [1, 1.2, 1.5];
 	const validBallSpeeds = [1, 1.5, 2.0];
 	const validObstacles = [0, 1, 2];
 
