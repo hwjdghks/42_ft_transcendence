@@ -36,7 +36,6 @@ export async function router() {
   const app = document.getElementById('app');
   const newRoute = parseRoute(window.location.hash);
 
-
   if (
     currentRoute &&
     isTournamentRoute(currentRoute) &&

@@ -30,8 +30,6 @@ function updateNavbar() {
             <img src="../static/logo.png" alt="Logo" style="height: 30px;">
           </div>
           <div class="position-relative">
-            <!-- 이모지 사용: 🌐 -->
-            <span id="language-switcher" style="font-size: 1.5rem; cursor: pointer;">🌏</span>
             <!-- 언어 선택 드롭다운 -->
             <div id="language-dropdown" class="position-absolute bg-white border" style="display: none; right: 0; top: 100%; z-index: 10;">
               <div data-lang="en" class="lang-option p-4" style="cursor: pointer;">English</div>
@@ -51,14 +49,6 @@ function updateNavbar() {
             <a href="#profile" class="nav-link protected-link">${trans[window.curLang].navProfile}</a>
             <a href="#gameplay/option" class="nav-link protected-link">${trans[window.curLang].navGamePlay}</a>
           </div>
-          <div class="position-relative">
-            <!-- 이모지 사용: 🌐 -->
-            <span id="language-switcher" style="font-size: 1.5rem; cursor: pointer;">🌏</span>
-            <div id="language-dropdown" class="position-absolute bg-white border" style="display: none; right: 0; top: 100%; z-index: 10;">
-              <div data-lang="en" class="lang-option p-4" style="cursor: pointer;">English</div>
-              <div data-lang="ko" class="lang-option p-4" style="cursor: pointer;">한국어</div>
-            </div>
-          </div>
         </div>
       </nav>
     `;
@@ -71,22 +61,6 @@ function updateNavbar() {
           alert('Log in is required.');
           window.location.hash = "#login";
         }
-      });
-    });
-  }
-
-  // 언어 전환 드롭다운 이벤트 처리
-  const switcher = document.getElementById('language-switcher');
-  const dropdown = document.getElementById('language-dropdown');
-  if (switcher && dropdown) {
-    switcher.addEventListener('click', () => {
-      dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
-    });
-    dropdown.querySelectorAll('.lang-option').forEach(option => {
-      option.addEventListener('click', (e) => {
-        const selectedLang = e.target.getAttribute('data-lang');
-        changeLanguage(selectedLang);
-        dropdown.style.display = 'none';
       });
     });
   }
