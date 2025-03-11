@@ -29,13 +29,6 @@ function updateNavbar() {
           <div>
             <img src="../static/logo.png" alt="Logo" style="height: 30px;">
           </div>
-          <div class="position-relative">
-            <!-- 언어 선택 드롭다운 -->
-            <div id="language-dropdown" class="position-absolute bg-white border" style="display: none; right: 0; top: 100%; z-index: 10;">
-              <div data-lang="en" class="lang-option p-4" style="cursor: pointer;">English</div>
-              <div data-lang="ko" class="lang-option p-4" style="cursor: pointer;">한국어</div>
-            </div>
-          </div>
         </div>
       </nav>
     `;
