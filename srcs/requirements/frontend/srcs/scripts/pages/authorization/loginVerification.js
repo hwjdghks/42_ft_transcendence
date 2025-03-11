@@ -4,6 +4,7 @@ import { checkTempCookie } from '../../validation/cookie.js';
 import { trans } from '../../language.js';
 
 export function LoginVerificationPage() {
+  sessionStorage.removeItem('verificationAllowed');
   async function verifyTokenOnLoad() {
     const existingToken = await checkTempCookie();
     if (!existingToken) {

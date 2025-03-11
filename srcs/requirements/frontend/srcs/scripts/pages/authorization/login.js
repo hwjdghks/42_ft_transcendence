@@ -16,6 +16,7 @@ async function handleLoginSubmit(event) {
 
     setTimeout(async () => {
       fetchFriends();
+      sessionStorage.setItem('verificationAllowed', 'true');
       window.location.hash = "#login-verification"; 
     }, 1000);
 
@@ -80,7 +81,7 @@ export function LoginPage() {
             <input type="password" class="form-control" id="password" placeholder="${trans[window.curLang].loginPasswordHolder}">
           </div>
           <button type="submit" class="btn login-btn">${trans[window.curLang].loginBtn}</button>
-          <button type="submit" class="btn oauth-btn">${trans[window.curLang].loginOauthBtn}</button>
+          <button type="button" class="btn oauth-btn">${trans[window.curLang].loginOauthBtn}</button>
         </form>
         <div id="login-message" class="mt-3"></div>
         <a href="/#signup" class="btn btn-link mt-3">${trans[window.curLang].loginSingupBtn}</a>

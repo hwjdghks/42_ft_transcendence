@@ -36,6 +36,10 @@ export async function router() {
   const app = document.getElementById('app');
   const newRoute = parseRoute(window.location.hash);
 
+  if ((newRoute === 'signup-verification' || newRoute === 'login-verification') && !sessionStorage.getItem('verificationAllowed')) {
+    return;
+  }
+
   if (
     currentRoute &&
     isTournamentRoute(currentRoute) &&
@@ -207,7 +211,7 @@ function isProtectedRoute(route) {
   return route === 'profile' ||
          route === 'gameplay/option' ||
          route === 'gameplay/tournament' ||
-         isGamePlayRoute(route);
+         isGamePlayRoute(route);        
 }
 
 // 토너먼트 관련 라우트 여부 판단 (토너먼트 페이지 및 게임 플레이 페이지)
