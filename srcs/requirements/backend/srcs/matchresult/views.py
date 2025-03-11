@@ -71,7 +71,7 @@ def add(request: HttpRequest) -> JsonResponse:
         if not re.fullmatch(r'[0-9a-zA-Z]+', username) or not re.fullmatch(r'[0-9a-zA-Z]+', guestname):
             return JsonResponse({'error': '이름은 알파벳과 숫자로만 이루어져야 합니다.'}, status=400)
 
-        if not all([session_id, user_score, guest_score is not None, guestname is not None, game_result]):
+        if not all([session_id, user_score is not None, guest_score is not None, guestname is not None, game_result]):
             return JsonResponse({'error': 'Missing required fields'}, status=400)
 
         match_result = MatchResult.objects.create(
