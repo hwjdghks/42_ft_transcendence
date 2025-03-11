@@ -52,10 +52,6 @@ export function renderFriends() {
   
   friendsContainer.innerHTML = '';
 
-  friendsContainer.style.display = 'grid';
-  friendsContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(150px, 1fr))';
-  friendsContainer.style.gap = '16px';
-
   friends.forEach(friend => {
     const friendElement = document.createElement('div');
     friendElement.classList.add('d-flex', 'align-items-center', 'mb-2', 'justify-content-between', 'border', 'p-2', 'rounded');

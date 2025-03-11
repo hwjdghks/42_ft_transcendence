@@ -25,7 +25,7 @@ def signup(request: HttpRequest) -> JsonResponse:
     
     if not is_valid_password(password):
         return JsonResponse({
-            'error': '비밀번호는 최소 8자에서 50자 사이여야 하며, 영어 대소문자, 숫자, 특수문자를 각각 하나 이상 포함해야 합니다.'
+            'error': 'The password must be between 8 and 50 characters long, and it must include at least one uppercase letter, one lowercase letter, one number, and one special character.'
         }, status=400)
 
     # 이메일 중복 검사 단 유저가 is_active가 false이고 otp를 발송한지 30분이 지난상태면 삭제

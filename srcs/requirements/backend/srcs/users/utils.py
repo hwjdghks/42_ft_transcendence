@@ -57,7 +57,7 @@ def handle_invalid_password(user, current_password, new_password):
 
     if not is_valid_password(new_password):
         return JsonResponse({
-            'error': '비밀번호는 최소 8자에서 50자 사이여야 하며, 영어 대소문자, 숫자, 특수문자를 각각 하나 이상 포함해야 합니다.'
+            'error': 'The password must be between 8 and 50 characters long, and it must include at least one uppercase letter, one lowercase letter, one number, and one special character.'
         }, status=400)
     
     return None
