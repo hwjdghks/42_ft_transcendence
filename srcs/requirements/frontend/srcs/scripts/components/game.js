@@ -1,6 +1,6 @@
 import { trans } from '../language.js';
-import { getProfileData } from '../api/scriptApi.js';
-import { postMatchResult } from '../api/scriptApi.js';
+import { getProfileData, postMatchResult } from '../api/scriptApi.js';
+import { updateProfilePage } from '../pages/profile/profile.js';
 
 function initializePingPongGame(parentContainer, configJson, currentMatch) {
   // gameContainer, scoreBoard 등 DOM 참조
@@ -118,6 +118,7 @@ function initializePingPongGame(parentContainer, configJson, currentMatch) {
         }
       }
       document.getElementById('exitButton').addEventListener('click', () => {
+        getProfileData();
         window.location.hash = '#gameplay/tournament';
       });
     } catch (error) {
