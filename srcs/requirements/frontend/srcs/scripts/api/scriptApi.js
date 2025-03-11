@@ -1,5 +1,5 @@
 import { validateTournamentSession } from '../validation/sessionData.js';
-import { checkCookie } from '../validation/cookie.js';
+import { checkCookie, removeCookie } from '../validation/cookie.js';
 
 /**
  * 공통 응답 처리 함수
@@ -238,8 +238,6 @@ export async function postWithdrawAccount(otp) {
     body: JSON.stringify({ otp })
   });
   const data = await handleApiResponse(response);
-  if (!await checkCookie()) {
-    throw new Error('There are no tokens.');
-  }
+  await removeCookie('jwt');
   return data;
 }
