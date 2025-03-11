@@ -45,6 +45,7 @@ export function renderSettings() {
       <select id="language-select" class="form-select">
         <option value="en">English</option>
         <option value="ko">한국어</option>
+        <option value="fn">France</option>
       </select>
     </div>
     <button class="btn btn-danger w-100" id="deleteAccountBtn">${trans[window.curLang].settingDeleteAccount}</button>

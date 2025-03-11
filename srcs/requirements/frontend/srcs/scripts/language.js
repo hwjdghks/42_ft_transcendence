@@ -292,6 +292,157 @@ const trans = {
     friendAddedSuccessfully: "친구가 성공적으로 추가되었습니다!",
     friendRemovedSuccessfully: "친구가 성공적으로 삭제되었습니다!",
     errorDeletingFriend: "친구 삭제 에러:",
+  },
+  
+  fn: {
+    // Navbar
+    navProfile: "Profil",
+    navGamePlay: "Jeu",
+  
+    // Login
+    loginHeader: "ft_transcendence",
+    loginEmail: "E-mail",
+    loginEmailHolder: "Entrez votre e-mail",
+    loginPassword: "Mot de passe",
+    loginPasswordHolder: "Entrez votre mot de passe",
+    loginBtn: "Soumettre",
+    loginOauthBtn: "Compte 42",
+    loginSingupBtn: "S'inscrire",
+  
+    // Verify
+    verifyHeader: "Vérifier le code",
+    verifyCode: "Code de vérification",
+    verifyCodeHolder: "Entrez le code OTP",
+    verifyBtn: "Vérifier",
+  
+    // Signup
+    signupHeader: "Inscription",
+    signupUsername: "Nom d'utilisateur",
+    signupUsernameHolder: "Entrez votre nom d'utilisateur",
+    signupEmail: "E-mail",
+    signupEmailHolder: "Entrez votre e-mail",
+    signupPassword: "Mot de passe",
+    signupPasswordHolder: "Entrez votre mot de passe",
+    signupConfirmPassword: "Confirmer le mot de passe",
+    signupConfirmPasswordHolder: "Confirmez votre mot de passe",
+    signupSendBtn: "Envoyer le code",
+    signupLoginBtn: "Connexion",
+  
+    // Profile
+    profileUpload: "Téléverser la photo de profil",
+    total: "Total",
+    wins: "Victoires",
+    losses: "Défaites",
+    draws: "Matchs nuls",
+    matchHistory: "Historique des matchs",
+    friends: "Amis",
+    setting: "Paramètres",
+    logout: "Déconnexion",
+  
+    // Profile Settings
+    settingUsername: "Nom d'utilisateur",
+    settingUsernameHolder: "Changer le nom d'utilisateur",
+    settingPassword: "Mot de passe",
+    settingPasswordHolder: "Changer le mot de passe",
+    settingPrivacy: "Confidentialité",
+    settingPrivacyHolder: "Définir les options de confidentialité",
+    settingLanguage: "Langue",
+    settingDeleteAccount: "Supprimer le compte",
+    settingMatchHistoryHolder: "Vide...",
+  
+    // Profile Settings Modal - Username
+    settingModalUsername: "Changer de nom d'utilisateur",
+    settingModalNewUsername: "Nouveau nom d'utilisateur",
+    settingModalNewUsernameHolder: "Entrez un nouveau nom d'utilisateur",
+    settingModalUsernameSmall: "Seulement des lettres anglaises et des chiffres. (10 caractères maximum)",
+  
+    // Profile Settings Modal - Privacy
+    settingModalPrivacy: "Paramètres de confidentialité",
+    settingModalPrivacy1: "Apparaître dans la recherche d'amis",
+    settingModalPrivacy2: "Partager l'image de profil",
+    settingModalPrivacy3: "Partager le statut en ligne",
+  
+    // Profile Settings Modal - Password
+    settingModalPassword: "Changer le mot de passe",
+    settingModalCurPassword: "Mot de passe actuel",
+    settingModalCurPasswordHolder: "Entrez votre mot de passe actuel",
+    settingModalNewPassword: "Nouveau mot de passe",
+    settingModalNewPasswordHolder: "Entrez un nouveau mot de passe",
+    settingModalConPassword: "Confirmer le nouveau mot de passe",
+    settingModalConPasswordHolder: "Entrez la confirmation du mot de passe",
+    settingModalPasswordSmall:
+      "Doit contenir au moins un chiffre, une lettre et un caractère spécial (8 à 50 caractères)",
+  
+    // Profile Settings Modal - Delete Account
+    settingModalDelete: "Attention",
+    settingModalDeleteBody:
+      "Un code OTP vous a été envoyé par e-mail pour confirmer la suppression du compte. Veuillez saisir le code OTP.",
+    settingModalDeleteHolder: "Entrez le code OTP",
+    settingModalBtn: "Supprimer le compte",
+  
+    // Modal Buttons
+    Cancel: "Annuler",
+    Save: "Enregistrer",
+    Next: "Suivant",
+  
+    // Alerts - Success
+    successLogout: "Vous vous êtes déconnecté avec succès.",
+    successChangePassword: "Mot de passe modifié avec succès.",
+  
+    // Alerts - Error
+    errorUpdateProfile:
+      "Échec du chargement des informations de profil. Veuillez réessayer plus tard.",
+    errorinitProfileUpload:
+      "Échec du chargement des informations de profil. Veuillez réessayer plus tard.",
+    errorLogout: "Échec de la déconnexion. Veuillez réessayer plus tard.",
+    errorChangePasswordDif: "Les mots de passe ne correspondent pas.",
+    errorChangePassword: "Échec de la mise à jour du mot de passe",
+  
+    // Option
+    optionHeader: "Options de jeu",
+    optionRule: "Règles du jeu",
+    optionRuleBody:
+      "Le premier à 7 points gagne.<br>- Joueur 1 : Appuyez sur 'W' pour monter, 'S' pour descendre.<br>- Joueur 2 : Appuyez sur 'I' pour monter, 'K' pour descendre.",
+    optionHeaderSmall:
+      "Uniquement des lettres anglaises et des chiffres, sans doublons. (10 caractères maximum)",
+    optionPlayers: "Liste des joueurs",
+    optionUserInputHeader: "Moi",
+    optionPlayersInputHeader: "Joueur",
+    optionPlayersInputHolder: "Entrez le nom du joueur",
+    optionPaddleSize: "Taille de la raquette",
+    optionBallSpeed: "Vitesse de la balle",
+    optionObstacle: "Nombre d'obstacles",
+  
+    errorDuplicateName: "Nom en double.",
+    errorEmptyName: "Veuillez entrer un nom.",
+  
+    // Tournament
+    tournamentHeader: "Arbre du tournoi",
+    tournamentMatch: "Match",
+    tournamentTBD: "À déterminer",
+    tournamentScore: "Score",
+    tournamentWinner: "Vainqueur",
+    tournamentNextMatch: "Match suivant",
+    tournamentLastAlert: "🏆 Le gagnant final :",
+  
+    // Game
+    gameWin: "gagne !",
+    gameBackBtn: "Retour au tournoi",
+  
+    // Friends
+    friendsAddFriend: "Ajouter un ami",
+    friendsModalTitle: "Ajouter un ami",
+    friendsSearchPlaceholder: "Rechercher des amis...",
+    friendsClose: "Fermer",
+    errorFetchingFriends: "Erreur lors de la récupération de la liste d'amis :",
+    errorSearchingFriends: "Erreur lors de la recherche d'amis :",
+    attemptingToAddFriend: "Tentative d'ajout d'ami :",
+    httpStatusCode: "Code d'état HTTP :",
+    responseData: "Données de la réponse :",
+    errorAddingFriend: "Une erreur s'est produite lors de l'ajout d'un ami :",
+    friendAddedSuccessfully: "Ami ajouté avec succès !",
+    friendRemovedSuccessfully: "Ami supprimé avec succès !",
+    errorDeletingFriend: "Erreur lors de la suppression d'un ami :"
   }
 };
 
