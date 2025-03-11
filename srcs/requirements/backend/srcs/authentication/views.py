@@ -78,8 +78,9 @@ def check_cookie(request):
         if token:
             try:
                 payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+                request.user = User.objects.get(email=payload['id'])
                 result[cookie_value] = True  # 유효한 토큰
-            except (jwt.ExpiredSignatureError, jwt.DecodeError, jwt.InvalidTokenError):
+            except Exception:
                 result[cookie_value] = False  # 유효하지 않은 토큰
         else:
             result[cookie_value] = False  # 쿠키 없음 또는 유효하지 않은 토큰
