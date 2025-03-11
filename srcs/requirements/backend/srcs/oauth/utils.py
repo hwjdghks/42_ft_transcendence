@@ -2,6 +2,7 @@ import requests
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.http import JsonResponse
 
 def get_oauth_token(code):
     token_data = {
@@ -33,11 +34,19 @@ def get_user_info(access_token):
 
 def get_or_create_user(email, username):
     user = get_user_model().objects.filter(email=email).first()
-
+    
+    # 42 email을 사용하는 계정 없을때 (새로운 42 회원 생성)
     if user is None:
+        # 1. username 이미 존재
+        if get_user_model().objects.filter(username=username).exists():
+            return None
+        
         user = get_user_model().objects.create(username=username, email=email)
         user.set_unusable_password()
         user.is_active = True
         user.save()
+    else:
+        if user.has_usable_password() == True:     # 42intra 계정이 아닌 경우
+            return None
 
     return user
