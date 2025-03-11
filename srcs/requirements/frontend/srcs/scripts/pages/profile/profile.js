@@ -26,7 +26,7 @@ function ProfilePage() {
         </div>
 
         <!-- Stats Section -->
-        <div class="row g-3 mb-4">
+        <div class="row g-3 mb-4 justify-content-center">
           <div class="col-3">
             <div class="stat-card bg-purple text-white p-2 rounded-top">
               <span class="fs-5 fw-bold">${trans[window.curLang].total}</span>
@@ -46,14 +46,6 @@ function ProfilePage() {
           <div class="col-3">
             <div class="stat-card bg-danger text-white p-2 rounded-top">
               <span class="fs-5 fw-bold">${trans[window.curLang].losses}</span>
-            </div>
-            <div class="text-center fw-bold bg-light rounded-bottom">
-              <span class="fs-5 fw-bold">0</span>
-            </div>
-          </div>
-          <div class="col-3">
-            <div class="stat-card bg-secondary text-white p-2 rounded-top">
-              <span class="fs-5 fw-bold">${trans[window.curLang].draws}</span>
             </div>
             <div class="text-center fw-bold bg-light rounded-bottom">
               <span class="fs-5 fw-bold">0</span>
@@ -191,11 +183,10 @@ async function updateProfilePage() {
     }
   
     const statElements = document.querySelectorAll('.stat-card + .text-center .fs-5.fw-bold');
-    if (statElements.length >= 4) {
+    if (statElements.length >= 3) {
       statElements[0].textContent = data.total  || 0; // Totals
       statElements[1].textContent = data.win    || 0; // Wins
       statElements[2].textContent = data.lose   || 0; // Losses
-      statElements[3].textContent = data.draw   || 0; // Draws
     }
 
     const showInSearch = data.show_in_search;

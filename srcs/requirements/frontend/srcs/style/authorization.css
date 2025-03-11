@@ -55,6 +55,7 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: 90%; /* 너비를 화면에 맞게 설정 */
     max-width: 400px; /* 최대 너비를 제한 */
+    margin-bottom: 100px;
 }
 
 .login-heading {
