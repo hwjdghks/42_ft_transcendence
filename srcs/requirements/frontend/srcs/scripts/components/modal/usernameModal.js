@@ -35,14 +35,6 @@ export function createUsernameModal() {
     </div>
   `;
   document.body.appendChild(modalDiv);
-
-  // 모달 내에서 Enter 키 입력 차단
-  modalDiv.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-    }
-  });
-
   const newUsernameInput = modalDiv.querySelector('#newUsername');
   const usernameSaveBtn = modalDiv.querySelector('#usernameSaveBtn');
 

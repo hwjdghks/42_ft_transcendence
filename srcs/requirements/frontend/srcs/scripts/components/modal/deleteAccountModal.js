@@ -5,14 +5,6 @@ export function createDeleteAccountModal() {
   if (document.getElementById('deleteAccountModal')) return;
 
   const modalDiv = document.createElement('div');
-
-  // 모달 내에서 Enter 키 입력 차단
-  modalDiv.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-    }
-  });
-
   modalDiv.id = 'deleteAccountModal';
   modalDiv.className = 'modal fade';
   modalDiv.tabIndex = -1;
