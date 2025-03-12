@@ -5,7 +5,6 @@ export function SignupPage() {
   async function handleSendCodeSubmit(event) {
     event.preventDefault();
 
-    // 가입 버튼을 비활성화하여 중복 클릭 방지
     const signupBtn = document.querySelector('.btn.signup-btn');
     signupBtn.disabled = true;
 
@@ -14,7 +13,6 @@ export function SignupPage() {
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm_password').value;
 
-    // 필수 동의 여부 확인
     const requiredConsent = document.getElementById('requiredConsent').checked;
     if (!requiredConsent) {
       showMessage('You must agree to the required privacy policy to sign up.', 'error');
@@ -28,7 +26,6 @@ export function SignupPage() {
       return;
     }
 
-    // 선택 동의 항목 개별 체크 (체크 여부에 따라 각각 전송)
     const friendSearchConsent = document.getElementById('friendSearchConsent').checked;
     const profileImageConsent = document.getElementById('profileImageConsent').checked;
     const onlineStatusConsent = document.getElementById('onlineStatusConsent').checked;
@@ -51,7 +48,6 @@ export function SignupPage() {
 
       setTimeout(() => {
         window.location.hash = '#signup-verification';
-        // 일정 시간 후 버튼을 다시 활성화
         signupBtn.disabled = false;
       }, 1000);
     } catch (error) {
@@ -69,7 +65,6 @@ export function SignupPage() {
   }, 0);
 
   return `
-  <!-- 인라인 스타일 추가 -->
   <style>
     .signup-container {
       max-height: 80vh;

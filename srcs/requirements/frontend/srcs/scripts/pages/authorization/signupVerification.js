@@ -28,7 +28,6 @@ export function SignupVerificationPage() {
     }
 
     try {
-      // 중복 제출 방지: 버튼 비활성화
       document.getElementById('verify-btn').disabled = true;
       const verifyResponse = await fetchOTPVerify(otp);
       
@@ -39,7 +38,6 @@ export function SignupVerificationPage() {
     } catch (error) {
       console.error(error);
       showMessage(error.message || 'OTP verification failed. Please try again.', 'error');
-      // 에러 발생 시 버튼 다시 활성화
       document.getElementById('verify-btn').disabled = false;
     }
   }
