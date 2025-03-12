@@ -18,7 +18,6 @@ async function handleLoginSubmit(event) {
     showMessage(otpResponse.message || 'OTP has been sent. Check your email.', 'success');
 
     setTimeout(async () => {
-      fetchFriends();
       sessionStorage.setItem('verificationAllowed', 'true');
       window.location.hash = "#login-verification"; 
       
