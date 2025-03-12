@@ -2,7 +2,10 @@ import { trans, changeLanguage } from '../language.js';
 import { createDeleteAccountModal } from './modal/deleteAccountModal.js';
 import { createUsernameModal } from './modal/usernameModal.js';
 import { createPasswordModal } from './modal/passwordModal.js';
-import { createPrivacyModal, loadPrivacySettingsLocally } from './modal/privacyModal.js'; 
+import { createPrivacyModal, loadPrivacySettingsLocally } from './modal/privacyModal.js';
+
+// 모든 모달 열기 요청이 동시에 발생하지 않도록 하는 전역 플래그
+let isModalOpening = false;
 
 export function renderSettings() {
   const settingsContainer = document.getElementById('setting');
@@ -52,7 +55,7 @@ export function renderSettings() {
     <div id="setting-message" class="mt-3"></div>
   `;
 
-  // 모달 초기화 (한 번만 생성)
+  // 모달이 한 번만 생성되도록 초기화
   if (!document.getElementById('usernameModal')) {
     createUsernameModal();
   }
@@ -70,10 +73,18 @@ export function renderSettings() {
   const editUsernameBtn = settingsContainer.querySelector('#editUsernameBtn');
   if (editUsernameBtn) {
     editUsernameBtn.addEventListener('click', () => {
+      if (isModalOpening) return; // 이미 열기 중이면 동작 중단
+      isModalOpening = true;
+      
       const currentUsername = settingsContainer.querySelector('#username').value;
       document.getElementById('newUsername').value = currentUsername;
-      const modal = new bootstrap.Modal(document.getElementById('usernameModal'));
+      const modalElement = document.getElementById('usernameModal');
+      const modal = new bootstrap.Modal(modalElement);
       modal.show();
+      // 모달이 완전히 열리면 플래그 해제
+      modalElement.addEventListener('shown.bs.modal', () => {
+        isModalOpening = false;
+      }, { once: true });
     });
   }
   
@@ -81,8 +92,15 @@ export function renderSettings() {
   const editPasswordBtn = settingsContainer.querySelector('#editPasswordBtn');
   if (editPasswordBtn) {
     editPasswordBtn.addEventListener('click', () => {
-      const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+      if (isModalOpening) return;
+      isModalOpening = true;
+      
+      const modalElement = document.getElementById('passwordModal');
+      const modal = new bootstrap.Modal(modalElement);
       modal.show();
+      modalElement.addEventListener('shown.bs.modal', () => {
+        isModalOpening = false;
+      }, { once: true });
     });
   }
   
@@ -90,9 +108,16 @@ export function renderSettings() {
   const editPrivacyBtn = settingsContainer.querySelector('#editPrivacyBtn');
   if (editPrivacyBtn) {
     editPrivacyBtn.addEventListener('click', () => {
+      if (isModalOpening) return;
+      isModalOpening = true;
+      
       loadPrivacySettingsLocally();
-      const modal = new bootstrap.Modal(document.getElementById('privacySettingsModal'));
+      const modalElement = document.getElementById('privacySettingsModal');
+      const modal = new bootstrap.Modal(modalElement);
       modal.show();
+      modalElement.addEventListener('shown.bs.modal', () => {
+        isModalOpening = false;
+      }, { once: true });
     });
   }
 
@@ -110,8 +135,15 @@ export function renderSettings() {
   const deleteAccountBtn = settingsContainer.querySelector('#deleteAccountBtn');
   if (deleteAccountBtn) {
     deleteAccountBtn.addEventListener('click', () => {
-      const modal = new bootstrap.Modal(document.getElementById('deleteAccountModal'));
+      if (isModalOpening) return;
+      isModalOpening = true;
+      
+      const modalElement = document.getElementById('deleteAccountModal');
+      const modal = new bootstrap.Modal(modalElement);
       modal.show();
+      modalElement.addEventListener('shown.bs.modal', () => {
+        isModalOpening = false;
+      }, { once: true });
     });
   }
 
