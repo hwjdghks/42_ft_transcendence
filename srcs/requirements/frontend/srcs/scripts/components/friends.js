@@ -116,6 +116,7 @@ export function openAddFriendPopup() {
   searchInput.classList.add('form-control', 'mb-3');
   searchInput.addEventListener('keydown', function(event) {
     if (event.key === "Enter") {
+      event.preventDefault();
       performFriendSearch(event.target.value);
     }
   });
