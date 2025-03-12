@@ -37,6 +37,7 @@ export async function router() {
   const newRoute = parseRoute(window.location.hash);
 
   if ((newRoute === 'signup-verification' || newRoute === 'login-verification') && !sessionStorage.getItem('verificationAllowed')) {
+    window.location.hash = '#login';
     return;
   }
 
@@ -48,6 +49,7 @@ export async function router() {
   ) {
     const confirmLeave = confirm("Tournament is in progress. Do you really want to end and move on?");
     if (!confirmLeave) {
+      window.location.hash = currentRoute;
       return;
     } else {
       resetTournamentSession();
@@ -158,7 +160,6 @@ async function requireTournamentSession(route) {
   }
   return true;
 }
-
 
 // "gameplay/play-<id>" 경로의 유효성을 체크하는 함수
 function validateGamePlayRoute(route) {
