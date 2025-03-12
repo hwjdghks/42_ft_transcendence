@@ -5,7 +5,6 @@ import { renderSettings } from "../../components/setting.js";
 import { trans } from '../../language.js'
 import { removeCookie } from "../../validation/cookie.js";
 
-// 프로필 페이지를 생성하여 반환하는 함수
 function ProfilePage() {
   const container = document.createElement('div');
   container.className = 'container py-5';
@@ -88,7 +87,6 @@ function ProfilePage() {
     </div>
   `;
 
-  // ProfilePage 내부에서만 사용되는 toggleContent 함수
   function toggleContent(id) {
     const content = container.querySelector(`#${id}`);
     if (!content) return;
@@ -96,7 +94,6 @@ function ProfilePage() {
     const button = content.previousElementSibling;
     const icon = button.querySelector('.bi-chevron-down');
 
-    // 다른 아코디언 콘텐츠는 모두 숨기기
     container.querySelectorAll('.content').forEach(el => {
       if (el.id !== id) {
         el.style.display = 'none';
@@ -112,7 +109,6 @@ function ProfilePage() {
       content.style.display = 'block';
       if (icon) icon.style.transform = 'rotate(180deg)';
 
-      // 각 콘텐츠 영역별 처리
       if (id === 'matchHistory') {
         renderMatchHistory();
       } else if (id === 'friends') {
@@ -125,7 +121,6 @@ function ProfilePage() {
     }
   }
 
-  // 아코디언 토글 버튼에 이벤트 리스너 등록
   const accordionToggles = container.querySelectorAll('.accordion-toggle');
   accordionToggles.forEach(toggle => {
     toggle.addEventListener('click', () => {
@@ -134,13 +129,11 @@ function ProfilePage() {
     });
   });
 
-    // 로그아웃 버튼 이벤트 등록
     const logoutBtn = container.querySelector('#logoutBtn');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', handleLogout);
     }
 
-  // 프로필 데이터, 드롭다운, 프로필 업로드 초기화
   updateProfilePage();
   initializeDropdowns();
   initProfileUpload(container);
@@ -148,7 +141,6 @@ function ProfilePage() {
   return container;
 }
 
-// 드롭다운 메뉴 초기화 함수
 function initializeDropdowns() {
   document.querySelectorAll('.dropdown').forEach(dropdown => {
     const toggle = dropdown.querySelector('.dropdown-toggle');
@@ -168,7 +160,6 @@ function initializeDropdowns() {
   });
 }
 
-// 프로필 페이지 정보 업데이트 함수
 async function updateProfilePage() {
   try {
     const data = await getProfileData();
@@ -207,7 +198,6 @@ async function updateProfilePage() {
   }
 }
 
-// 프로필 업로드 초기화 함수
 function initProfileUpload(container) {
   const uploadBtn = container.querySelector('#profile-upload-btn');
   const fileInput = container.querySelector('#profile-image-input');
@@ -230,7 +220,6 @@ function initProfileUpload(container) {
   });
 }
 
-// 로그아웃 함수
 async function handleLogout() {
   try {
     await postLogout();
