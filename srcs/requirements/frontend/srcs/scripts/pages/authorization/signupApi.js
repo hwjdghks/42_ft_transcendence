@@ -1,5 +1,4 @@
 export async function fetchSignup(data) {
-    // console.log("Signup Request Data:", JSON.stringify(data, null, 2));
     const response = await fetch('https://localhost/api/users/signup/', {
       method: 'POST',
       credentials: 'include',
