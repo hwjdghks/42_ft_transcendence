@@ -60,6 +60,14 @@ export function createPrivacyModal() {
 
   // 모달 컨테이너 생성 및 DOM에 추가
   const modalDiv = document.createElement('div');
+
+  // 모달 내에서 Enter 키 입력 차단
+  modalDiv.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
+});
+
   modalDiv.id = 'privacySettingsModal';
   modalDiv.className = 'modal fade';
   modalDiv.tabIndex = -1;
