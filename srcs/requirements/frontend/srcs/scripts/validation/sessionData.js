@@ -4,7 +4,7 @@ import { resetTournamentSession } from '../pages/game/tournament.js'
 
 // 플레이어리스트 검증 함수
 async function isSessionPlayerListValid() {
-  console.log('Session storage: playerList 검증 시도');
+  // console.log('Session storage: playerList 검증 시도');
 
   try {
     const playerList = getSessionData('playerList');
@@ -49,7 +49,7 @@ async function isSessionPlayerListValid() {
 
 // 게임 옵션 객체를 검증하는 함수
 function isSessionGameOptionsValid() {
-  console.log('Session storage: game_option 검증 시도');
+  // console.log('Session storage: game_option 검증 시도');
   const gameOption = getSessionData('game_option');
   if (!gameOption) {
     return false;
@@ -75,7 +75,7 @@ function isSessionGameOptionsValid() {
 
 // currentMatch 객체 검증 함수
 function isSessionCurrentMatchValid() {
-  console.log('Session storage: currentMatch 검증 시도');
+  // console.log('Session storage: currentMatch 검증 시도');
   const currentMatch = getSessionData('currentMatch');
   if (!currentMatch) return false;
 
@@ -131,7 +131,7 @@ function isSessionMatchItemValid(item) {
   
 // match 배열 전체 검증 함수
 function isSessionMatchArrayValid() {
-  console.log('Session storage: matchArray 검증 시도');
+  // console.log('Session storage: matchArray 검증 시도');
   const matchArray = getSessionData('matches');
   if (!matchArray) return false;
 

@@ -1,5 +1,5 @@
 export async function fetchSignup(data) {
-    console.log("Signup Request Data:", JSON.stringify(data, null, 2));
+    // console.log("Signup Request Data:", JSON.stringify(data, null, 2));
     const response = await fetch('https://localhost/api/users/signup/', {
       method: 'POST',
       credentials: 'include',
@@ -10,7 +10,7 @@ export async function fetchSignup(data) {
     });
   
     const responseData = await response.json();
-    console.log("Signup API Response:", responseData);
+    // console.log("Signup API Response:", responseData);
   
     if (!response.ok) {
       throw new Error(responseData.error || "Signup failed");

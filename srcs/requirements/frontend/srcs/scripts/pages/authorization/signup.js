@@ -39,10 +39,10 @@ export function SignupPage() {
         share_profile_image: profileImageConsent, 
         share_online_status: onlineStatusConsent 
       });
-      console.log("Signup Response:", signupResponse);
+      // console.log("Signup Response:", signupResponse);
   
       const otpResponse = await fetchOTPRequest();
-      console.log("OTP Response:", otpResponse);
+      // console.log("OTP Response:", otpResponse);
       showMessage(otpResponse.message || 'OTP has been sent. Check your email.', 'success');
       sessionStorage.setItem('verificationAllowed', 'true');
 

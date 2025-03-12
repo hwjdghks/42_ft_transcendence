@@ -190,7 +190,7 @@ async function updateProfilePage() {
       shareOnlineStatus
     };
 
-    console.log(settings);
+    // console.log(settings);
     localStorage.setItem('privacySettings', JSON.stringify(settings));
 
   } catch (error) {
