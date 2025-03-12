@@ -9,7 +9,7 @@ export async function fetchSignup(data) {
     });
   
     const responseData = await response.json();
-    console.log("Signup API Response:", responseData);
+    // console.log("Signup API Response:", responseData);
   
     if (!response.ok) {
       throw new Error(responseData.error || "Signup failed");

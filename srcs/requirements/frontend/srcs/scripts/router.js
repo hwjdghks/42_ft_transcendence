@@ -230,3 +230,10 @@ window.addEventListener('beforeunload', (e) => {
     return confirmationMessage;
   }
 });
+
+// 모달 백드롭 제거
+document.addEventListener('hidden.bs.modal', () => {
+  document.querySelectorAll('.modal-backdrop').forEach((backdrop) => {
+    backdrop.remove();
+  });
+});
