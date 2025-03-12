@@ -121,6 +121,11 @@ export function openAddFriendPopup() {
     }
   });
   popupContent.appendChild(searchInput);
+  
+  setTimeout(() => {
+    searchInput.focus();
+  }, 0);
+
 
   const searchResults = document.createElement('div');
   searchResults.id = 'searchResults';
