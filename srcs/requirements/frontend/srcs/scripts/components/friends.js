@@ -206,7 +206,17 @@ export function removeFriend(friendname) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  fetchFriends();
+  if (document.getElementById('friends')) {
+    fetchFriends();
+  } else {
+    const observer = new MutationObserver((mutations, obs) => {
+      if (document.getElementById('friends')) {
+        fetchFriends();
+        obs.disconnect();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
 });
 
 window.removeFriend = removeFriend;
