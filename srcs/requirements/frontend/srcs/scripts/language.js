@@ -15,7 +15,7 @@ const trans = {
     loginPasswordHolder: "Enter your password",
     loginBtn: "Submit",
     loginOauthBtn: "42 account",
-    loginSignupBtn: "Sing up",
+    loginSignupBtn: "Sign up",
 
     // Verify
     verifyHeader: "Verify Code",
