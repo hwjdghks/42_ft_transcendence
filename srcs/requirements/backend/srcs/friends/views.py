@@ -133,3 +133,6 @@ def get_online(request: HttpRequest) -> JsonResponse:
         is_online = u.id in online_users if u.share_online_status else False
         result.append({"username": u.username, "is_online": is_online})
     return JsonResponse({'results': result}, status=200)
+
+def set_offline(user):
+    OnlineList.objects.filter(user=user).delete()

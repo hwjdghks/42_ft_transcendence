@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
 from authentication.views import generate_jwt, jwt_required, verify_otp, set_jwt_cookie
-from friends.views import update_last_activate
+from friends.views import update_last_activate, set_offline
 from matchresult.models import MatchResult
 from .models import User
 from .utils import check_existing_user, is_valid_password, handle_invalid_password
@@ -85,6 +85,8 @@ def signin(request: HttpRequest) -> JsonResponse:
 @require_POST
 @jwt_required(expected_factor_level=2) # jwt (2fa) 필요
 def signout(request: HttpRequest) -> JsonResponse:
+    user = request.user
+    set_offline(user)
     return JsonResponse({'message': 'Signed out successfully'}, status=200)
 
 @csrf_exempt
