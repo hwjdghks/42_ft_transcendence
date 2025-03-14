@@ -15,7 +15,7 @@ const trans = {
     loginPasswordHolder: "Enter your password",
     loginBtn: "Submit",
     loginOauthBtn: "42 account",
-    loginSingupBtn: "Sing up",
+    loginSignupBtn: "Sign up",
 
     // Verify
     verifyHeader: "Verify Code",
@@ -162,7 +162,7 @@ const trans = {
     loginPasswordHolder: "비밀번호를 입력하세요",
     loginBtn: "로그인",
     loginOauthBtn: "42 계정",
-    loginSingupBtn: "회원가입",
+    loginSignupBtn: "회원가입",
 
     // Verify
     verifyHeader: "인증 코드",
@@ -307,7 +307,7 @@ const trans = {
     loginPasswordHolder: "Entrez votre mot de passe",
     loginBtn: "Soumettre",
     loginOauthBtn: "Compte 42",
-    loginSingupBtn: "S'inscrire",
+    loginSignupBtn: "S'inscrire",
   
     // Verify
     verifyHeader: "Vérifier le code",

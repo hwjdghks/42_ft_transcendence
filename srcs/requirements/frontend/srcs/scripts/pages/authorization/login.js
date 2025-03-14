@@ -86,7 +86,7 @@ export function LoginPage() {
           <button type="button" class="btn oauth-btn">${trans[window.curLang].loginOauthBtn}</button>
         </form>
         <div id="login-message" class="mt-3"></div>
-        <a href="/#signup" class="btn btn-link mt-3">${trans[window.curLang].loginSingupBtn}</a>
+        <a href="/#signup" class="btn btn-link mt-3">${trans[window.curLang].loginSignupBtn}</a>
       </div>
     </div>
   `;
