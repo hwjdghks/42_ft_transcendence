@@ -23,11 +23,27 @@ function GamePlayPage(configJson) {
   container.cleanup = function() {};
 
   setTimeout(() => {
-    const cleanupFn = initializePingPongGame(container, configJson, currentMatch);
-    container.cleanup = cleanupFn;
+    loadThreeJS(() => {
+      const cleanupFn = initializePingPongGame(container, configJson, currentMatch);
+      container.cleanup = cleanupFn;
+    });
   }, 100);
-
+  
   return container;
 }
+
+function loadThreeJS(callback) {
+  // 이미 THREE가 로드되어 있으면 바로 callback 실행
+  if (window.THREE) {
+    callback();
+    return;
+  }
+
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+  script.onload = callback;
+  document.head.appendChild(script);
+}
+
 
 export { GamePlayPage };
