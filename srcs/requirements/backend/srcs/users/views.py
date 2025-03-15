@@ -23,10 +23,10 @@ def signup(request: HttpRequest) -> JsonResponse:
     if not email or not password:
         return JsonResponse({'error': 'Email and password are required'}, status=400)
     
-    if not is_valid_password(password):
+    """if not is_valid_password(password):
         return JsonResponse({
             'error': 'The password must be between 8 and 50 characters long, and it must include at least one uppercase letter, one lowercase letter, one number, and one special character.'
-        }, status=400)
+        }, status=400)"""
 
     # 이메일 중복 검사 단 유저가 is_active가 false이고 otp를 발송한지 30분이 지난상태면 삭제
     response = check_existing_user(User.objects.filter(email=email).first(), "Email")

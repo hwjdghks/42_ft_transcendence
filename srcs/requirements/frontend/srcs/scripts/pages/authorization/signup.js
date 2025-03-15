@@ -29,6 +29,22 @@ export function SignupPage() {
       return;
     }
 
+    if (!password.trim()) {
+      showMessage('비밀번호는 공백일 수 없습니다.', 'error');
+      signupBtn.disabled = false;
+      return;
+    }
+    
+    const passwordPattern = /^(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/;
+    if (!passwordPattern.test(password)) {
+      showMessage(
+        'The password must be between 8 and 50 characters long, and include at least one uppercase letter and one special character.',
+        'error'
+      );
+      signupBtn.disabled = false;
+      return;
+    }
+
     if (password !== confirmPassword) {
       showMessage('Passwords do not match. Please try again.', 'error');
       signupBtn.disabled = false;
