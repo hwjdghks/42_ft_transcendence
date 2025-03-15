@@ -154,12 +154,12 @@ export async function postUpdateUsername(newUsername) {
 
 /**
  * 개인정보 설정 업데이트 함수
- * @param {boolean} showInSearch - 검색 노출 여부
+ * @param {boolean} isFriendEnabled - 친구 기능 사용 여부
  * @param {boolean} shareProfileImage - 프로필 이미지 공유 여부
  * @param {boolean} shareOnlineStatus - 온라인 상태 공유 여부
  * @returns {Promise<Object>} 백엔드가 전달한 결과
  */
-export async function postUpdatePrivacySettings(showInSearch, shareProfileImage, shareOnlineStatus) {
+export async function postUpdatePrivacySettings(isFriendEnabled, shareProfileImage, shareOnlineStatus) {
   const response = await fetch('https://localhost/api/users/update/settings/', {
     method: 'POST',
     credentials: 'include',
@@ -167,7 +167,7 @@ export async function postUpdatePrivacySettings(showInSearch, shareProfileImage,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      show_in_search: showInSearch,
+      is_friend_enabled: isFriendEnabled,
       share_profile_image: shareProfileImage,
       share_online_status: shareOnlineStatus
     })

@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
 from authentication.views import generate_jwt, jwt_required, verify_otp, set_jwt_cookie
-from friends.views import update_last_activate
+from friends.views import update_last_activate, delete_followers
 from matchresult.models import MatchResult
 from .models import User
 from .utils import check_existing_user, is_valid_password, handle_invalid_password
@@ -39,18 +39,18 @@ def signup(request: HttpRequest) -> JsonResponse:
         return response
     
     if len(username) > 10:
-        return JsonResponse({'error': '유저 이름은 10글자 이하여야합니다다.'}, status=400)
+        return JsonResponse({'error': '유저 이름은 10글자 이하여야합니다.'}, status=400)
 
     if not re.fullmatch(r'[0-9a-zA-Z]+', username):
         return JsonResponse({'error': '유저 이름은 알파벳과 숫자로만 이루어져야 합니다.'}, status=400)
 
-    show_in_search = data.get('show_in_search', True)
-    share_profile_image = data.get('share_profile_image', True)
-    share_online_status = data.get('share_online_status', True)
+    is_friend_enabled = data.get('is_friend_enabled', False)
+    share_profile_image = data.get('share_profile_image', False)
+    share_online_status = data.get('share_online_status', False)
 
     user = User.objects.create_user(username=username, email=email, password=password)
     user.is_active = False
-    user.show_in_search = show_in_search
+    user.is_friend_enabled = is_friend_enabled
     user.share_profile_image = share_profile_image
     user.share_online_status = share_online_status
     user.save()
@@ -133,7 +133,7 @@ def get_profile(request: HttpRequest) -> JsonResponse:
         'total': total_games,
         'win': win,
         'lose': lose,
-        'show_in_search': user.show_in_search,
+        'is_friend_enabled': user.is_friend_enabled,
         'share_online_status': user.share_online_status,
         'share_profile_image': user.share_profile_image
     }
@@ -162,7 +162,7 @@ def update_username(request: HttpRequest) -> JsonResponse:
         }, status=400)
 
     if len(new_username) > 10:
-        return JsonResponse({'error': '유저 이름은 10글자 이하여야합니다다.'}, status=400)
+        return JsonResponse({'error': '유저 이름은 10글자 이하여야합니다.'}, status=400)
 
     if not re.fullmatch(r'[0-9a-zA-Z]+', new_username):
         return JsonResponse({'error': '유저 이름은 알파벳과 숫자로만 이루어져야 합니다.'}, status=400)
@@ -207,12 +207,14 @@ def update_password(request: HttpRequest) -> JsonResponse:
 def update_user_settings(request: HttpRequest) -> JsonResponse:
     user = request.user
     data = json.loads(request.body)
-    show_in_search = data.get('show_in_search')
+    is_friend_enabled = data.get('is_friend_enabled')
     share_profile_image = data.get('share_profile_image')
     share_online_status = data.get('share_online_status')
 
-    if show_in_search is not None:
-        user.show_in_search = bool(show_in_search)
+    if is_friend_enabled is not None:
+        if user.is_friend_enabled is True and is_friend_enabled is False:
+            delete_followers(user)
+        user.is_friend_enabled = bool(is_friend_enabled)
     if share_profile_image is not None:
         user.share_profile_image = bool(share_profile_image)
     if share_online_status is not None:

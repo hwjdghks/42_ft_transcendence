@@ -52,7 +52,7 @@ def search_users(request: HttpRequest) -> JsonResponse:
     users = User.objects.filter(username__icontains=query).exclude(id=request.user.id)
     result = []
     for user in users:
-        if user.show_in_search:
+        if user.is_friend_enabled:
             profile_image = (
                 user.profile_image.url
                 if user.profile_image and user.share_profile_image
@@ -133,3 +133,7 @@ def get_online(request: HttpRequest) -> JsonResponse:
         is_online = u.id in online_users if u.share_online_status else False
         result.append({"username": u.username, "is_online": is_online})
     return JsonResponse({'results': result}, status=200)
+
+def delete_followers(user):
+    Friend.objects.filter(following=user).delete()
+

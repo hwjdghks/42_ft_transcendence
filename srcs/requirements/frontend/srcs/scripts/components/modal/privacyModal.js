@@ -8,7 +8,7 @@ export function createPrivacyModal() {
   // localStorage에서 저장된 값 읽기 (저장된 값이 없으면 기본값 true)
   let storedSettings = localStorage.getItem('privacySettings');
   let settings = {
-    showInSearch: true,
+    isFriendEnabled: true,
     shareProfileImage: true,
     shareOnlineStatus: true,
   };
@@ -21,7 +21,7 @@ export function createPrivacyModal() {
   }
 
   // 각 체크박스의 초기 checked 상태 설정
-  const showInSearchChecked = settings.showInSearch ? 'checked' : '';
+  const isFriendEnabledChecked = settings.isFriendEnabled ? 'checked' : '';
   const shareProfileImageChecked = settings.shareProfileImage ? 'checked' : '';
   const shareOnlineStatusChecked = settings.shareOnlineStatus ? 'checked' : '';
 
@@ -36,8 +36,8 @@ export function createPrivacyModal() {
          <div class="modal-body">
            <form id="privacySettingsForm">
              <div class="form-check mb-2">
-               <input type="checkbox" class="form-check-input" id="modalShowInSearchCheckbox" ${showInSearchChecked}>
-               <label class="form-check-label" for="modalShowInSearchCheckbox">${trans[window.curLang].settingModalPrivacy1}</label>
+               <input type="checkbox" class="form-check-input" id="modalisFriendEnabledCheckbox" ${isFriendEnabledChecked}>
+               <label class="form-check-label" for="modalisFriendEnabledCheckbox">${trans[window.curLang].settingModalPrivacy1}</label>
              </div>
              <div class="form-check mb-2">
                <input type="checkbox" class="form-check-input" id="modalShareProfileImageCheckbox" ${shareProfileImageChecked}>
@@ -80,12 +80,12 @@ export function createPrivacyModal() {
   // 개인정보 업데이트 요청 처리
   const saveBtn = modalDiv.querySelector('#privacySettingsSaveBtn');
   saveBtn.addEventListener('click', async () => {
-    const showInSearch = document.getElementById('modalShowInSearchCheckbox').checked;
+    const isFriendEnabled = document.getElementById('modalisFriendEnabledCheckbox').checked;
     const shareProfileImage = document.getElementById('modalShareProfileImageCheckbox').checked;
     const shareOnlineStatus = document.getElementById('modalShareOnlineStatusCheckbox').checked;
 
     try {
-      await postUpdatePrivacySettings(showInSearch, shareProfileImage, shareOnlineStatus);
+      await postUpdatePrivacySettings(isFriendEnabled, shareProfileImage, shareOnlineStatus);
       // 저장 성공 시 localStorage에도 반영
       savePrivacySettingsLocally();
       alert('Success');
@@ -99,12 +99,12 @@ export function createPrivacyModal() {
 
 // localStorage에 개인정보 설정 저장
 function savePrivacySettingsLocally() {
-  const showInSearch = document.getElementById('modalShowInSearchCheckbox').checked;
+  const isFriendEnabled = document.getElementById('modalisFriendEnabledCheckbox').checked;
   const shareProfileImage = document.getElementById('modalShareProfileImageCheckbox').checked;
   const shareOnlineStatus = document.getElementById('modalShareOnlineStatusCheckbox').checked;
 
   const settings = {
-    showInSearch,
+    isFriendEnabled,
     shareProfileImage,
     shareOnlineStatus
   };
@@ -116,8 +116,8 @@ function savePrivacySettingsLocally() {
 export function loadPrivacySettingsLocally() {
   const storedSettings = localStorage.getItem('privacySettings');
   if (storedSettings) {
-    const { showInSearch, shareProfileImage, shareOnlineStatus } = JSON.parse(storedSettings);
-    document.getElementById('modalShowInSearchCheckbox').checked = showInSearch;
+    const { isFriendEnabled, shareProfileImage, shareOnlineStatus } = JSON.parse(storedSettings);
+    document.getElementById('modalisFriendEnabledCheckbox').checked = isFriendEnabled;
     document.getElementById('modalShareProfileImageCheckbox').checked = shareProfileImage;
     document.getElementById('modalShareOnlineStatusCheckbox').checked = shareOnlineStatus;
   }

@@ -180,12 +180,12 @@ async function updateProfilePage() {
       statElements[2].textContent = data.lose   || 0; // Losses
     }
 
-    const showInSearch = data.show_in_search;
+    const isFriendEnabled = data.is_friend_enabled;
     const shareProfileImage = data.share_profile_image;
     const shareOnlineStatus = data.share_online_status;
 
     const settings = {
-      showInSearch,
+      isFriendEnabled,
       shareProfileImage,
       shareOnlineStatus
     };
