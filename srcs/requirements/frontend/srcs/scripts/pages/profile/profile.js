@@ -7,15 +7,13 @@ import { removeCookie } from "../../validation/cookie.js";
 
 function ProfilePage() {
   const container = document.createElement('div');
-  container.className = 'container py-5';
+  container.className = 'container py-4 bg-white rounded-4 shadow p-4 mx-auto text-center mt-5';
   container.innerHTML = `
-    <div class="container py-5">
-      <div class="bg-white rounded shadow p-4 max-width-800 mx-auto text-center">
         <!-- Profile Section -->
         <div class="mb-4">
-          <img src="/static/profile.jpg" alt="Profile" class="profile-img mb-3">
+          <img src="/static/profile.jpg" alt="Profile" class="profile-img mb-3 rounded-circle">
           <h2 class="h4 mb-3">
-            <span class="fs-2 fw-bold"></span>
+            <span class="fs-3 fw-bold"></span>
           </h2>
           <button id="profile-upload-btn" class="btn btn-secondary">
             <span class="fw-bold">${trans[window.curLang].profileUpload}</span>
@@ -83,8 +81,6 @@ function ProfilePage() {
           </div>
           <button class="btn btn-outline-primary w-100 mb-2" id="logoutBtn">${trans[window.curLang].logout}</button>
         </div>
-      </div>
-    </div>
   `;
 
   function toggleContent(id) {
@@ -163,7 +159,7 @@ function initializeDropdowns() {
 async function updateProfilePage() {
   try {
     const data = await getProfileData();
-    const usernameElement = document.querySelector('.fs-2.fw-bold');
+    const usernameElement = document.querySelector('.fs-3.fw-bold');
     if (usernameElement && data.username) {
       usernameElement.textContent = data.username;
     }

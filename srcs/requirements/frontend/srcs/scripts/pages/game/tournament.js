@@ -2,7 +2,7 @@ import { trans } from '../../language.js';
 
 export function GameTournamentPage() {
   const container = document.createElement('div');
-  container.className = 'container py-5';
+  container.className = 'container py-4 bg-white rounded-4 shadow p-4 mx-auto mt-5';
 
   // const options = JSON.parse(sessionStorage.getItem('game_option'));
   const playerList = JSON.parse(sessionStorage.getItem('playerList'));

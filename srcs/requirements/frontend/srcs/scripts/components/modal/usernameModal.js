@@ -71,7 +71,7 @@ export function createUsernameModal() {
       alert(updateMessage.message || 'Success');
 
       // 화면 상단 username 업데이트
-      const usernameElement = document.querySelector('.fs-2.fw-bold');
+      const usernameElement = document.querySelector('.fs-3.fw-bold');
       if (usernameElement) {
         usernameElement.textContent = newUsername;
       }
