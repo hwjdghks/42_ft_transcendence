@@ -1,6 +1,15 @@
 import { fetchSignup, fetchOTPRequest, showMessage } from './signupApi.js';
 import { trans } from '../../language.js';
 
+async function hashPassword(password) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex;
+}
+
 export function SignupPage() {
   async function handleSendCodeSubmit(event) {
     event.preventDefault();
@@ -31,10 +40,13 @@ export function SignupPage() {
     const onlineStatusConsent = document.getElementById('onlineStatusConsent').checked;
 
     try {
+
+      const hashedPassword = await hashPassword(password);
+
       const signupResponse = await fetchSignup({ 
         username, 
         email, 
-        password, 
+        hashedPassword, 
         show_in_search: friendSearchConsent, 
         share_profile_image: profileImageConsent, 
         share_online_status: onlineStatusConsent 

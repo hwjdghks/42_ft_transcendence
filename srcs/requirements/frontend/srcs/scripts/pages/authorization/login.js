@@ -1,6 +1,14 @@
 import { fetchLogin, fetchLoginOTPRequest, showMessage } from './loginApi.js';
-import { fetchFriends } from '../../components/friends.js';
 import { trans } from '../../language.js';
+
+async function hashPassword(password) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex;
+}
 
 async function handleLoginSubmit(event) {
   event.preventDefault();
@@ -12,7 +20,8 @@ async function handleLoginSubmit(event) {
   const password = document.getElementById('password').value;
 
   try {
-    const response = await fetchLogin({ email, password });
+    const hashedPassword = await hashPassword(password);
+    const response = await fetchLogin({ email, hashedPassword });
     const otpResponse = await fetchLoginOTPRequest();
     showMessage(otpResponse.message || 'OTP has been sent. Check your email.', 'success');
 
