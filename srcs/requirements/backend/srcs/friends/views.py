@@ -137,3 +137,5 @@ def get_online(request: HttpRequest) -> JsonResponse:
 def delete_followers(user):
     Friend.objects.filter(following=user).delete()
 
+def set_offline(user):
+    OnlineList.objects.filter(user=user).delete()

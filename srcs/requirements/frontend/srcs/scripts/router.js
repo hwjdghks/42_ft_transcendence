@@ -33,6 +33,12 @@ let currentRoute = null;
 
 // 메인 라우터 함수
 export async function router() {
+
+  if (window.location.pathname === '/oauth-callback/') {
+    window.location.href = '/#oauth-callback/' + window.location.search;
+    return;
+  }
+
   const app = document.getElementById('app');
   const newRoute = parseRoute(window.location.hash);
 
