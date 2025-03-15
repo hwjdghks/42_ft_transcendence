@@ -11,7 +11,7 @@ function ProfilePage() {
   container.innerHTML = `
         <!-- Profile Section -->
         <div class="mb-4">
-          <img src="/static/profile.jpg" alt="Profile" class="profile-img mb-3 rounded-circle">
+          <img src="/static/profile.jpg" alt="Profile" class="profile-img mb-1 rounded-circle">
           <h2 class="h4 mb-3">
             <span class="fs-3 fw-bold"></span>
           </h2>
@@ -28,24 +28,24 @@ function ProfilePage() {
             <div class="stat-card bg-purple text-white p-2 rounded-top">
               <span class="fs-5 fw-bold">${trans[window.curLang].total}</span>
             </div>
-            <div class="text-center fw-bold bg-light rounded-bottom">
-              <span class="fs-5 fw-bold">0</span>
+            <div class="text-center fw-bold bg-dark rounded-bottom">
+              <span class="fs-5 fw-bold text-white">0</span>
             </div>
           </div>
           <div class="col-3">
             <div class="stat-card bg-primary text-white p-2 rounded-top">
               <span class="fs-5 fw-bold">${trans[window.curLang].wins}</span>
             </div>
-            <div class="text-center fw-bold bg-light rounded-bottom">
-              <span class="fs-5 fw-bold">0</span>
+            <div class="text-center fw-bold bg-dark rounded-bottom">
+              <span class="fs-5 fw-bold text-white">0</span>
             </div>
           </div>
           <div class="col-3">
             <div class="stat-card bg-danger text-white p-2 rounded-top">
               <span class="fs-5 fw-bold">${trans[window.curLang].losses}</span>
             </div>
-            <div class="text-center fw-bold bg-light rounded-bottom">
-              <span class="fs-5 fw-bold">0</span>
+            <div class="text-center fw-bold bg-dark rounded-bottom">
+              <span class="fs-5 fw-bold text-white">0</span>
             </div>
           </div>
         </div>
@@ -57,7 +57,7 @@ function ProfilePage() {
               <span class="fs-5 fw-bold">${trans[window.curLang].matchHistory}</span>
               <i class="bi bi-chevron-down"></i>
             </button>
-            <div id="matchHistory" class="content p-3 bg-white rounded-3 mt-2 shadow-sm" style="display: none;">
+            <div id="matchHistory" class="content p-3 bg-white rounded-3 mt-2" style="display: none;">
               <!-- matchHistory 내용 -->
             </div>
           </div>

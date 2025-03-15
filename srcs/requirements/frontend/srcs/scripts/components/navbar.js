@@ -22,7 +22,7 @@ function updateNavbar() {
 
   if (isAuthPage) {
     navbar.innerHTML = `
-      <nav class="navbar navbar-expand bg-light sticky-top py-2">
+      <nav class="navbar navbar-expand bg-white py-2">
         <div class="container d-flex justify-content-center align-items-center">
             <img src="../static/logo.png" alt="Logo" height="30">
         </div>
@@ -30,7 +30,7 @@ function updateNavbar() {
     `;
   } else {
     navbar.innerHTML = `
-      <nav class="navbar navbar-expand bg-light sticky-top py-2">
+      <nav class="navbar navbar-expand bg-white py-2">
         <div class="container d-flex justify-content-center align-items-center gap-3">
             <img src="../static/logo.png" alt="Logo" height="30">
           <a href="#profile" class="nav-link fw-bold fs-5 protected-link">${trans[window.curLang].navProfile}</a>

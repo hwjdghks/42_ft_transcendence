@@ -74,7 +74,7 @@ function renderBracket(matchData, parent, nextButton) {
 
   const title = document.createElement('h2');
   title.textContent = trans[window.curLang].tournamentHeader;
-  title.className = 'mb-4 fw-bold';
+  title.className = 'fs-3 fw-bold mb-4';
   parent.appendChild(title);
 
   const bracketDiv = document.createElement('div');
