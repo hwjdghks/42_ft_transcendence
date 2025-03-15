@@ -74,7 +74,7 @@
 }
 
 .oauth-btn {
-  background-color: #777777 !important;
+  background-color: #222222 !important;
   color: white !important;
   margin-top: 10px;
   border: none;
@@ -87,7 +87,7 @@
 }
 
 .oauth-btn:hover {
-  background-color: #414141 !important;
+  background-color: #000000 !important;
 }
 
 .auth-btn {

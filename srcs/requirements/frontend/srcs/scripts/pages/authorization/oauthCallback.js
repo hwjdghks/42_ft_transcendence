@@ -3,7 +3,9 @@ import { postOauthToken } from '../../api/scriptApi.js';
 
 export function OauthCallbackPage() {
   const container = document.createElement("div");
-  container.innerHTML = "<p>로그인 처리 중입니다. 잠시만 기다려주세요...</p>";
+  container.innerHTML = `
+    <div class="fs-5 text-white">로그인 처리 중입니다. 잠시만 기다려주세요...</div>
+  `;
 
   setTimeout(handleOauthCallback, 100);
 
