@@ -21,7 +21,7 @@ async function handleLoginSubmit(event) {
 
   try {
     const hashedPassword = await hashPassword(password);
-    const response = await fetchLogin({ email, hashedPassword });
+    const response = await fetchLogin({ email, password: hashedPassword });
     const otpResponse = await fetchLoginOTPRequest();
     showMessage(otpResponse.message || 'OTP has been sent. Check your email.', 'success');
 

@@ -46,7 +46,7 @@ export function SignupPage() {
       const signupResponse = await fetchSignup({ 
         username, 
         email, 
-        hashedPassword, 
+        password: hashedPassword, 
         show_in_search: friendSearchConsent, 
         share_profile_image: profileImageConsent, 
         share_online_status: onlineStatusConsent 
