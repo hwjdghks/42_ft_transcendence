@@ -29,7 +29,7 @@ def update_last_activate(func):
 @update_last_activate
 def friend_list(request: HttpRequest) -> JsonResponse:
     user = request.user
-    list = Friend.objects.filter(follower=user)
+    list = Friend.objects.filter(follower=user,  following__is_friend_enabled=True)
     result = []
     for friend in list:
         now = friend.following
@@ -133,9 +133,6 @@ def get_online(request: HttpRequest) -> JsonResponse:
         is_online = u.id in online_users if u.share_online_status else False
         result.append({"username": u.username, "is_online": is_online})
     return JsonResponse({'results': result}, status=200)
-
-def delete_followers(user):
-    Friend.objects.filter(following=user).delete()
 
 def set_offline(user):
     OnlineList.objects.filter(user=user).delete()

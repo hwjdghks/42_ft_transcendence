@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
 from authentication.views import generate_jwt, jwt_required, verify_otp, set_jwt_cookie
-from friends.views import update_last_activate, set_offline, delete_followers
+from friends.views import update_last_activate, set_offline
 from matchresult.models import MatchResult
 from .models import User
 from .utils import check_existing_user, is_valid_password, handle_invalid_password
@@ -214,8 +214,6 @@ def update_user_settings(request: HttpRequest) -> JsonResponse:
     share_online_status = data.get('share_online_status')
 
     if is_friend_enabled is not None:
-        if user.is_friend_enabled is True and is_friend_enabled is False:
-            delete_followers(user)
         user.is_friend_enabled = bool(is_friend_enabled)
     if share_profile_image is not None:
         user.share_profile_image = bool(share_profile_image)

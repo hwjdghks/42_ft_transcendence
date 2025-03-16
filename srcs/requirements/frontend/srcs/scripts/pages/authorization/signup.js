@@ -133,7 +133,7 @@ export function SignupPage() {
             <div class="form-check mb-2">
               <input type="checkbox" class="form-check-input" id="isFriendEnabledConsent">
               <label class="form-check-label" for="isFriendEnabledConsent">
-                친구 기능 사용: 다른 유저가 친구 검색, 친구 등록 시 회원님의 정보가 노출됩니다.
+                친구 기능 사용: 다른 유저가 친구 검색, 친구 등록 시 회원님의 정보가 노출됩니다.  친구 기능 비활성화 시 데이터가 보존되며, 추후 기능 재활성화 시 기존 친구 관계가 유지됩니다.
               </label>
             </div>
             <div class="form-check mb-2">
