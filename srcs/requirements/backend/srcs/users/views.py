@@ -15,10 +15,9 @@ from .utils import check_existing_user, is_valid_password, handle_invalid_passwo
 @csrf_exempt
 @require_POST
 def signup(request: HttpRequest) -> JsonResponse:
-    data = json.loads(request.body)
-    email = data.get('email')
-    username = data.get('username')
-    password = data.get('password')
+    email = request.POST.get('email')
+    username = request.POST.get('username')
+    password = request.POST.get('password')
 
     if not email or not password:
         return JsonResponse({'error': 'Email and password are required'}, status=400)
@@ -28,12 +27,10 @@ def signup(request: HttpRequest) -> JsonResponse:
             'error': 'The password must be between 8 and 50 characters long, and it must include at least one uppercase letter, one lowercase letter, one number, and one special character.'
         }, status=400)
 
-    # 이메일 중복 검사 단 유저가 is_active가 false이고 otp를 발송한지 30분이 지난상태면 삭제
     response = check_existing_user(User.objects.filter(email=email).first(), "Email")
     if response:
         return response
 
-    # 사용자명 중복 검사 단 유저가 is_active가 false이고 otp를 발송한지 30분이 지난상태면 삭제
     response = check_existing_user(User.objects.filter(username=username).first(), "Username")
     if response:
         return response
@@ -44,9 +41,9 @@ def signup(request: HttpRequest) -> JsonResponse:
     if not re.fullmatch(r'[0-9a-zA-Z]+', username):
         return JsonResponse({'error': '유저 이름은 알파벳과 숫자로만 이루어져야 합니다.'}, status=400)
 
-    show_in_search = data.get('show_in_search', True)
-    share_profile_image = data.get('share_profile_image', True)
-    share_online_status = data.get('share_online_status', True)
+    show_in_search = 'show_in_search' in request.POST
+    share_profile_image = 'share_profile_image' in request.POST
+    share_online_status = 'share_online_status' in request.POST
 
     user = User.objects.create_user(username=username, email=email, password=password)
     user.is_active = False
