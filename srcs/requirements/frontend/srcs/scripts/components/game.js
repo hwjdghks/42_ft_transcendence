@@ -8,19 +8,10 @@ function initializePingPongGame(parentContainer, configJson, currentMatch) {
   if (!gameContainer) {
     return () => {};
   }
-  
-  // 카운트다운 오버레이 세팅
-  const countdownOverlay = document.getElementById('countdownOverlay');
-  
-  // 스코어 보드 세팅
-  const scoreBoard = document.getElementById('scoreBoard');
-  if (scoreBoard) {
-    scoreBoard.innerText = `${currentMatch.player1}: ${gameScore.player1} | ${currentMatch.player2}: ${gameScore.player2}`;
-  }
 
   // Session data에서 게임 정보를 읽어오기
   const config = prepareGameConfig(configJson);
-
+  
   // three js 세팅
   const { scene, camera, renderer } = createSceneAndRenderer(gameContainer, config);
   const { leftPaddle, rightPaddle, ball, ballVelocity, obstacles } = createGameObjects(scene, config);
@@ -32,16 +23,18 @@ function initializePingPongGame(parentContainer, configJson, currentMatch) {
   let scoringInProgress = false;
   let isCountdownActive = false;
   
+  // 카운트다운 오버레이 세팅
+  const countdownOverlay = document.getElementById('countdownOverlay');
 
   // 프레임 단위로 호출되어 게임 상황을 업데이트 하는 함수
   function update() {
     if (gameOver || isCountdownActive) return;
-
+    
     movePaddles(leftPaddle, rightPaddle, keysPressed, config);
     moveBall(ball, ballVelocity, config);
     checkPaddleCollision(ball, ballVelocity, leftPaddle, rightPaddle, config);
     checkObstacleCollision(ball, ballVelocity, obstacles);
-
+    
     // 득점 - 득점 사이, 즉 플레이 중인지 검사
     if (!scoringInProgress) { // 플레이 중이 아니라면 -> 방금 득점이 된 상태
       handleScoring(
@@ -49,66 +42,71 @@ function initializePingPongGame(parentContainer, configJson, currentMatch) {
         () => { scoringInProgress = true; },
         endGame,
         (countdownTime, direction) => startCountdown(countdownTime, direction)
-      );
-    }
-  }
-
-  // 카운트 다운 함수
-  function startCountdown(time, direction) {
-    isCountdownActive = true;
-    countdownOverlay.style.display = 'block';
-    countdownOverlay.innerText = `${time}`;
-
-    // 1초(1000밀리초) 마다 카운트 다운 1초 감소
-    const intervalId = setInterval(() => {
-      time--;
-      if (time > 0) {
-        countdownOverlay.innerText = `${time}`;
-      } else {
-        clearInterval(intervalId);
-        countdownOverlay.style.display = 'none';
-        resetBall(ball, ballVelocity, config, direction);
-        isCountdownActive = false;
-        scoringInProgress = false;
+        );
       }
-    }, 1000);
-  }
-
-  // 게임 종료 시 호출되는 함수
-  async function endGame(winMessage) {
-    try {
-      const response = await getProfileData();
-      gameOver = true;
-      const winnerMessage = document.getElementById('winnerMessage');
-      const profileUsername = response.username;
-      const currentMatch = JSON.parse(sessionStorage.getItem('currentMatch'));
-      const matches = JSON.parse(sessionStorage.getItem('matches')) || [];
-      const { winnerName, userScore, opponentScore, opponentName } = determineWinner(
-        profileUsername, currentMatch, gameScore
-      );
-
-      const displayMessage = winMessage || `${winnerName} ${trans[window.curLang].gameWin}`;
+      // 스코어 보드 세팅
+      const scoreBoard = document.getElementById('scoreBoard');
+      if (scoreBoard) {
+        scoreBoard.innerText = `${currentMatch.player1}: ${gameScore.player1} | ${currentMatch.player2}: ${gameScore.player2}`;
+      }
+    }
     
-      winnerMessage.innerHTML = `
-        <div style="text-align: center;">
+    // 카운트 다운 함수
+    function startCountdown(time, direction) {
+      isCountdownActive = true;
+      countdownOverlay.style.display = 'block';
+      countdownOverlay.innerText = `${time}`;
+      
+      // 1초(1000밀리초) 마다 카운트 다운 1초 감소
+      const intervalId = setInterval(() => {
+        time--;
+        if (time > 0) {
+          countdownOverlay.innerText = `${time}`;
+        } else {
+          clearInterval(intervalId);
+          countdownOverlay.style.display = 'none';
+          resetBall(ball, ballVelocity, config, direction);
+          isCountdownActive = false;
+          scoringInProgress = false;
+        }
+      }, 1000);
+    }
+    
+    // 게임 종료 시 호출되는 함수
+    async function endGame(winMessage) {
+      try {
+        const response = await getProfileData();
+        gameOver = true;
+        const winnerMessage = document.getElementById('winnerMessage');
+        const profileUsername = response.username;
+        const currentMatch = JSON.parse(sessionStorage.getItem('currentMatch'));
+        const matches = JSON.parse(sessionStorage.getItem('matches')) || [];
+        const { winnerName, userScore, opponentScore, opponentName } = determineWinner(
+          profileUsername, currentMatch, gameScore
+          );
+          
+          const displayMessage = winMessage || `${winnerName} ${trans[window.curLang].gameWin}`;
+          
+          winnerMessage.innerHTML = `
+          <div style="text-align: center;">
           <div style="font-size: 24px; margin-bottom: 10px;">${displayMessage}</div>
           <div>${gameScore.player1} - ${gameScore.player2}</div>
           <button id="exitButton" class="btn btn-primary" style="margin-top: 20px;">
-            ${trans[window.curLang].gameBackBtn}
+          ${trans[window.curLang].gameBackBtn}
           </button>
-        </div>
+          </div>
       `;
       winnerMessage.style.display = 'block';
     
       // Session data 업데이트
       updateMatchStorage(currentMatch, matches, gameScore, winnerName);
-    
+      
       let finishedGames = JSON.parse(sessionStorage.getItem('finishedGames')) || [];
       if (currentMatch.id) {
         finishedGames.push(currentMatch.id);
         sessionStorage.setItem('finishedGames', JSON.stringify(finishedGames));
       }
-    
+      
       // 만약 방금 종료된 게임이 실제 플레이어의 경기였다면 백앤드로 전송(전적 업데이트)
       if (currentMatch.player1 === profileUsername) {
         const matchResultData = createMatchResultData(profileUsername, currentMatch, opponentName, userScore, opponentScore, winnerName);
@@ -126,7 +124,7 @@ function initializePingPongGame(parentContainer, configJson, currentMatch) {
       alert('Error: ' + error.message);
     }
   }
-
+  
   // 브라우저의 프레임 마다 animate->update 함수 호출을 통해 게임을 렌더함. 즉, 다음 프레임의 update를 예약 걸어두는 것.
   let requestId;
   function animate() {
@@ -134,17 +132,21 @@ function initializePingPongGame(parentContainer, configJson, currentMatch) {
     renderer.render(scene, camera);
     requestId = requestAnimationFrame(animate);
   }
-
+  
   scoringInProgress = true;
   startCountdown(3, 1);
   animate();
-
+  
   // 게임 창 이탈 시 자원 정리 & 키보드 게임 키 입력을 방지
   function cleanup() {
     cancelAnimationFrame(requestId);
     removeKeyListeners();
   }
 
+
+  
+
+  
   return cleanup;
 }
 
