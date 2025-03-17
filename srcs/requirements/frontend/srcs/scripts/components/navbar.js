@@ -1,11 +1,6 @@
 import { checkCookie } from '../validation/cookie.js';
 import { trans } from '../language.js';
 
-// 토큰 쿠키 삭제 함수
-function clearTokenCookie() {
-  document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-}
-
 async function isLoggedIn() {
   const token = await checkCookie();
   console.log("🔹 [isLoggedIn] JWT Token 상태:", token);
@@ -60,9 +55,6 @@ function updateActiveLink() {
     link.classList.toggle('active', link.getAttribute('href') === currentHash);
   });
 }
-
-// 창 닫거나 새로고침할 때 쿠키 토큰 삭제
-window.addEventListener('beforeunload', clearTokenCookie);
 
 window.updateNavbar = updateNavbar;
 window.addEventListener('DOMContentLoaded', updateNavbar);
