@@ -49,19 +49,20 @@ def friend_list(request: HttpRequest) -> JsonResponse:
 @update_last_activate
 def search_users(request: HttpRequest) -> JsonResponse:
     query = request.GET.get('search_query', '')
-    users = User.objects.filter(username__icontains=query).exclude(id=request.user.id)
     result = []
-    for user in users:
-        if user.is_friend_enabled:
-            profile_image = (
-                user.profile_image.url
-                if user.profile_image and user.share_profile_image
-                else None
-            )
-            result.append({
-                'username': user.username,
-                'profile_image': profile_image
-            })
+    if query:
+        users = User.objects.filter(username__icontains=query).exclude(id=request.user.id)
+        for user in users:
+            if user.is_friend_enabled:
+                profile_image = (
+                    user.profile_image.url
+                    if user.profile_image and user.share_profile_image
+                    else None
+                )
+                result.append({
+                    'username': user.username,
+                    'profile_image': profile_image
+                })
     return JsonResponse({'results': result}, status=200)
 
 
