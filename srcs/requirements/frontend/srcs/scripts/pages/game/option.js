@@ -7,12 +7,10 @@ import { isInputUsernameValid } from '../../validation/inputData.js';
 function GameOptionPage() {
   resetTournamentSession();
   const container = document.createElement('div');
-  container.className = 'container py-5';
+  container.className = 'container py-4 bg-white rounded-4 shadow p-4 mx-auto mt-5';
   container.innerHTML = `
       <!-- Header Section -->
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold ">${trans[window.curLang].optionHeader}</h2>
-      </div>
+      <h2 class="fs-3 fw-bold mb-4">${trans[window.curLang].optionHeader}</h2>
 
       <!-- Players Section -->
       <div class="card mb-4">

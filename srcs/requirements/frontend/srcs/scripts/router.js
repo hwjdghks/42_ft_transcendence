@@ -1,3 +1,4 @@
+import { trans } from './language.js';
 import { LoginPage } from './pages/authorization/login.js';
 import { SignupPage } from './pages/authorization/signup.js';
 import { GameOptionPage } from './pages/game/option.js';
@@ -34,6 +35,7 @@ let currentRoute = null;
 // 메인 라우터 함수
 export async function router() {
 
+  // oauth 주소 해시태그 적용 /oauth-callback/?~ -> /#oauth-callback/?~
   if (window.location.pathname === '/oauth-callback/') {
     window.location.href = '/#oauth-callback/' + window.location.search;
     return;
@@ -195,10 +197,10 @@ function validateGamePlayRoute(route) {
 // 404
 function renderNotFound(container) {
   container.innerHTML = `
-    <div class="not-found">
-      <h1>404 - Page Not Found</h1>
-      <p>요청하신 페이지를 찾을 수 없습니다.</p>
-      <a href="#login">로그인 페이지로 이동</a>
+    <div class="not-found text-white m-4">
+      <h5>404 Error</h5>
+      <p>${trans[window.curLang].notFound}</p>
+      <a href="#login">${trans[window.curLang].toLoginPage}</a>
     </div>
   `;
 }
@@ -216,9 +218,9 @@ function resetTournamentSession() {
 // 보호 대상 라우트인지 검사
 function isProtectedRoute(route) {
   return route === 'profile' ||
-         route === 'gameplay/option' ||
-         route === 'gameplay/tournament' ||
-         isGamePlayRoute(route);        
+        route === 'gameplay/option' ||
+        route === 'gameplay/tournament' ||
+        isGamePlayRoute(route);        
 }
 
 // 토너먼트 관련 라우트 여부 판단 (토너먼트 페이지 및 게임 플레이 페이지)

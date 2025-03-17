@@ -1,15 +1,187 @@
+:root {
+	--primary-color: #6c2bd9;
+	--white-color: #FFFFFF;
+	--black-color: #181818;
+	--dgray-color: #464646;
+	--mgray-color: #828282;
+	--lgray-color: #f2f2f2;
+
+    --primary-hover-color: #250e4d;
+
+	/* --background-color: var(--dgray-color);
+	--text-color: var(--black-color);
+	--gray-color: var(--lgray-color); */
+}
+
+.bg-purple {
+    background-color: var(--primary-color);
+}
+
+/* main */
 body, html {
     margin: 0;
     padding: 0;
     width: 100%;
-    /* background-image: url("../static/background.png");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat; */
+    background-color: var(--dgray-color);
 }
 
 #app {
     display: flex;
     max-width: 600px;
     margin: 0 auto;
+}
+
+/* navbar */
+#navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-link.active {
+    color: var(--primary-color);
+}
+
+#navbar img {
+    width: 32px;
+    height: 32px;
+}
+
+/* signup */
+.signup-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width:100%;
+    height: 100vh; /* 화면 전체 높이 */
+    margin: 0; /* 여백 제거 */
+    padding: 0; /* 여백 제거 */
+}
+
+.signup-container {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+}
+
+.signup-heading {
+    color: var(--primary-color);
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.signup-btn {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    border: none;
+    padding: 10px 20px;
+    width: 100%;
+}
+
+.signup-btn:hover {
+    color: var(--white-color);
+    background-color: var(--primary-hover-color);
+}
+
+/* login */
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width:100%;
+    height: 100vh; /* 화면 전체 높이 */
+    margin: 0; /* 여백 제거 */
+    padding: 0; /* 여백 제거 */
+}
+
+.login-container {
+    background-color: var(--white-color);
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 400px;
+    margin-bottom: 100px;
+}
+
+.login-heading {
+    color: var(--primary-color);
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.login-btn {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    border: none;
+    padding: 10px 20px;
+    width: 100%;
+}
+
+.oauth-btn {
+    background-color: var(--dgray-color);
+    color: var(--white-color);
+    margin-top: 10px;   border: none;
+    padding: 10px 20px;
+    width: 100%;
+}
+
+.login-btn:hover {
+    color: var(--white-color);
+    background-color: var(--primary-hover-color);
+}
+
+.oauth-btn:hover {
+    color: var(--white-color);
+    background-color: black;
+}
+
+.auth-icon {
+    width: 80px;
+    height: 40px;
+}
+
+/* profile */
+.profile-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+}
+
+/* game */
+#gameContainer {
+    width: 100%;
+    max-width: 600px;
+    position: relative;
+    padding-bottom: 100%;
+}
+
+#gameContainer canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+#countdownOverlay {
+    z-index: 999;
+}
+
+#winnerMessage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* 중앙 정렬 보정 */
+    z-index: 999;
+    background: rgba(0, 0, 0, 0.7);
+    color: var(--white-color);
+    padding: 20px;
+    border-radius: 8px;
+    display: none;
 }

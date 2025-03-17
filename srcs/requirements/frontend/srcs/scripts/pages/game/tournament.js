@@ -2,7 +2,7 @@ import { trans } from '../../language.js';
 
 export function GameTournamentPage() {
   const container = document.createElement('div');
-  container.className = 'container py-5';
+  container.className = 'container py-4 bg-white rounded-4 shadow p-4 mx-auto mt-5';
 
   // const options = JSON.parse(sessionStorage.getItem('game_option'));
   const playerList = JSON.parse(sessionStorage.getItem('playerList'));
@@ -74,7 +74,7 @@ function renderBracket(matchData, parent, nextButton) {
 
   const title = document.createElement('h2');
   title.textContent = trans[window.curLang].tournamentHeader;
-  title.className = 'mb-4 fw-bold';
+  title.className = 'fs-3 fw-bold mb-4';
   parent.appendChild(title);
 
   const bracketDiv = document.createElement('div');
