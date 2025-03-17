@@ -1,3 +1,4 @@
+import { trans } from './language.js';
 import { LoginPage } from './pages/authorization/login.js';
 import { SignupPage } from './pages/authorization/signup.js';
 import { GameOptionPage } from './pages/game/option.js';
@@ -195,10 +196,10 @@ function validateGamePlayRoute(route) {
 // 404
 function renderNotFound(container) {
   container.innerHTML = `
-    <div class="not-found">
-      <h1>404 - Page Not Found</h1>
-      <p>요청하신 페이지를 찾을 수 없습니다.</p>
-      <a href="#login">로그인 페이지로 이동</a>
+    <div class="not-found text-white m-4">
+      <h5>404 Error</h5>
+      <p>${trans[window.curLang].notFound}</p>
+      <a href="#login">${trans[window.curLang].toLoginPage}</a>
     </div>
   `;
 }

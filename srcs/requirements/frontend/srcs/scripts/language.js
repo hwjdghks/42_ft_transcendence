@@ -3,6 +3,10 @@ import { updateModals } from './components/setting.js'
 
 const trans = {
   en: {
+    // 404 
+    notFound: "The page you requested cannot be found.",
+    toLoginPage: "To the Login page",
+
     // Navbar
     navProfile: "Profile",
     navGamePlay: "Gameplay",
@@ -16,6 +20,7 @@ const trans = {
     loginBtn: "Submit",
     loginOauthBtn: "42 account",
     loginSignupBtn: "Sign up",
+    oauth: "Logging in...",
 
     // Verify
     verifyHeader: "Verify Code",
@@ -151,6 +156,10 @@ const trans = {
   },
 
   ko: {
+    // 404 
+    notFound: "요청하신 페이지를 찾을 수 없습니다.",
+    toLoginPage: "로그인 페이지로",
+
     // Navbar
     navProfile: "프로필",
     navGamePlay: "게임 플레이",
@@ -164,6 +173,7 @@ const trans = {
     loginBtn: "로그인",
     loginOauthBtn: "42 계정",
     loginSignupBtn: "회원가입",
+    oauth: "로그인 중 입니다...",
 
     // Verify
     verifyHeader: "인증 코드",
@@ -297,6 +307,10 @@ const trans = {
   },
   
   fn: {
+    // 404 
+    notFound: "La page que vous avez demandée est introuvable.",
+    toLoginPage: "Vers la page de connexion",
+    
     // Navbar
     navProfile: "Profil",
     navGamePlay: "Jeu",
@@ -310,6 +324,7 @@ const trans = {
     loginBtn: "Soumettre",
     loginOauthBtn: "Compte 42",
     loginSignupBtn: "S'inscrire",
+    oauth: "Connexion en cours...",
   
     // Verify
     verifyHeader: "Vérifier le code",

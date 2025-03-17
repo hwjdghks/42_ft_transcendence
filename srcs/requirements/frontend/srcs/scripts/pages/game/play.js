@@ -12,18 +12,20 @@ function GamePlayPage(configJson) {
   container.className = "container py-4 bg-white rounded-4 shadow p-4 mx-auto mt-5";
   container.innerHTML = `
     <div class="w-100 bg-light p-3 rounded shadow-lg text-center">
-            <div id="scoreBoard" class="fs-4 fw-bold text-black">
-                ${currentMatch.player1}: 0 | ${currentMatch.player2}: 0
-            </div>
-        </div>
-    <div id="gameContainer" style="margin: 0 auto; text-align: center;"></div>
-    <div id="winnerMessage"></div>
-    <!-- 카운트다운 UI -->
-    <div id="countdownOverlay"
-        class="display-4 fw-bold text-white bg-dark rounded-2 p-4" 
-        style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);">
+      <div id="scoreBoard" class="fs-4 fw-bold text-black">
+        ${currentMatch.player1}: 0 | ${currentMatch.player2}: 0
+      </div>
     </div>
-  `;
+    <div id="gameContainer" style="margin: 0 auto; text-align: center; position: relative;">
+      <!-- 게임 내용 -->
+      <div id="winnerMessage" style="position: absolute; top:50%; left:50%; transform: translate(-50%, -50%);"></div>
+      <div id="countdownOverlay"
+          class="display-4 fw-bold text-white bg-dark rounded-2 p-4"
+          style="display:none; position:absolute; top:50%; left:50%; transform: translate(-50%, -50%);">
+      </div>
+    </div>
+`;
+
 
   container.cleanup = function() {};
 
