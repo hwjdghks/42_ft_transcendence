@@ -10,14 +10,11 @@ export function createUsernameModal() {
   modalDiv.id = 'usernameModal';
   modalDiv.className = 'modal fade';
   modalDiv.tabIndex = -1;
-
-  modalDiv.setAttribute('aria-labelledby', 'usernameModalLabel');
-  modalDiv.setAttribute('aria-hidden', 'true');
   modalDiv.innerHTML = `
     <div class="modal-dialog">
       <div class="modal-content">
          <div class="modal-header">
-           <h5 id="usernameModalLabel" class="modal-title">${trans[window.curLang].settingModalUsername}</h5>
+           <h5 class="modal-title">${trans[window.curLang].settingModalUsername}</h5>
            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
          </div>
          <div class="modal-body">
