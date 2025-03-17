@@ -43,6 +43,7 @@ const trans = {
     losses: "Losses",
     draws: "Draws",
     matchHistory: "Match History",
+    noMatchHistory: "No Match History",
     friends: "Friends",
     setting: "Settings",
     logout: "Logout",
@@ -193,6 +194,7 @@ const trans = {
     friends: "친구",
     setting: "설정",
     logout: "로그아웃",
+    noMatchHistory: "매치 기록이 없습니다.",
   
     // Profile Settings
     settingUsername: "사용자 이름",
@@ -338,6 +340,7 @@ const trans = {
     friends: "Amis",
     setting: "Paramètres",
     logout: "Déconnexion",
+    noMatchHistory: "Il n'y a pas d'historique de match.",
   
     // Profile Settings
     settingUsername: "Nom d'utilisateur",

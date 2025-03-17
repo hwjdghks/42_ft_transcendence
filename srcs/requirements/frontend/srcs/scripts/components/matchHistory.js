@@ -1,3 +1,5 @@
+import { trans } from '../language.js';
+
 /**
  * 경기 결과 데이터를 가져옴
  * 
@@ -11,7 +13,6 @@ async function postMatchResults() {
       headers: {
           'Content-Type': 'application/json',
       }
-      // 
   });
   if (!response.ok) {
     const error = await response.json();
@@ -33,7 +34,7 @@ async function renderMatchHistory() {
       // 경기 결과가 없을 경우, 사용자에게 알림 표시
       if (!allMatches || allMatches.length === 0) {
           document.getElementById('matchHistory').innerHTML = `
-              <div class="alert alert-info">경기 결과가 없습니다.</div>`;
+              <div class="alert alert-info">${trans[window.curLang].noMatchHistory}</div>`;
           return;
       }
 

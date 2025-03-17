@@ -70,23 +70,34 @@ export function renderSettings() {
   }
   
   // Edit Username 버튼 이벤트
-  const editUsernameBtn = settingsContainer.querySelector('#editUsernameBtn');
-  if (editUsernameBtn) {
-    editUsernameBtn.addEventListener('click', () => {
-      if (isModalOpening) return; // 이미 열기 중이면 동작 중단
-      isModalOpening = true;
-      
-      const currentUsername = settingsContainer.querySelector('#username').value;
-      document.getElementById('newUsername').value = currentUsername;
-      const modalElement = document.getElementById('usernameModal');
-      const modal = new bootstrap.Modal(modalElement);
-      modal.show();
-      // 모달이 완전히 열리면 플래그 해제
-      modalElement.addEventListener('shown.bs.modal', () => {
-        isModalOpening = false;
-      }, { once: true });
-    });
-  }
+  // 기존 renderSettings() 함수 내에서 editUsernameBtn 이벤트 리스너 등록 부분
+const editUsernameBtn = settingsContainer.querySelector('#editUsernameBtn');
+editUsernameBtn.addEventListener('click', () => {
+  if (isModalOpening) return; // 이미 모달 열기 중이면 중단
+  isModalOpening = true;
+  
+  // 모달 열기 전에 현재 버튼(트리거)을 저장
+  const triggerElement = editUsernameBtn;
+  
+  // 현재 username 값을 모달의 input에 설정
+  const currentUsername = settingsContainer.querySelector('#username').value;
+  document.getElementById('newUsername').value = currentUsername;
+  
+  // 모달 열기
+  const modalElement = document.getElementById('usernameModal');
+  const modal = new bootstrap.Modal(modalElement);
+  modal.show();
+  
+  // 모달이 완전히 열리면 플래그 해제
+  modalElement.addEventListener('shown.bs.modal', () => {
+    isModalOpening = false;
+  }, { once: true });
+  
+  // 모달이 완전히 닫힌 후, 원래 버튼으로 포커스 복원
+  modalElement.addEventListener('hidden.bs.modal', () => {
+    triggerElement.focus();
+  }, { once: true });
+});
   
   // Edit Password 버튼 이벤트
   const editPasswordBtn = settingsContainer.querySelector('#editPasswordBtn');
@@ -150,19 +161,19 @@ export function renderSettings() {
   return settingsContainer;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const modals = document.querySelectorAll(".modal");
-  modals.forEach(modal => {
-    modal.addEventListener("hidden.bs.modal", () => {
-      if (modal.contains(document.activeElement)) {
-        document.activeElement.blur();
-      }
-      setTimeout(() => {
-        modal.removeAttribute("aria-hidden");
-      }, 300);
-    });
-  });
-});
+// document.addEventListener("DOMContentLoaded", () => {
+//   const modals = document.querySelectorAll(".modal");
+//   modals.forEach(modal => {
+//     modal.addEventListener("hidden.bs.modal", () => {
+//       if (modal.contains(document.activeElement)) {
+//         document.activeElement.blur();
+//       }
+//       setTimeout(() => {
+//         modal.removeAttribute("aria-hidden");
+//       }, 300);
+//     });
+//   });
+// });
 
 export function updateModals() {
   // 1. 사용자 이름 변경 모달 업데이트

@@ -10,6 +10,9 @@ export function createUsernameModal() {
   modalDiv.id = 'usernameModal';
   modalDiv.className = 'modal fade';
   modalDiv.tabIndex = -1;
+
+  modalDiv.setAttribute('aria-labelledby', 'usernameModalLabel');
+  modalDiv.setAttribute('aria-hidden', 'true');
   modalDiv.innerHTML = `
     <div class="modal-dialog">
       <div class="modal-content">
