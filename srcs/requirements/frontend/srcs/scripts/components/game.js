@@ -8,19 +8,32 @@ function initializePingPongGame(parentContainer, configJson, currentMatch) {
   if (!gameContainer) {
     return () => {};
   }
+  
+  // 카운트다운 오버레이 세팅
+  const countdownOverlay = document.getElementById('countdownOverlay');
+  
+  // 스코어 보드 세팅
+  const scoreBoard = document.getElementById('scoreBoard');
+  if (scoreBoard) {
+    scoreBoard.innerText = `${currentMatch.player1}: ${gameScore.player1} | ${currentMatch.player2}: ${gameScore.player2}`;
+  }
 
+  // Session data에서 게임 정보를 읽어오기
   const config = prepareGameConfig(configJson);
+
+  // three js 세팅
   const { scene, camera, renderer } = createSceneAndRenderer(gameContainer, config);
   const { leftPaddle, rightPaddle, ball, ballVelocity, obstacles } = createGameObjects(scene, config);
   const { keysPressed, removeKeyListeners } = setupKeyListeners();
-
+  
+  // 기본 게임 플래그 세팅
   let gameScore = { player1: 0, player2: 0 };
   let gameOver = false;
   let scoringInProgress = false;
   let isCountdownActive = false;
+  
 
-  const countdownOverlay = document.getElementById('countdownOverlay');
-
+  // 프레임 단위로 호출되어 게임 상황을 업데이트 하는 함수
   function update() {
     if (gameOver || isCountdownActive) return;
 
@@ -29,7 +42,8 @@ function initializePingPongGame(parentContainer, configJson, currentMatch) {
     checkPaddleCollision(ball, ballVelocity, leftPaddle, rightPaddle, config);
     checkObstacleCollision(ball, ballVelocity, obstacles);
 
-    if (!scoringInProgress) {
+    // 득점 - 득점 사이, 즉 플레이 중인지 검사
+    if (!scoringInProgress) { // 플레이 중이 아니라면 -> 방금 득점이 된 상태
       handleScoring(
         ball, ballVelocity, gameScore, config, currentMatch,
         () => { scoringInProgress = true; },
@@ -37,17 +51,15 @@ function initializePingPongGame(parentContainer, configJson, currentMatch) {
         (countdownTime, direction) => startCountdown(countdownTime, direction)
       );
     }
-    const scoreBoard = document.getElementById('scoreBoard');
-    if (scoreBoard) {
-      scoreBoard.innerText = `${currentMatch.player1}: ${gameScore.player1} | ${currentMatch.player2}: ${gameScore.player2}`;
-    }
   }
 
+  // 카운트 다운 함수
   function startCountdown(time, direction) {
     isCountdownActive = true;
     countdownOverlay.style.display = 'block';
     countdownOverlay.innerText = `${time}`;
 
+    // 1초(1000밀리초) 마다 카운트 다운 1초 감소
     const intervalId = setInterval(() => {
       time--;
       if (time > 0) {
@@ -62,6 +74,7 @@ function initializePingPongGame(parentContainer, configJson, currentMatch) {
     }, 1000);
   }
 
+  // 게임 종료 시 호출되는 함수
   async function endGame(winMessage) {
     try {
       const response = await getProfileData();
@@ -87,6 +100,7 @@ function initializePingPongGame(parentContainer, configJson, currentMatch) {
       `;
       winnerMessage.style.display = 'block';
     
+      // Session data 업데이트
       updateMatchStorage(currentMatch, matches, gameScore, winnerName);
     
       let finishedGames = JSON.parse(sessionStorage.getItem('finishedGames')) || [];
@@ -95,6 +109,7 @@ function initializePingPongGame(parentContainer, configJson, currentMatch) {
         sessionStorage.setItem('finishedGames', JSON.stringify(finishedGames));
       }
     
+      // 만약 방금 종료된 게임이 실제 플레이어의 경기였다면 백앤드로 전송(전적 업데이트)
       if (currentMatch.player1 === profileUsername) {
         const matchResultData = createMatchResultData(profileUsername, currentMatch, opponentName, userScore, opponentScore, winnerName);
         try {
@@ -112,17 +127,19 @@ function initializePingPongGame(parentContainer, configJson, currentMatch) {
     }
   }
 
+  // 브라우저의 프레임 마다 animate->update 함수 호출을 통해 게임을 렌더함. 즉, 다음 프레임의 update를 예약 걸어두는 것.
   let requestId;
   function animate() {
-    requestId = requestAnimationFrame(animate);
     update();
     renderer.render(scene, camera);
+    requestId = requestAnimationFrame(animate);
   }
 
   scoringInProgress = true;
   startCountdown(3, 1);
   animate();
 
+  // 게임 창 이탈 시 자원 정리 & 키보드 게임 키 입력을 방지
   function cleanup() {
     cancelAnimationFrame(requestId);
     removeKeyListeners();
@@ -205,35 +222,23 @@ function createSceneAndRenderer(gameContainer, config) {
 }
 
 function addPingPongRoom(scene, config) {
-  // 1. 탁구대 표면 (플레이 영역과 동일한 크기)
+  // 탁구대 표면 (플레이 영역과 동일한 크기)
   const tableGeometry = new THREE.PlaneGeometry(config.boundaryX * 2, config.boundaryY * 2);
   const tableMaterial = new THREE.MeshPhongMaterial({ color: 0x006600 });
   const tableSurface = new THREE.Mesh(tableGeometry, tableMaterial);
+
   // 게임 오브젝트(공, 패들)보다 약간 뒤에 배치 (z = -0.5)
   tableSurface.position.set(0, 0, -0.5);
   scene.add(tableSurface);
 
-  // 2. 탁구대 테두리 (흰색 선)
-  const borderMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
-  const borderPoints = [
-    new THREE.Vector3(-config.boundaryX, config.boundaryY, -0.49),
-    new THREE.Vector3(config.boundaryX, config.boundaryY, -0.49),
-    new THREE.Vector3(config.boundaryX, -config.boundaryY, -0.49),
-    new THREE.Vector3(-config.boundaryX, -config.boundaryY, -0.49),
-    new THREE.Vector3(-config.boundaryX, config.boundaryY, -0.49)
-  ];
-  const borderGeometry = new THREE.BufferGeometry().setFromPoints(borderPoints);
-  const borderLine = new THREE.Line(borderGeometry, borderMaterial);
-  scene.add(borderLine);
-
-  // 3. 중앙 네트 (세로로 얇은 흰색 판)
+  // 중앙 네트 (세로로 얇은 흰색 판)
   const netGeometry = new THREE.PlaneGeometry(0.1, config.boundaryY * 2);
   const netMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
   const net = new THREE.Mesh(netGeometry, netMaterial);
   net.position.set(0, 0, -0.48);
   scene.add(net);
 
-  // 4. 배경 벽면
+  // 배경 벽면
   const wallGeometry = new THREE.PlaneGeometry(50, 30);
   const wallMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
   const wall = new THREE.Mesh(wallGeometry, wallMaterial);
@@ -270,27 +275,34 @@ function createGameObjects(scene, config) {
   return { leftPaddle, rightPaddle, ball, ballVelocity, obstacles };
 }
 
+// 장애물 생성 함수
 function createObstacles(scene, config, obstacleMaterial) {
   const obstacles = [];
   const safeZoneRadius = 3;
 
+  // 장애물의 위치를 랜덤하게 생성하고, 그것이 유효한지 검사
   for (let i = 0; i < config.obstacleCount; i++) {
     let validPositionFound = false;
     let attempt = 0;
     let obstacle;
 
-    while (!validPositionFound && attempt < 10) {
+    while (!validPositionFound && attempt < 20) {
+      //posX의 범위는 -10 ~ 10 사이의 값
       const posX = (Math.random() * 20) - 10;
+
+      // posY의 범위는 (-boundaryY + 1) ~ (boundaryY - 1) 사이의 값
       const posY = (Math.random() * (config.boundaryY * 2 - 2)) - (config.boundaryY - 1);
 
       obstacle = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), obstacleMaterial);
       obstacle.position.set(posX, posY, 0);
 
+      // 검사 1. 장애물 생성 좌표는 원점으로부터 조금 떨어져 있어야 함
       if (obstacle.position.distanceTo(new THREE.Vector3(0, 0, 0)) < safeZoneRadius) {
         attempt++;
         continue;
       }
 
+      // 검사 2. 장애물 생성 좌표는 기존에 존재하는 장애물 좌표와 조금 떨어져 있어야 함
       let collision = false;
       for (const existing of obstacles) {
         if (obstacle.position.distanceTo(existing.position) < 1.5) {
@@ -305,17 +317,20 @@ function createObstacles(scene, config, obstacleMaterial) {
       validPositionFound = true;
     }
 
+    // 유효한 위치가 확인되면 장애물을 추가
     if (validPositionFound) {
       scene.add(obstacle);
       obstacles.push(obstacle);
     } else {
-      console.warn("유효한 장애물 위치를 찾지 못했습니다.");
+      alert("Could not find a valid obstacle location.");
+      window.location.hash = '#profile';
     }
   }
 
   return obstacles;
 }
 
+// 키 셋업 함수
 function setupKeyListeners() {
   const keysPressed = {};
 
@@ -337,11 +352,18 @@ function setupKeyListeners() {
   return { keysPressed, removeKeyListeners };
 }
 
+// 공 움직임 계산 함수
 function moveBall(ball, ballVelocity, config) {
+  
+  // 공 위치 업데이트
   ball.position.add(ballVelocity);
   
+  // 공이 위, 아래 벽에 닿았는지 확인
   if (ball.position.y + BALL_RADIUS > config.boundaryY || ball.position.y - BALL_RADIUS < -config.boundaryY) {
+    // 벽에 닿았을 경우 벡터 y값 반전 (반사)
     ballVelocity.y = -ballVelocity.y;
+
+    // 공이 벽을 뚫고 나가는 것을 방지
     if (ball.position.y + BALL_RADIUS > config.boundaryY) {
       ball.position.y = config.boundaryY - BALL_RADIUS;
     } else if (ball.position.y - BALL_RADIUS < -config.boundaryY) {
@@ -367,20 +389,21 @@ function movePaddles(leftPaddle, rightPaddle, keysPressed, config) {
 
 // 패들 충돌 판정
 function checkPaddleCollision(ball, ballVelocity, leftPaddle, rightPaddle, config) {
-  // 왼쪽 패들 충돌 처리 (패들의 오른쪽 앞면 기준)
+  // 왼쪽 패들 충돌 처리
   const leftCollisionRect = {
-    x: leftPaddle.position.x + config.paddleSize.width / 2,
-    y: leftPaddle.position.y,
-    width: config.paddleSize.width,
-    height: config.paddleSize.height
+    x: leftPaddle.position.x + config.paddleSize.width / 2, // 왼쪽 패들의 오른쪽 끝 위치
+    y: leftPaddle.position.y, // 패들의 중심 Y 좌표
+    width: config.paddleSize.width, // 패들의 너비
+    height: config.paddleSize.height // 패들의 높이
   };
   if (checkCircleRectCollision(
       {x: ball.position.x, y: ball.position.y, radius: BALL_RADIUS},
       leftCollisionRect
     )) {
-    ballVelocity.x = Math.abs(ballVelocity.x);
-    adjustBallAngle(ballVelocity, false);
-    ballVelocity.multiplyScalar(1.05);
+      // 충돌이 확인 되었을 경우
+    ballVelocity.x = Math.abs(ballVelocity.x); // 벡터 x성분 반전
+    adjustBallAngle(ballVelocity, false); // 반사각도조정
+    ballVelocity.multiplyScalar(1.05); // 공 속도 증가
   }
   
   // 오른쪽 패들 충돌 처리 (패들의 왼쪽 앞면 기준)
@@ -394,26 +417,36 @@ function checkPaddleCollision(ball, ballVelocity, leftPaddle, rightPaddle, confi
       {x: ball.position.x, y: ball.position.y, radius: BALL_RADIUS},
       rightCollisionRect
     )) {
-    // 각도 조정 후, x 속도를 음수로 보장
     adjustBallAngle(ballVelocity, false);
     ballVelocity.x = -Math.abs(ballVelocity.x);
     ballVelocity.multiplyScalar(1.05);
   }
 }
 
-// 원-사각형 충돌 판정 (원은 중심 좌표와 반지름, 사각형은 중심 좌표와 전체 너비/높이를 사용)
+/*
+  원-사각형 충돌 판정 (원은 중심 좌표와 반지름, 사각형은 중심 좌표와 전체 너비/높이를 사용)
+  circle.x, circle.y → 공의 중심 좌표
+  circle.radius → 공의 반지름
+  rect.x, rect.y → 패들의 중심 좌표
+  rect.width, rect.height → 패들의 크기(너비, 높이)
+*/
 function checkCircleRectCollision(circle, rect) {
-  const distX = Math.abs(circle.x - rect.x);
-  const distY = Math.abs(circle.y - rect.y);
+  const distX = Math.abs(circle.x - rect.x); // 공과 패들 사이 x축 거리 차이
+  const distY = Math.abs(circle.y - rect.y); // 공과 패들 사이 y축 거리 차이
 
+  // 공의 중심이 패들 바깥에 있는 경우 으로 너무 멀리 있는 경우: 충돌 없음
   if (distX > (rect.width / 2 + circle.radius)) return false;
   if (distY > (rect.height / 2 + circle.radius)) return false;
 
+  // 공의 중심이 패들 안에 있는 경우 으로 너무 멀리 있는 경우: 충돌 있음
   if (distX <= (rect.width / 2)) return true;
   if (distY <= (rect.height / 2)) return true;
 
-  const dx = distX - rect.width / 2;
-  const dy = distY - rect.height / 2;
+  // 공이 패들의 모서리에 닿았는지 확인
+  const dx = distX - rect.width / 2; // 공의 중심과 패들의 오른쪽/왼쪽 수직 경계선 사이 거리
+  const dy = distY - rect.height / 2; // 공의 중심과 패들의 위/아래 수직 경계선 사이 거리
+
+  // 공의 중심과 패들의 모서리 간 거리가 공의 반지름 이내라면 충돌
   return (dx * dx + dy * dy <= (circle.radius * circle.radius));
 }
 

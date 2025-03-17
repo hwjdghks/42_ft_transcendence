@@ -35,6 +35,7 @@ let currentRoute = null;
 // 메인 라우터 함수
 export async function router() {
 
+  // oauth 주소 해시태그 적용 /oauth-callback/?~ -> /#oauth-callback/?~
   if (window.location.pathname === '/oauth-callback/') {
     window.location.href = '/#oauth-callback/' + window.location.search;
     return;
@@ -217,9 +218,9 @@ function resetTournamentSession() {
 // 보호 대상 라우트인지 검사
 function isProtectedRoute(route) {
   return route === 'profile' ||
-         route === 'gameplay/option' ||
-         route === 'gameplay/tournament' ||
-         isGamePlayRoute(route);        
+        route === 'gameplay/option' ||
+        route === 'gameplay/tournament' ||
+        isGamePlayRoute(route);        
 }
 
 // 토너먼트 관련 라우트 여부 판단 (토너먼트 페이지 및 게임 플레이 페이지)
