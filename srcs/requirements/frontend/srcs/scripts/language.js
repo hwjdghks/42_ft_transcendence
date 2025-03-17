@@ -66,7 +66,7 @@ const trans = {
 
     // Profile Settings Modal - Privacy
     settingModalPrivacy: "Privacy Settings",
-    settingModalPrivacy1: "Show in friend search",
+    settingModalPrivacy1: "Is friend enabled",
     settingModalPrivacy2: "Share profile image",
     settingModalPrivacy3: "Share online status",
 
@@ -213,7 +213,7 @@ const trans = {
 
     // Profile Settings Modal - Privacy
     settingModalPrivacy: "개인정보 설정",
-    settingModalPrivacy1: "친구 검색에 표시",
+    settingModalPrivacy1: "친구기능 사용",
     settingModalPrivacy2: "프로필 이미지 공유",
     settingModalPrivacy3: "온라인 상태 표시",
 
@@ -358,7 +358,7 @@ const trans = {
   
     // Profile Settings Modal - Privacy
     settingModalPrivacy: "Paramètres de confidentialité",
-    settingModalPrivacy1: "Apparaître dans la recherche d'amis",
+    settingModalPrivacy1: "Est-ce que l'ami est activé",
     settingModalPrivacy2: "Partager l'image de profil",
     settingModalPrivacy3: "Partager le statut en ligne",
   

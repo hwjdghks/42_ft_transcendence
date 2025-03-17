@@ -26,7 +26,7 @@ export function SignupPage() {
       return;
     }
 
-    const friendSearchConsent = document.getElementById('friendSearchConsent').checked;
+    const isFriendEnabledConsent = document.getElementById('isFriendEnabledConsent').checked;
     const profileImageConsent = document.getElementById('profileImageConsent').checked;
     const onlineStatusConsent = document.getElementById('onlineStatusConsent').checked;
 
@@ -35,7 +35,7 @@ export function SignupPage() {
         username, 
         email, 
         password, 
-        show_in_search: friendSearchConsent, 
+        is_friend_enabled: isFriendEnabledConsent, 
         share_profile_image: profileImageConsent, 
         share_online_status: onlineStatusConsent 
       });
@@ -131,9 +131,9 @@ export function SignupPage() {
           </div>
           <div class="card-body">
             <div class="form-check mb-2">
-              <input type="checkbox" class="form-check-input" id="friendSearchConsent">
-              <label class="form-check-label" for="friendSearchConsent">
-                친구 검색 표시: 다른 유저가 친구 검색 시 회원님의 정보(유저네임)가 노출됩니다.
+              <input type="checkbox" class="form-check-input" id="isFriendEnabledConsent">
+              <label class="form-check-label" for="isFriendEnabledConsent">
+                친구 기능 사용: 다른 유저가 친구 검색, 친구 등록 시 회원님의 정보가 노출됩니다.  친구 기능 비활성화 시 데이터가 보존되며, 추후 기능 재활성화 시 기존 친구 관계가 유지됩니다.
               </label>
             </div>
             <div class="form-check mb-2">

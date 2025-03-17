@@ -29,7 +29,7 @@ def update_last_activate(func):
 @update_last_activate
 def friend_list(request: HttpRequest) -> JsonResponse:
     user = request.user
-    list = Friend.objects.filter(follower=user)
+    list = Friend.objects.filter(follower=user,  following__is_friend_enabled=True)
     result = []
     for friend in list:
         now = friend.following
@@ -52,7 +52,7 @@ def search_users(request: HttpRequest) -> JsonResponse:
     users = User.objects.filter(username__icontains=query).exclude(id=request.user.id)
     result = []
     for user in users:
-        if user.show_in_search:
+        if user.is_friend_enabled:
             profile_image = (
                 user.profile_image.url
                 if user.profile_image and user.share_profile_image

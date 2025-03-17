@@ -249,9 +249,9 @@ export function updateModals() {
     if (modalTitle) {
       modalTitle.textContent = trans[window.curLang].settingModalPrivacy;
     }
-    const showInSearchLabel = privacyModal.querySelector('label[for="modalShowInSearchCheckbox"]');
-    if (showInSearchLabel) {
-      showInSearchLabel.textContent = trans[window.curLang].settingModalPrivacy1;
+    const isFriendEnabledLabel = privacyModal.querySelector('label[for="modalisFriendEnabledCheckbox"]');
+    if (isFriendEnabledLabel) {
+      isFriendEnabledLabel.textContent = trans[window.curLang].settingModalPrivacy1;
     }
     const shareProfileLabel = privacyModal.querySelector('label[for="modalShareProfileImageCheckbox"]');
     if (shareProfileLabel) {
